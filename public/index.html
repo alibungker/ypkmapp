@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PEDULI YPKM — Design System</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --navy: #00034a;
+  --navy-light: #1a1e5e;
+  --green: #017723;
+  --green-light: #e8f5ec;
+  --gold: #e5a820;
+  --gold-light: #fef7e6;
+  --white: #ffffff;
+  --bg: #f5f6fa;
+  --text: #1a1a2e;
+  --text-secondary: #6b7280;
+  --border: #e5e7eb;
+  --radius: 12px;
+  --shadow: 0 1px 3px rgba(0,3,74,0.06), 0 1px 2px rgba(0,3,74,0.04);
+  --shadow-lg: 0 10px 40px rgba(0,3,74,0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); }
+.wrapper { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+/* Header */
+.brand-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 0; border-bottom: 1px solid var(--border); margin-bottom: 32px; }
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-icon { width: 40px; height: 40px; background: var(--navy); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--gold); font-weight: 800; font-size: 16px; }
+.brand-text { font-weight: 800; font-size: 20px; color: var(--navy); letter-spacing: -0.5px; }
+.brand-text span { color: var(--green); }
+.brand-sub { font-size: 11px; color: var(--text-secondary); letter-spacing: 0.5px; text-transform: uppercase; }
+.nav-links { display: flex; gap: 24px; font-size: 14px; font-weight: 500; color: var(--text-secondary); }
+.nav-links a { text-decoration: none; color: inherit; }
+.nav-links .active { color: var(--navy); font-weight: 600; }
+
+.page-title { font-size: 24px; font-weight: 700; margin-bottom: 24px; color: var(--navy); }
+.page-desc { font-size: 14px; color: var(--text-secondary); margin-bottom: 32px; }
+
+/* Cards */
+.card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; border: 1px solid var(--border); transition: all 0.2s; }
+.card:hover { box-shadow: var(--shadow-lg); }
+.card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+.card-header h3 { font-size: 15px; font-weight: 600; flex: 1; }
+.card-body { padding: 20px; }
+
+/* Grid */
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 24px; margin-bottom: 40px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+
+/* Stats */
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+.stat { background: var(--white); border-radius: var(--radius); padding: 20px; border: 1px solid var(--border); }
+.stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 12px; }
+.stat-value { font-size: 28px; font-weight: 800; color: var(--navy); letter-spacing: -1px; }
+.stat-label { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+
+/* Badges */
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.badge-green { background: var(--green-light); color: var(--green); }
+.badge-gold { background: var(--gold-light); color: #b07d14; }
+.badge-navy { background: #e8e8f0; color: var(--navy); }
+.badge-red { background: #fef2f2; color: #dc2626; }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; border: none; cursor: pointer; transition: all 0.15s; font-family: inherit; }
+.btn-primary { background: var(--navy); color: white; }
+.btn-primary:hover { background: var(--navy-light); }
+.btn-green { background: var(--green); color: white; }
+.btn-green:hover { background: #015d1c; }
+.btn-outline { background: white; border: 1.5px solid var(--border); color: var(--text); }
+.btn-outline:hover { border-color: var(--navy); color: var(--navy); }
+.btn-sm { padding: 6px 14px; font-size: 13px; }
+
+/* Table */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+thead th { text-align: left; padding: 12px 8px; border-bottom: 2px solid var(--border); color: var(--text-secondary); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+tbody td { padding: 12px 8px; border-bottom: 1px solid var(--border); }
+tbody tr:hover { background: var(--bg); }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+.status-dot.green { background: var(--green); }
+.status-dot.gold { background: var(--gold); }
+.status-dot.navy { background: var(--navy); }
+.status-dot.red { background: #dc2626; }
+
+/* Form */
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+.form-group label .required { color: #dc2626; }
+.form-control { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; transition: border-color 0.15s; background: white; }
+.form-control:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(0,3,74,0.08); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+select.form-control { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; }
+
+/* Mockup Phone */
+.mockup-phone { max-width: 320px; margin: 0 auto; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,3,74,0.12); border: 1px solid var(--border); background: white; }
+.mockup-phone-status { background: var(--navy); color: white; padding: 8px 16px; font-size: 11px; display: flex; justify-content: space-between; }
+
+/* Sidebar */
+.sidebar-layout { display: flex; min-height: 300px; }
+.sidebar { width: 220px; background: var(--navy); padding: 16px 0; }
+.sidebar-item { padding: 10px 20px; color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: all 0.15s; }
+.sidebar-item:hover { color: white; background: rgba(255,255,255,0.05); }
+.sidebar-item.active { color: white; background: rgba(255,255,255,0.1); border-right: 3px solid var(--gold); font-weight: 600; }
+.sidebar-content { flex: 1; padding: 20px; }
+
+/* Tags */
+.tag { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 500; background: var(--gold-light); color: #b07d14; margin: 2px; }
+
+/* Progress */
+.progress-bar { height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; }
+.progress-bar .fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+.progress-bar .fill.navy { background: var(--navy); }
+.progress-bar .fill.green { background: var(--green); }
+.progress-bar .fill.gold { background: var(--gold); }
+
+/* Section labels */
+.section-label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; }
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* Report section */
+.report-section { margin-top: 40px; }
+
+@media (max-width: 768px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } .stat-grid { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+<!-- Header -->
+<div class="brand-header">
+  <div class="brand">
+    <div class="brand-icon">P</div>
+    <div>
+      <div class="brand-text">PEDULI<span>YPKM</span></div>
+      <div class="brand-sub">Yayasan Pelangi Kesejahteraan Masyarakat</div>
+    </div>
+  </div>
+  <nav class="nav-links">
+    <a href="#" class="active">Dashboard</a>
+    <a href="#">Penerima</a>
+    <a href="#">Kelompok</a>
+    <a href="#">Distribusi</a>
+    <a href="#">Laporan</a>
+  </nav>
+</div>
+
+<!-- Stats -->
+<div class="stat-grid">
+  <div class="stat">
+    <div class="stat-icon" style="background:#e8e8f0;">👥</div>
+    <div class="stat-value">1.247</div>
+    <div class="stat-label">Total Penerima</div>
+  </div>
+  <div class="stat">
+    <div class="stat-icon" style="background:var(--green-light);">📋</div>
+    <div class="stat-value">48</div>
+    <div class="stat-label">Kelompok</div>
+  </div>
+  <div class="stat">
+    <div class="stat-icon" style="background:var(--gold-light);">🚚</div>
+    <div class="stat-value">12</div>
+    <div class="stat-label">Distribusi</div>
+  </div>
+  <div class="stat">
+    <div class="stat-icon" style="background:#fef2f2;">👤</div>
+    <div class="stat-value">23</div>
+    <div class="stat-label">Relawan</div>
+  </div>
+</div>
+
+<!-- Page Title -->
+<h2 class="page-title">Dashboard Admin</h2>
+<p class="page-desc">Ringkasan aktivitas penyaluran bantuan YPKM secara real-time.</p>
+
+<!-- Main Grid -->
+<div class="grid-2">
+
+<!-- Left: Recent Distributions -->
+<div class="card">
+  <div class="card-header">
+    <h3>🚚 Distribusi Terbaru</h3>
+    <button class="btn btn-outline btn-sm">Lihat Semua</button>
+  </div>
+  <div class="card-body">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Kegiatan</th><th>Daerah</th><th>Tanggal</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Bantuan Sembako</strong></td><td>Aceh Tamiang</td><td>25 Jul 2026</td><td><span class="badge badge-green"><span class="status-dot green"></span>Selesai</span></td></tr>
+          <tr><td><strong>Paket Pangan</strong></td><td>Pidie</td><td>28 Jul 2026</td><td><span class="badge badge-gold"><span class="status-dot gold"></span>Berlangsung</span></td></tr>
+          <tr><td><strong>Bantuan Sekolah</strong></td><td>Bireuen</td><td>02 Agu 2026</td><td><span class="badge badge-navy"><span class="status-dot navy"></span>Rencana</span></td></tr>
+          <tr><td><strong>Sembako Subulussalam</strong></td><td>Subulussalam</td><td>05 Agu 2026</td><td><span class="badge badge-navy"><span class="status-dot navy"></span>Rencana</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Right: Progress -->
+<div class="card">
+  <div class="card-header">
+    <h3>📊 Progress Distribusi</h3>
+  </div>
+  <div class="card-body">
+    <div style="margin-bottom:16px;">
+      <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
+        <span>Bantuan Sembako - Tamiang</span><span>50/50 paket</span>
+      </div>
+      <div class="progress-bar"><div class="fill green" style="width:100%"></div></div>
+    </div>
+    <div style="margin-bottom:16px;">
+      <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
+        <span>Paket Pangan - Pidie</span><span>20/50 paket</span>
+      </div>
+      <div class="progress-bar"><div class="fill gold" style="width:40%"></div></div>
+    </div>
+    <div style="margin-bottom:16px;">
+      <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
+        <span>Sembako Subulussalam</span><span>0/40 paket</span>
+      </div>
+      <div class="progress-bar"><div class="fill navy" style="width:0%"></div></div>
+    </div>
+    <div style="margin-top:20px; padding:12px; background:var(--gold-light); border-radius:8px; font-size:13px; color:#b07d14; display:flex; align-items:center; gap:8px;">
+      🔔 2 distribusi perlu konfirmasi ketua kelompok
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Section: Data Penerima -->
+<div class="section-label" style="margin-top:40px;">Manajemen Data</div>
+<div class="card">
+  <div class="card-header">
+    <h3>👥 Data Penerima Manfaat</h3>
+    <div style="display:flex; gap:8px;">
+      <input class="form-control" placeholder="Cari NIK / nama..." style="width:200px; padding:6px 12px; font-size:13px;">
+      <select class="form-control" style="width:140px; padding:6px 12px; font-size:13px;">
+        <option>Semua Status</option>
+        <option>Terverifikasi</option>
+        <option>Pending</option>
+        <option>Ditolak</option>
+      </select>
+      <button class="btn btn-primary btn-sm">+ Tambah</button>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>NIK</th><th>Nama</th><th>Kelompok</th><th>Kontak</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          <tr><td style="color:var(--text-secondary);">1101***0001</td><td><strong>Ahmad Fauzi</strong></td><td><span class="tag">Meunasah</span></td><td>0812xxxx</td><td><span class="badge badge-green">Terverifikasi</span></td><td><button class="btn btn-outline btn-sm" style="padding:4px 10px;">Detail</button></td></tr>
+          <tr><td style="color:var(--text-secondary);">1101***0002</td><td><strong>Siti Aisyah</strong></td><td><span class="tag">Krueng</span></td><td>0823xxxx</td><td><span class="badge badge-gold">Pending</span></td><td><button class="btn btn-outline btn-sm" style="padding:4px 10px;">Verifikasi</button></td></tr>
+          <tr><td style="color:var(--text-secondary);">1101***0003</td><td><strong>Muhammad Yusuf</strong></td><td><span class="tag">Gampong</span></td><td>0852xxxx</td><td><span class="badge badge-red">Ditolak</span></td><td><button class="btn btn-outline btn-sm" style="padding:4px 10px;">Detail</button></td></tr>
+          <tr><td style="color:var(--text-secondary);">1101***0004</td><td><strong>Nurul Fitri</strong></td><td><span class="tag">Blang</span></td><td>0813xxxx</td><td><span class="badge badge-green">Terverifikasi</span></td><td><button class="btn btn-outline btn-sm" style="padding:4px 10px;">Detail</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; font-size:13px; color:var(--text-secondary);">
+      <span>Menampilkan 1-4 dari 1.247 penerima</span>
+      <div style="display:flex; gap:4px;">
+        <button class="btn btn-outline btn-sm" style="padding:4px 10px;">‹</button>
+        <button class="btn btn-primary btn-sm" style="padding:4px 10px; min-width:32px;">1</button>
+        <button class="btn btn-outline btn-sm" style="padding:4px 10px; min-width:32px;">2</button>
+        <button class="btn btn-outline btn-sm" style="padding:4px 10px; min-width:32px;">3</button>
+        <button class="btn btn-outline btn-sm" style="padding:4px 10px;">›</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section: Form & Mobile -->
+<div class="grid-2" style="margin-top:24px;">
+  <!-- Form Tambah -->
+  <div class="card">
+    <div class="card-header"><h3>📝 Tambah Penerima Baru</h3></div>
+    <div class="card-body">
+      <div class="form-row">
+        <div class="form-group"><label>NIK <span class="required">*</span></label><input class="form-control" value="1101010101010001"></div>
+        <div class="form-group"><label>No. KK</label><input class="form-control" value="1101010101010001"></div>
+      </div>
+      <div class="form-group"><label>Nama Lengkap <span class="required">*</span></label><input class="form-control" value="Ahmad Fauzi"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Tempat Lahir</label><input class="form-control" value="Lhokseumawe"></div>
+        <div class="form-group"><label>Tanggal Lahir</label><input class="form-control" type="date" value="1985-06-15"></div>
+      </div>
+      <div class="form-group"><label>Alamat Lengkap</label><input class="form-control" value="Jl. Merdeka No. 10, Meunasah"></div>
+      <div class="form-row">
+        <div class="form-group"><label>No. HP</label><input class="form-control" value="0812xxxxxxxx"></div>
+        <div class="form-group"><label>Jumlah Keluarga</label><input class="form-control" type="number" value="4"></div>
+      </div>
+      <div class="form-group"><label>Sumber Data</label>
+        <select class="form-control"><option>Mandiri</option><option selected>Relawan</option><option>Ketua Kelompok</option></select>
+      </div>
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:8px;">
+        <button class="btn btn-outline">Batal</button>
+        <button class="btn btn-primary">Simpan Data</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile View -->
+  <div class="card">
+    <div class="card-header"><h3>📱 Tampilan Mobile Relawan</h3></div>
+    <div class="card-body" style="display:flex; justify-content:center;">
+      <div class="mockup-phone">
+        <div class="mockup-phone-status">
+          <span>📶 4G</span>
+          <span>12:30</span>
+          <span>🔋 78%</span>
+        </div>
+        <div style="background:var(--navy); color:white; padding:16px; text-align:center;">
+          <div style="font-size:18px; font-weight:800;">PEDULI YPKM</div>
+          <div style="font-size:11px; opacity:0.7; margin-top:2px;">Selamat datang, Relawan</div>
+        </div>
+        <div style="padding:16px;">
+          <div class="grid-2" style="gap:8px;">
+            <div style="background:var(--green-light); padding:12px; border-radius:8px; text-align:center;">
+              <div style="font-size:24px; font-weight:800; color:var(--green);">5</div>
+              <div style="font-size:10px; color:var(--text-secondary);">Tugas Aktif</div>
+            </div>
+            <div style="background:#e8e8f0; padding:12px; border-radius:8px; text-align:center;">
+              <div style="font-size:24px; font-weight:800; color:var(--navy);">12</div>
+              <div style="font-size:10px; color:var(--text-secondary);">Tersalurkan</div>
+            </div>
+          </div>
+          <div style="font-size:13px; font-weight:600; margin:12px 0 8px;">Tugas Hari Ini</div>
+          <div style="border:1px solid var(--border); border-radius:8px; padding:12px;">
+            <div style="font-size:13px; font-weight:600;">Distribusi Sembako</div>
+            <div style="font-size:11px; color:var(--text-secondary); margin:4px 0;">📍 Aceh Tamiang</div>
+            <div style="display:flex; justify-content:space-between; font-size:11px;">
+              <span>✅ 20/50 paket</span>
+              <span class="badge badge-gold">Berlangsung</span>
+            </div>
+          </div>
+          <div style="margin-top:12px; display:flex; gap:8px;">
+            <button class="btn btn-outline btn-sm" style="flex:1; padding:10px; font-size:12px;">📷 Scan KTP</button>
+            <button class="btn btn-primary btn-sm" style="flex:1; padding:10px; font-size:12px;">✅ Tanda Terima</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Section: Laporan -->
+<div class="section-label" style="margin-top:40px;">Laporan & Analitik</div>
+<div class="card">
+  <div class="card-header">
+    <h3>📄 Rekap Penyaluran Bantuan</h3>
+    <div style="display:flex; gap:8px;">
+      <select class="form-control" style="width:140px; padding:6px 12px; font-size:13px;"><option>Bulan Ini</option></select>
+      <select class="form-control" style="width:150px; padding:6px 12px; font-size:13px;"><option>Semua Daerah</option></select>
+      <button class="btn btn-outline btn-sm">📥 Export Excel</button>
+      <button class="btn btn-outline btn-sm">🖨️ Cetak</button>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Daerah</th><th>Penerima</th><th>Kelompok</th><th>Distribusi</th><th>Paket</th><th>Progress</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Aceh Tamiang</strong></td><td>342</td><td>12</td><td>5</td><td>1.250</td><td><div class="progress-bar" style="width:80px;"><div class="fill green" style="width:100%"></div></div></td></tr>
+          <tr><td><strong>Pidie</strong></td><td>281</td><td>10</td><td>3</td><td>840</td><td><div class="progress-bar" style="width:80px;"><div class="fill gold" style="width:60%"></div></div></td></tr>
+          <tr><td><strong>Aceh Utara</strong></td><td>198</td><td>8</td><td>2</td><td>500</td><td><div class="progress-bar" style="width:80px;"><div class="fill gold" style="width:40%"></div></div></td></tr>
+          <tr><td><strong>Bireuen</strong></td><td>156</td><td>6</td><td>2</td><td>400</td><td><div class="progress-bar" style="width:80px;"><div class="fill navy" style="width:30%"></div></div></td></tr>
+          <tr><td><strong>Subulussalam</strong></td><td>120</td><td>5</td><td>1</td><td>200</td><td><div class="progress-bar" style="width:80px;"><div class="fill navy" style="width:0%"></div></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding:12px; background:var(--navy); border-radius:8px; color:white;">
+      <div><strong>Total Keseluruhan</strong></div>
+      <div style="display:flex; gap:32px; font-size:13px;">
+        <span>1.097 Penerima</span>
+        <span>41 Kelompok</span>
+        <span>13 Distribusi</span>
+        <span style="font-weight:700;">3.190 Paket</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<div style="text-align:center; margin-top:48px; padding:24px 0; border-top:1px solid var(--border); color:var(--text-secondary); font-size:13px;">
+  <strong style="color:var(--navy);">PEDULI YPKM</strong> — Pendataan & Distribusi Untuk Layanan Insani<br>
+  Yayasan Pelangi Kesejahteraan Masyarakat &bull; peduli.ypkm.info
+</div>
+
+</div>
+</body>
+</html>
