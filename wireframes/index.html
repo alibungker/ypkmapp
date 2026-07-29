@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wireframe - PEDULI YPKM</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; padding: 40px; }
+.header { text-align: center; margin-bottom: 40px; }
+.header h1 { color: #1a73e8; font-size: 28px; }
+.header p { color: #5f6368; margin-top: 5px; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 30px; }
+
+.card { background: white; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); overflow: hidden; transition: transform .2s; }
+.card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+.card-header { padding: 16px 20px; border-bottom: 1px solid #e8eaed; display: flex; align-items: center; gap: 10px; }
+.card-header .icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: white; }
+.card-header h3 { font-size: 15px; color: #202124; flex: 1; }
+.card-body { padding: 20px; }
+.card-footer { padding: 12px 20px; border-top: 1px solid #e8eaed; }
+.badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+.badge-blue { background: #e8f0fe; color: #1a73e8; }
+.badge-green { background: #e6f4ea; color: #137333; }
+.badge-amber { background: #fef7e0; color: #e37400; }
+
+/* Mockup styles */
+.mockup { border: 1px solid #dadce0; border-radius: 12px; overflow: hidden; background: white; }
+.mockup-nav { background: #1a73e8; color: white; padding: 12px 16px; display: flex; align-items: center; gap: 12px; font-size: 14px; }
+.mockup-nav .brand { font-weight: 700; }
+.mockup-nav .spacer { flex: 1; }
+.mockup-nav .avatar { width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.3); }
+.mockup-body { padding: 16px; min-height: 200px; }
+.mockup-sidebar { width: 200px; background: #f8f9fa; min-height: 200px; padding: 12px; border-right: 1px solid #dadce0; font-size: 13px; }
+.mockup-sidebar .item { padding: 8px 12px; border-radius: 8px; margin-bottom: 4px; color: #5f6368; }
+.mockup-sidebar .item.active { background: #e8f0fe; color: #1a73e8; font-weight: 600; }
+.mockup-content { flex: 1; padding: 16px; }
+.mockup-row { display: flex; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+.mockup-row .status { width: 8px; height: 8px; border-radius: 50%; }
+.mockup-row .status.green { background: #34a853; }
+.mockup-row .status.amber { background: #fbbc04; }
+.mockup-row .status.blue { background: #1a73e8; }
+.table-mini { width: 100%; font-size: 12px; border-collapse: collapse; }
+.table-mini th { text-align: left; padding: 6px 4px; border-bottom: 2px solid #e8eaed; color: #5f6368; }
+.table-mini td { padding: 6px 4px; border-bottom: 1px solid #f0f0f0; }
+.chart-bar { height: 8px; background: #e8f0fe; border-radius: 4px; overflow: hidden; margin: 4px 0; }
+.chart-bar .fill { height: 100%; background: #1a73e8; border-radius: 4px; }
+.form-group { margin-bottom: 12px; }
+.form-group label { display: block; font-size: 12px; color: #5f6368; margin-bottom: 4px; }
+.form-group input, .form-group select { width: 100%; padding: 8px 12px; border: 1px solid #dadce0; border-radius: 8px; font-size: 13px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.btn { padding: 8px 16px; border: none; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 600; }
+.btn-primary { background: #1a73e8; color: white; }
+.btn-outline { background: white; border: 1px solid #dadce0; color: #5f6368; }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; background: #e8f0fe; color: #1a73e8; margin: 2px; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>📱 PEDULI YPKM — Wireframe Aplikasi</h1>
+  <p>Visual mockup setiap halaman utama aplikasi</p>
+</div>
+
+<div class="grid">
+
+<!-- 1. Landing / Login -->
+<div class="card">
+  <div class="card-header"><div class="icon" style="background:#1a73e8">🔐</div><h3>1. Halaman Login</h3><span class="badge badge-blue">Admin/Relawan</span></div>
+  <div class="card-body">
+    <div class="mockup">
+      <div class="mockup-body" style="text-align:center; padding:30px 20px;">
+        <div style="font-size:32px; font-weight:700; color:#1a73e8; margin-bottom:5px;">PEDULI</div>
+        <div style="font-size:12px; color:#5f6368; margin-bottom:20px;">Yayasan Pelangi Kesejahteraan Masyarakat</div>
+        <div class="form-group"><input type="text" placeholder="Email" value="admin@ypkm.info" style="background:#f8f9fa"></div>
+        <div class="form-group"><input type="password" placeholder="Password" value="••••••••" style="background:#f8f9fa"></div>
+        <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:16px;">
+          <label><input type="checkbox"> Ingat saya</label>
+          <a href="#" style="color:#1a73e8;">Lupa password?</a>
+        </div>
+        <button class="btn btn-primary" style="width:100%; padding:12px;">Masuk</button>
+        <div style="font-size:11px; color:#5f6368; margin-top:16px;">Belum punya akun? <a href="#" style="color:#1a73e8;">Daftar disini</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. Dashboard Admin -->
+<div class="card">
+  <div class="card-header"><div class="icon" style="background:#34a853">📊</div><h3>2. Dashboard Admin</h3><span class="badge badge-green">Admin</span></div>
+  <div class="card-body">
+    <div class="mockup">
+      <div style="display:flex; min-height:220px;">
+        <div class="mockup-sidebar">
+          <div class="item active">📊 Dashboard</div>
+          <div class="item">👥 Penerima</div>
+          <div class="item">📋 Kelompok</div>
+          <div class="item">🚚 Distribusi</div>
+          <div class="item">👤 Relawan</div>
+          <div class="item">📄 Laporan</div>
+        </div>
+        <div class="mockup-content">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">
+            <div style="background:#e8f0fe; padding:10px; border-radius:8px; text-align:center;">
+              <div style="font-size:20px; font-weight:700; color:#1a73e8;">1,247</div>
+              <div style="font-size:11px; color:#5f6368;">Penerima</div>
+            </div>
+            <div style="background:#e6f4ea; padding:10px; border-radius:8px; text-align:center;">
+              <div style="font-size:20px; font-weight:700; color:#34a853;">48</div>
+              <div style="font-size:11px; color:#5f6368;">Kelompok</div>
+            </div>
+            <div style="background:#fef7e0; padding:10px; border-radius:8px; text-align:center;">
+              <div style="font-size:20px; font-weight:700; color:#e37400;">12</div>
+              <div style="font-size:11px; color:#5f6368;">Distribusi</div>
+            </div>
+            <div style="background:#fce8e6; padding:10px; border-radius:8px; text-align:center;">
+              <div style="font-size:20px; font-weight:700; color:#d93025;">23</div>
+              <div style="font-size:11px; color:#5f6368;">Relawan</div>
+            </div>
+          </div>
+          <div style="font-size:13px; font-weight:600; margin-bottom:6px;">Distribusi Terbaru</div>
+          <div class="mockup-row"><span class="status green"></span> Sembako - Aceh Tamiang <span style="margin-left:auto; font-size:11px; color:#5f6368;">✅ Selesai</span></div>
+          <div class="mockup-row"><span class="status amber"></span> Bantuan Pangan - Pidie <span style="margin-left:auto; font-size:11px; color:#5f6368;">⏳ Berlangsung</span></div>
+          <div class="mockup-row"><span class="status blue"></span> Paket Sekolah - Bireuen <span style="margin-left:auto; font-size:11px; color:#5f6368;">📋 Rencana</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3. Data Penerima -->
+<div class="card">
+  <div class="card-header"><div class="icon" style="background:#4285f4">👥</div><h3>3. Data Penerima</h3><span class="badge badge-blue">Admin/Relawan</span></div>
+  <div class="card-body">
+    <div class="mockup">
+      <div style="padding:12px;">
+        <div style="display:flex; gap:8px; margin-bottom:12px;">
+          <input type="text" placeholder="Cari NIK/nama..." style="flex:1; padding:8px 12px; border:1px solid #dadce0; border-radius:8px; font-size:13px;">
+          <select style="padding:8px; border:1px solid #dadce0; border-radius:8px; font-size:12px;"><option>Semua Status</option></select>
+          <button class="btn btn-primary">+ Tambah</button>
+        </div>
+        <table class="table-mini">
+          <tr><th>NIK</th><th>Nama</th><th>Kelompok</th><th>Status</th></tr>
+          <tr><td>1101***0001</td><td>Ahmad Fauzi</td><td>Meunasah</td><td><span class="badge badge-green">Terverifikasi</span></td></tr>
+          <tr><td>1101***0002</td><td>Siti Aisyah</td><td>Krueng</td><td><span class="badge badge-amber">Pending</span></td></tr>
+          <tr><td>1101***0003</td><td>M. Yusuf</td><td>Gampong</td><td><span class="badge badge-green">Terverifikasi</span></td></tr>
+          <tr><td>1101***0004</td><td>Nurul Fitri</td><td>Blang</td><td><span style="display:inline-block; padding:2px 8px; border-radius:6px; font-size:11px; background:#fce8e6; color:#d93025;">Ditolak</span></td></tr>
+        </table>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; font-size:11px; color:#5f6368;">
+          <span>1-4 dari 1.247</span>
+          <div style="display:flex; gap:4px;">
+            <button class="btn btn-outline" style="padding:4px 10px;">‹</button>
+            <button class="btn btn-outline" style="padding:4px 10px; background:#1a73e8; color:white;">1</button>
+            <button class="btn btn-outline" style="padding:4px 10px;">2</button>
+            <button class="btn btn-outline" style="padding:4px 10px;">›</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. Form Tambah Penerima -->
+<div class="card">
+  <div class="card-header"><div class="icon" style="background:#0f9d58">📝</div><h3>4. Tambah Penerima</h3><span class="badge badge-green">Form</span></div>
+  <div class="card-body">
+    <div class="mockup">
+      <div style="padding:12px;">
+        <div class="form-row">
+          <div class="form-group"><label>NIK *</label><input type="text" value="1101010101010001"></div>
+          <div class="form-group"><label>No. KK *</label><input type="text" value="1101010101010001"></div>
+        </div>
+        <div class="form-group"><label>Nama Lengkap *</label><input type="text" value="Ahmad Fauzi"></div>
+        <div class="form-row">
+          <div class="form-group"><label>Tempat Lahir</label><input type="text" value="Lhokseumawe"></div>
+          <div class="form-group"><label>Tanggal Lahir</label><input type="date" value="1985-06-15"></div>
+        </div>
+        <div class="form-group"><label>Alamat</label><input type="text" value="Jl. Merdeka No. 10, Meunasah"></div>
+        <div class="form-row">
+          <div class="form-group"><label>No. HP</label><input type="text" value="0812xxxxxx"></div>
+          <div class="form-group"><label>Jumlah Keluarga</label><input type="number" value="4"></div>
+        </div>
+        <div class="form-group"><label>Sumber Data</label><select><option>Mandiri</option><option selected>Relawan</option><option>Ketua Kelompok</option></select></div>
+        <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:12px;">
+          <button class="btn btn-outline">Batal</button>
+          <button class="btn btn-primary">Simpan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5. Registrasi Mandiri (Publik) -->
+<div class="card">
+  <div class="card-header"><div class="icon" style="background:#e37400">🌐</div><h3>5. Registrasi Mandiri</h3><span class="badge badge-amber">Publik</span></div>
+  <div class="card-body">
+    <div class="mockup">
+      <div class="mockup-nav">
+        <div class="brand">PEDULI YPKM</div>
+        <div class="spacer"></div>
+        <div style="font-size:12px;">🏠 Beranda</div>
+      </div>
+      <div style="padding:20px; text-align:center;">
+        <div style="font-size:20px; font-weight:700; color:#1a73e8; margin-bottom:4px;">Daftar Bantuan</div>
+        <div style="font-size:12px; color:#5f6368; margin-bottom:16px;">Isi data diri untuk mendaftar sebagai penerima bantuan</div>
+        <div style="background:#f8f9fa; border-radius:12px; padding:16px; text-align:left;">
+          <div class="form-group"><label>NIK *</label><input type="text" placeholder="Masukkan 16 digit NIK"></div>
+          <div class="form-group"><label>Nama Lengkap *</label><input type="text" placeholder="Sesuai KTP"></div>
+          <div class="form-row">
+            <div class="form-group"><label>No. HP</label><input type="text" placeholder="08xxxxxxxxxx"></div>
+            <div class="form-group"><label>Jumlah Keluarga</label><input type="number" placeholder="0"></div>
+          </div>
+          <div class="form-group"><label>Alamat *</label><input type="text" placeholder="Desa/Kecamatan/Kabupaten"></div>
+          <div class="form-group"><label>Alasan Mendaftar</label><textarea rows="2" style="width:100%; padding:8px; border:1px solid #dadce0; border-radius:8px; font-size:13px; resize:none;" placeholder="..."></textarea></div>
+          <button class="btn btn-primary" style="width:100%; padding:12px; margin-top:8px;">Kirim Pendaftaran</button>
+          <div style="font-size:11px; color:#5f6368; margin-top:8px;">✓ Data Anda aman dan hanya digunakan untuk verifikasi bantuan</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 6. Kelompok -->
+<div class="card">
+  <div class="card-header"><div class="icon" style="background:#7b1fa2">📋</div><h3>6. Manajemen Kelompok</h3><span class="badge" style="background:#f3e8fd; color:#7b1fa2;">Admin</span></div>
+  <div class="card-body">
+    <div class="mockup">
+      <div style="padding:12px;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <div style="border:1px solid #dadce0; border-radius:8px; padding:12px;">
+            <div style="font-size:14px; font-weight:600;">Kel. Meunasah</div>
+            <div style="font-size:11px; color:#5f6368;">Aceh Utara</div>
+            <div style="font-size:11px; margin-top:4px;">👤 Ketua: Ahmad</div>
+            <div style="font-size:11px;">👥 45 anggota</div>
+            <div style="margin-top:6px;"><span class="tag">Distribusi 12 Jul</span></div>
+          </div>
+          <div style="border:1px solid #dadce0; border-radius:8px; padding:12px;">
+            <div style="font-size:14px; font-weight:600;">Kel. Krueng</div>
+            <div style="font-size:11px; color:#5f6368;">Pidie</div>
+            <div style="font-size:11px; margin-top:4px;">👤 Ketua: Siti</div>
+            <div style="font-size:11px;">👥 32 anggota</div>
+            <div style="margin-top:6px;"><span class="tag">Menunggu</span></div>
+          </div>
+        </div>
+        <button class="btn btn-outline" style="width:100%; margin-top:10px; padding:10px;">+ Buat Kelompok Baru</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 7. Detail Distribusi -->
+<div class="card">
+  <div class="card-header"><div class="icon" style="background:#e37400">🚚</div><h3>7. Distribusi Detail</h3><span class="badge badge-amber">Admin/Relawan</span></div>
+  <div class="card-body">
+    <div class="mockup">
+      <div style="padding:12px;">
+        <div style="font-size:16px; font-weight:600;">Distribusi Sembako</div>
+        <div style="font-size:12px; color:#5f6368; margin-bottom:10px;">📍 Aceh Tamiang | 📅 25 Juli 2026</div>
+        <div style="background:#e8f0fe; border-radius:8px; padding:10px; margin-bottom:10px;">
+          <div style="display:flex; justify-content:space-between; font-size:13px;">
+            <span>Progress</span><span><strong>20/50</strong> paket</span>
+          </div>
+          <div class="chart-bar" style="margin-top:4px;"><div class="fill" style="width:40%; background:#34a853;"></div></div>
+        </div>
+        <div style="font-size:13px; font-weight:600; margin-bottom:6px;">Daftar Penerima</div>
+        <div class="mockup-row"><input type="checkbox" checked> Ahmad Fauzi <span class="badge badge-green" style="margin-left:auto;">✅ Terima</span></div>
+        <div class="mockup-row"><input type="checkbox" checked> Siti Aisyah <span class="badge badge-green" style="margin-left:auto;">✅ Terima</span></div>
+        <div class="mockup-row"><input type="checkbox"> M. Yusuf <span class="badge badge-amber" style="margin-left:auto;">⏳</span></div>
+        <div class="mockup-row"><input type="checkbox"> Nurul Fitri <span class="badge" style="background:#f0f0f0; color:#5f6368; margin-left:auto;">⬜</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 8. Laporan -->
+<div class="card">
+  <div class="card-header"><div class="icon" style="background:#d93025">📄</div><h3>8. Laporan</h3><span class="badge" style="background:#fce8e6; color:#d93025;">Admin</span></div>
+  <div class="card-body">
+    <div class="mockup">
+      <div style="padding:12px;">
+        <div style="display:flex; gap:8px; margin-bottom:12px;">
+          <select style="padding:6px; border:1px solid #dadce0; border-radius:8px; font-size:12px;"><option>Bulan Ini</option></select>
+          <select style="padding:6px; border:1px solid #dadce0; border-radius:8px; font-size:12px;"><option>Semua Daerah</option></select>
+          <button class="btn btn-outline" style="padding:6px 12px;">📥 Export</button>
+        </div>
+        <table class="table-mini">
+          <tr><th>Daerah</th><th>Penerima</th><th>Distribusi</th><th>Paket</th></tr>
+          <tr><td>Aceh Tamiang</td><td>342</td><td>5</td><td>1.250</td></tr>
+          <tr><td>Pidie</td><td>281</td><td>3</td><td>840</td></tr>
+          <tr><td>Aceh Utara</td><td>198</td><td>2</td><td>500</td></tr>
+          <tr><td>Bireuen</td><td>156</td><td>2</td><td>400</td></tr>
+          <tr style="font-weight:600;"><td>Total</td><td>977</td><td>12</td><td>2.990</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 9. Mobile View - Relawan -->
+<div class="card">
+  <div class="card-header"><div class="icon" style="background:#4285f4">📱</div><h3>9. Mobile Relawan</h3><span class="badge badge-blue">Mobile PWA</span></div>
+  <div class="card-body">
+    <div class="mockup" style="max-width:280px; margin:auto;">
+      <div style="background:#1a73e8; color:white; padding:16px; text-align:center;">
+        <div style="font-size:16px; font-weight:700;">PEDULI YPKM</div>
+        <div style="font-size:11px; opacity:0.9;">Selamat datang, Relawan</div>
+      </div>
+      <div style="padding:12px;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">
+          <div style="background:#e8f0fe; padding:12px; border-radius:8px;">
+            <div style="font-size:20px; font-weight:700; color:#1a73e8;">5</div>
+            <div style="font-size:10px; color:#5f6368;">Tugas Aktif</div>
+          </div>
+          <div style="background:#e6f4ea; padding:12px; border-radius:8px;">
+            <div style="font-size:20px; font-weight:700; color:#34a853;">12</div>
+            <div style="font-size:10px; color:#5f6368;">Tersalurkan</div>
+          </div>
+        </div>
+        <div style="font-size:13px; font-weight:600; margin-bottom:6px;">Tugas Hari Ini</div>
+        <div style="border:1px solid #dadce0; border-radius:8px; padding:10px;">
+          <div style="font-size:13px; font-weight:600;">Distribusi Sembako</div>
+          <div style="font-size:11px; color:#5f6368;">📍 Aceh Tamiang</div>
+          <div style="display:flex; justify-content:space-between; font-size:11px; margin-top:6px;">
+            <span>✅ 20/50 paket</span>
+            <span class="badge badge-amber">Berlangsung</span>
+          </div>
+        </div>
+        <div style="margin-top:8px; display:flex; gap:6px;">
+          <button class="btn btn-outline" style="flex:1; padding:10px; font-size:12px;">📷 Scan KTP</button>
+          <button class="btn btn-primary" style="flex:1; padding:10px; font-size:12px;">📍 Tandai Terima</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 10. Ketua Kelompok View -->
+<div class="card">
+  <div class="card-header"><div class="icon" style="background:#0f9d58">👤</div><h3>10. Ketua Kelompok</h3><span class="badge badge-green">Ketua</span></div>
+  <div class="card-body">
+    <div class="mockup" style="max-width:300px; margin:auto;">
+      <div style="padding:12px;">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+          <div style="width:40px; height:40px; border-radius:50%; background:#e8f0fe; display:flex; align-items:center; justify-content:center; font-size:20px;">👤</div>
+          <div>
+            <div style="font-size:14px; font-weight:600;">Ahmad</div>
+            <div style="font-size:11px; color:#5f6368;">Ketua Kel. Meunasah</div>
+          </div>
+        </div>
+        <div style="background:#f8f9fa; border-radius:8px; padding:10px;">
+          <div style="font-size:13px; font-weight:600;">Anggota Kelompok (45)</div>
+          <div class="mockup-row" style="font-size:12px;">👤 Abdullah <span class="badge badge-green" style="margin-left:auto;">✅</span></div>
+          <div class="mockup-row" style="font-size:12px;">👤 Fatimah <span class="badge badge-green" style="margin-left:auto;">✅</span></div>
+          <div class="mockup-row" style="font-size:12px;">👤 Hasan <span class="badge badge-amber" style="margin-left:auto;">⏳</span></div>
+          <div class="mockup-row" style="font-size:12px;">👤 Aisyah <span class="badge badge-green" style="margin-left:auto;">✅</span></div>
+          <button class="btn btn-outline" style="width:100%; padding:6px; margin-top:6px; font-size:12px;">+ Daftarkan Anggota</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div style="text-align:center; margin-top:40px; padding:20px; color:#5f6368; font-size:13px;">
+  <strong>PEDULI YPKM</strong> — Pendataan & Distribusi Untuk Layanan Insani<br>
+  Yayasan Pelangi Kesejahteraan Masyarakat | peduli.ypkm.info
+</div>
+</body>
+</html>
