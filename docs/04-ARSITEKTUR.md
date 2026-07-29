@@ -1,5 +1,5 @@
 # Software Architecture Document (SAD)
-## Aplikasi Manajemen Distribusi Bantuan YPKM
+## PEDULI YPKM — Sistem Informasi Penyaluran Bantuan Yayasan Pelangi Kesejahteraan Masyarakat
 **Kode:** SAD-01 | **Versi:** 1.0
 
 ---

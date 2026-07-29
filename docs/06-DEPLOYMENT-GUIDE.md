@@ -1,5 +1,5 @@
 # Deployment Guide — OpenCode CLI
-## Aplikasi Manajemen Distribusi Bantuan YPKM
+## PEDULI YPKM — Sistem Informasi Penyaluran Bantuan Yayasan Pelangi Kesejahteraan Masyarakat
 **Kode:** DEP-01 | **Versi:** 1.0
 
 ---
@@ -12,7 +12,7 @@
 | CPU | 2 core |
 | RAM | 4 GB |
 | Disk | 20 GB |
-| Domain | ypkm.acehprov.go.id (atau subdomain) |
+| Domain | peduli.ypkm.info (atau subdomain) |
 | Web Server | Nginx |
 | Database | MySQL 8+ |
 | PHP | 8.2+ |
@@ -62,18 +62,18 @@ php artisan migrate
 ```bash
 # Buat archive project
 cd /home/ali/hermes-workspace
-tar -czf ypkm-app.tar.gz ypkm-aplikasi/
+tar -czf peduli-ypkm.tar.gz ypkm-aplikasi/
 ```
 
 ### 4.2 Deploy via rsync/scp ke VPS
 ```bash
 # Upload ke server
-scp ypkm-app.tar.gz user@vps-server:/var/www/
+scp peduli-ypkm.tar.gz user@vps-server:/var/www/
 
 # Di server VPS
 cd /var/www
-tar -xzf ypkm-app.tar.gz
-cd ypkm-app
+tar -xzf peduli-ypkm.tar.gz
+cd peduli-ypkm
 
 # Copy .env production
 cp .env.example .env
@@ -104,8 +104,8 @@ php artisan queue:work --daemon &
 ```nginx
 server {
     listen 80;
-    server_name ypkm.acehprov.go.id;
-    root /var/www/ypkm-app/public;
+    server_name peduli.ypkm.info;
+    root /var/www/peduli-ypkm/public;
 
     add_header X-Frame-Options "SAMEORIGIN";
     add_header X-Content-Type-Options "nosniff";
@@ -141,7 +141,7 @@ ln -s /etc/nginx/sites-available/ypkm /etc/nginx/sites-enabled/
 nginx -t && systemctl reload nginx
 
 # SSL (LetsEncrypt)
-certbot --nginx -d ypkm.acehprov.go.id
+certbot --nginx -d peduli.ypkm.info
 ```
 
 ## 5. Backup
@@ -151,7 +151,7 @@ certbot --nginx -d ypkm.acehprov.go.id
 mysqldump -u ypkm_user -p ypkm > /backup/ypkm-$(date +%Y%m%d).sql
 
 # Backup file
-rsync -av /var/www/ypkm-app/storage /backup/storage-$(date +%Y%m%d)
+rsync -av /var/www/peduli-ypkm/storage /backup/storage-$(date +%Y%m%d)
 
 # Cron job harian
 0 3 * * * /usr/bin/mysqldump -u ypkm_user -p'password' ypkm > /backup/db/ypkm-$(date +\%Y\%m\%d).sql
@@ -161,7 +161,7 @@ rsync -av /var/www/ypkm-app/storage /backup/storage-$(date +%Y%m%d)
 
 ```bash
 # Cek log aplikasi
-tail -f /var/www/ypkm-app/storage/logs/laravel.log
+tail -f /var/www/peduli-ypkm/storage/logs/laravel.log
 
 # Cek queue worker
 ps aux | grep queue:work
@@ -174,8 +174,8 @@ htop
 
 ```bash
 # Simpan versi sebelumnya
-mv /var/www/ypkm-app /var/www/ypkm-app-rollback-$(date +%Y%m%d)
+mv /var/www/peduli-ypkm /var/www/peduli-ypkm-rollback-$(date +%Y%m%d)
 
 # Restore dari backup
-tar -xzf /backup/ypkm-app-20260729.tar.gz -C /var/www/
+tar -xzf /backup/peduli-ypkm-20260729.tar.gz -C /var/www/
 ```

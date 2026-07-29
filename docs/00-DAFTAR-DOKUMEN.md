@@ -1,4 +1,4 @@
-# Daftar Dokumen Proyek Aplikasi YPKM
+# Daftar Dokumen Proyek PEDULI YPKM
 ## Yayasan Pelangi Kesejahteraan Masyarakat
 ### ISO/IEC 12207 — Software Lifecycle Processes
 

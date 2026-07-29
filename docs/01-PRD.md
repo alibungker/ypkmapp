@@ -1,5 +1,5 @@
 # Product Requirements Document (PRD)
-## Aplikasi Manajemen Distribusi Bantuan YPKM
+## PEDULI YPKM — Sistem Informasi Penyaluran Bantuan Yayasan Pelangi Kesejahteraan Masyarakat
 **Kode:** PRD-01 | **Versi:** 1.0 | **Tanggal:** 29 Juli 2026
 
 ---

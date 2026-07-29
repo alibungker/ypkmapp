@@ -1,5 +1,5 @@
 # API Specification (API)
-## Aplikasi Manajemen Distribusi Bantuan YPKM
+## PEDULI YPKM — Sistem Informasi Penyaluran Bantuan Yayasan Pelangi Kesejahteraan Masyarakat
 **Kode:** API-01 | **Versi:** 1.0
 
 ---
@@ -8,7 +8,7 @@
 
 ```
 Development: http://localhost:8000/api
-Production:  https://ypkm.acehprov.go.id/api
+Production:  https://peduli.ypkm.info/api
 ```
 
 ## 2. Endpoints

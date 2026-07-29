@@ -1,5 +1,5 @@
 # Software Requirements Specification (SRS)
-## Aplikasi Manajemen Distribusi Bantuan YPKM
+## PEDULI YPKM — Sistem Informasi Penyaluran Bantuan Yayasan Pelangi Kesejahteraan Masyarakat
 **Kode:** SRS-01 | **Versi:** 1.0
 **Standar:** ISO/IEC/IEEE 29148
 
