@@ -40,6 +40,19 @@ cp src/app/Models/*.php app/Models/
 
 # Copy routes
 cp src/routes/*.php routes/
+
+# Copy controllers
+cp -r src/app/Http/Controllers/* app/Http/Controllers/
+
+# Copy views
+cp -r src/resources/views/* resources/views/
+```
+
+### 4. Tambah Route ke routes/web.php
+
+Buka `routes/web.php` dan tambahkan di bagian bawah:
+```php
+require __DIR__.'/../../src/routes/web.php';
 ```
 
 ### 4. Konfigurasi Database
