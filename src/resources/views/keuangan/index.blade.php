@@ -130,7 +130,7 @@
                 @forelse($dana_masuk ?? [] as $d)
                 <tr>
                     <td style="font-weight:500;">{{ $d->donatur }}</td>
-                    <td style="color:#6b7280;">{{ $d->tanggal_masuk->format('d M Y') }}</td>
+                    <td style="color:#6b7280;">{{ is_object($d->tanggal_masuk) ? $d->tanggal_masuk->format('d M Y') : date('d M Y', strtotime($d->tanggal_masuk)) }}</td>
                     <td style="font-weight:600;color:#017723;">Rp {{ number_format($d->jumlah,0,',','.') }}</td>
                     <td><span style="padding:2px 10px;background:#e8e8f0;border-radius:6px;font-size:12px;">{{ $d->jenis }}</span></td>
                     <td style="color:#6b7280;">{{ $d->keterangan ?? '-' }}</td>
