@@ -1,0 +1,106 @@
+<?php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Penerima extends Model
+{
+    protected $fillable = [
+        'nik', 'no_kk', 'nama', 'tempat_lahir', 'tanggal_lahir', 'jenis_kelamin',
+        'alamat', 'provinsi', 'kabupaten', 'kecamatan', 'desa', 'rt_rw',
+        'phone', 'jumlah_keluarga', 'pekerjaan', 'penghasilan', 'titik_koordinat',
+        'foto_ktp', 'foto_kk', 'foto_rumah', 'sumber_data', 'status',
+        'catatan_verifikasi', 'verified_by', 'verified_at', 'kelompok_id'
+    ];
+
+    public function kelompok() { return $this->belongsTo(Kelompok::class); }
+    public function verifikator() { return $this->belongsTo(User::class, 'verified_by'); }
+    public function penerimaDistribusi() { return $this->hasMany(PenerimaDistribusi::class); }
+}
+
+class Kelompok extends Model
+{
+    protected $fillable = ['nama', 'kode', 'daerah', 'kecamatan', 'ketua_id', 'jumlah_anggota', 'description'];
+
+    public function ketua() { return $this->belongsTo(Penerima::class, 'ketua_id'); }
+    public function penerima() { return $this->hasMany(Penerima::class); }
+    public function distribusi() { return $this->hasMany(Distribusi::class); }
+}
+
+class Distribusi extends Model
+{
+    protected $fillable = [
+        'kode_distribusi', 'nama_kegiatan', 'tanggal', 'lokasi', 'titik_koordinat',
+        'kelompok_id', 'jenis_bantuan', 'jumlah_paket', 'estimasi_nilai_total',
+        'sumber_dana', 'catatan', 'status', 'created_by'
+    ];
+
+    public function kelompok() { return $this->belongsTo(Kelompok::class); }
+    public function creator() { return $this->belongsTo(User::class, 'created_by'); }
+    public function penerimaDistribusi() { return $this->hasMany(PenerimaDistribusi::class); }
+    public function items() { return $this->hasMany(DistribusiItem::class); }
+    public function biayaOperasional() { return $this->hasMany(BiayaOperasional::class); }
+}
+
+class BarangBantuan extends Model
+{
+    protected $table = 'barang_bantuans';
+    protected $fillable = ['nama', 'kategori', 'satuan', 'harga_perkiraan', 'deskripsi'];
+    public function stokBarang() { return $this->hasMany(StokBarang::class); }
+}
+
+class DanaDonatur extends Model
+{
+    protected $table = 'dana_donaturs';
+    protected $fillable = ['donatur', 'tanggal_masuk', 'jumlah', 'jenis', 'keterangan', 'bukti_transfer', 'dicatat_oleh'];
+    public function pencatat() { return $this->belongsTo(User::class, 'dicatat_oleh'); }
+}
+
+class BiayaOperasional extends Model
+{
+    protected $table = 'biaya_operasionals';
+    protected $fillable = ['distribusi_id', 'kategori', 'deskripsi', 'jumlah', 'tanggal', 'bukti_foto', 'dicatat_oleh'];
+    public function distribusi() { return $this->belongsTo(Distribusi::class); }
+    public function pencatat() { return $this->belongsTo(User::class, 'dicatat_oleh'); }
+}
+
+class PenerimaDistribusi extends Model
+{
+    protected $table = 'penerima_distribusi';
+    protected $fillable = ['penerima_id', 'distribusi_id', 'status', 'tanda_terima', 'foto_bukti', 'catatan', 'received_by', 'received_at'];
+    public function penerima() { return $this->belongsTo(Penerima::class); }
+    public function distribusi() { return $this->belongsTo(Distribusi::class); }
+}
+
+class Relawan extends Model
+{
+    protected $fillable = ['user_id', 'daerah_tugas', 'keahlian', 'status'];
+    public function user() { return $this->belongsTo(User::class); }
+}
+
+class StokBarang extends Model
+{
+    protected $table = 'stok_barangs';
+    protected $fillable = ['barang_id', 'jumlah', 'sumber', 'nilai_total', 'tanggal_masuk', 'tanggal_kadaluarsa', 'catatan'];
+    public function barang() { return $this->belongsTo(BarangBantuan::class); }
+}
+
+class DistribusiItem extends Model
+{
+    protected $table = 'distribusi_items';
+    protected $fillable = ['distribusi_id', 'barang_id', 'jumlah_per_paket', 'jumlah_paket_distribusi', 'subtotal_nilai'];
+    public function distribusi() { return $this->belongsTo(Distribusi::class); }
+    public function barang() { return $this->belongsTo(BarangBantuan::class); }
+}
+
+class Anggaran extends Model
+{
+    protected $fillable = ['distribusi_id', 'kategori', 'anggaran', 'realisasi', 'catatan'];
+    public function distribusi() { return $this->belongsTo(Distribusi::class); }
+}
+
+class Log extends Model
+{
+    protected $fillable = ['user_id', 'action', 'description', 'ip_address', 'user_agent'];
+    public function user() { return $this->belongsTo(User::class); }
+}

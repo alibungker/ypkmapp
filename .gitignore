@@ -1,5 +1,23 @@
+# Laravel
 /node_modules/
 /vendor/
 .env
+.env.*.local
+.DS_Store
 *.log
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/logs/*
+!public/storage/
+bootstrap/cache/*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
 .DS_Store
