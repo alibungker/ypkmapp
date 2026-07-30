@@ -51,7 +51,7 @@
     <aside class="sidebar">
         <div class="p-5 border-b border-white/10">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-[#e5a820] rounded-lg flex items-center justify-center font-black text-[#00034a] text-lg">P</div>
+                <img src="{{ asset('img/logo-ypkm.jpg') }}" alt="Logo YPKM" class="w-10 h-10 rounded-lg" style="object-fit:cover;background:white;">
                 <div>
                     <div class="font-bold text-lg text-white">PEDULI</div>
                     <div class="text-xs text-white/50">YPKM</div>

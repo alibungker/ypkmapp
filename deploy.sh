@@ -26,6 +26,13 @@ cp src/app/Http/Controllers/*.php app/Http/Controllers/
 echo "📦 Copying views..."
 cp -r src/resources/views/* resources/views/
 
+# 4b. Copy public assets (logo, img, dll)
+echo "📦 Copying public assets..."
+if [ -d src/public/img ]; then
+    mkdir -p public/img
+    cp -r src/public/img/* public/img/
+fi
+
 # 5. Add routes
 echo "📦 Updating routes..."
 # Cek apakah sudah ada require, jika belum tambahkan
