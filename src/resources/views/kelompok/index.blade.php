@@ -5,57 +5,13 @@
 @if(session('error'))<div class="alert" style="background:#fce8e6;border:1px solid #f5c6c0;color:#dc2626;">❌ {{ session('error') }}</div>@endif
 @if($errors->any())<div class="alert" style="background:#fce8e6;border:1px solid #f5c6c0;color:#dc2626;">❌ {{ $errors->first() }}</div>@endif
 
-<div style="display:grid;grid-template-columns:340px 1fr;gap:20px;align-items:start;">
-    {{-- Form Tambah Kelompok --}}
-    <div class="card">
-        <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;">
-            <h3 style="font-size:15px;font-weight:600;">➕ Tambah Kelompok</h3>
-        </div>
-        <div style="padding:20px;">
-            <form method="POST" action="{{ route('kelompok.store') }}">
-                @csrf
-                <div style="margin-bottom:12px;">
-                    <label class="form-label">Nama Kelompok <span style="color:#dc2626;">*</span></label>
-                    <input type="text" name="nama" class="form-input" required value="{{ old('nama') }}" placeholder="Juar - Sekerak">
-                </div>
-                <div style="margin-bottom:12px;">
-                    <label class="form-label">Kode <span style="color:#dc2626;">*</span></label>
-                    <input type="text" name="kode" class="form-input" required value="{{ old('kode') }}" placeholder="JR-SKR-02">
-                </div>
-                <div style="margin-bottom:12px;">
-                    <label class="form-label">Kabupaten/Daerah <span style="color:#dc2626;">*</span></label>
-                    <select name="daerah" id="k_kab" class="form-input" required>
-                        <option value="">— Pilih Kabupaten/Kota —</option>
-                    </select>
-                </div>
-                <div style="margin-bottom:12px;">
-                    <label class="form-label">Kecamatan</label>
-                    <select name="kecamatan" id="k_kec" class="form-input">
-                        <option value="">— Pilih kabupaten dulu —</option>
-                    </select>
-                </div>
-                <div style="margin-bottom:12px;">
-                    <label class="form-label">Desa</label>
-                    <select name="desa" id="k_desa" class="form-input">
-                        <option value="">— Pilih kecamatan dulu —</option>
-                    </select>
-                </div>
-                <div style="margin-bottom:12px;">
-                    <label class="form-label">Keterangan</label>
-                    <input type="text" name="description" class="form-input" value="{{ old('description') }}" placeholder="Gampong ..., Batch ...">
-                </div>
-                <button type="submit" class="btn btn-primary" style="width:100%;">💾 Simpan Kelompok</button>
-            </form>
-        </div>
+<div class="card">
+    <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;">
+        <h3 style="font-size:15px;font-weight:600;">📋 Data Kelompok</h3>
+        <button onclick="document.getElementById('tambahModal').style.display='flex'" class="btn btn-primary btn-sm">➕ Tambah Kelompok</button>
     </div>
-
-    {{-- Tabel Kelompok --}}
-    <div class="card">
-        <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;">
-            <h3 style="font-size:15px;font-weight:600;">📋 Data Kelompok</h3>
-        </div>
-        <div style="padding:16px 20px;overflow-x:auto;">
-            <table class="table-data">
+    <div style="padding:16px 20px;overflow-x:auto;">
+        <table class="table-data">
                 <thead><tr><th>Kode</th><th>Nama</th><th>Daerah</th><th>Kecamatan</th><th>Anggota</th><th>Ketua</th><th></th></tr></thead>
                 <tbody>
                     @forelse($kelompoks ?? [] as $k)
@@ -80,6 +36,54 @@
                 </tbody>
             </table>
         </div>
+    </div>
+    </div>
+
+{{-- Modal Tambah --}}
+<div id="tambahModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:999;align-items:center;justify-content:center;" onclick="if(event.target===this)this.style.display='none'">
+    <div style="background:white;border-radius:12px;padding:24px;width:90%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,0.3);" onclick="event.stopPropagation()">
+        <h3 style="font-size:16px;font-weight:600;margin-bottom:16px;">➕ Tambah Kelompok Baru</h3>
+        <form method="POST" action="{{ route('kelompok.store') }}">
+            @csrf
+            <div style="margin-bottom:12px;">
+                <label class="form-label">Nama Kelompok <span style="color:#dc2626;">*</span></label>
+                <input type="text" name="nama" class="form-input" required placeholder="Acut_Lancok">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div>
+                    <label class="form-label">Kode <span style="color:#dc2626;">*</span></label>
+                    <input type="text" name="kode" class="form-input" required placeholder="AL-LCK-02">
+                </div>
+                <div>
+                    <label class="form-label">Kabupaten <span style="color:#dc2626;">*</span></label>
+                    <select name="daerah" id="mk_kab" class="form-input" required>
+                        <option value="">— Pilih —</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
+                <div>
+                    <label class="form-label">Kecamatan</label>
+                    <select name="kecamatan" id="mk_kec" class="form-input">
+                        <option value="">— Pilih kabupaten dulu —</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Desa</label>
+                    <select name="desa" id="mk_desa" class="form-input">
+                        <option value="">— Pilih kecamatan dulu —</option>
+                    </select>
+                </div>
+            </div>
+            <div style="margin-top:12px;">
+                <label class="form-label">Keterangan</label>
+                <input type="text" name="description" class="form-input" placeholder="Gampong ..., Batch ...">
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid #e5e7eb;">
+                <button type="button" onclick="document.getElementById('tambahModal').style.display='none'" class="btn btn-outline">Batal</button>
+                <button type="submit" class="btn btn-primary">💾 Simpan Kelompok</button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -139,11 +143,10 @@
 
 @section('scripts')
 <script>
-// ===== Cascading dropdown wilayah (form tambah) =====
-let wilayahKab = [];
-const kKab = document.getElementById('k_kab');
-const kKec = document.getElementById('k_kec');
-const kDesa = document.getElementById('k_desa');
+// ===== Cascading dropdown wilayah (form tambah modal) =====
+const mkKab = document.getElementById('mk_kab');
+const mkKec = document.getElementById('mk_kec');
+const mkDesa = document.getElementById('mk_desa');
 
 function fillWilayah(sel, list, placeholder) {
     sel.innerHTML = '<option value="">' + placeholder + '</option>';
@@ -156,19 +159,19 @@ function fillWilayah(sel, list, placeholder) {
     });
 }
 
-fetch('/api/wilayah/kabupaten').then(r => r.json()).then(list => { wilayahKab = list; fillWilayah(kKab, list, '— Pilih Kabupaten/Kota —'); });
+fetch('/api/wilayah/kabupaten').then(r => r.json()).then(list => { fillWilayah(mkKab, list, '— Pilih Kabupaten/Kota —'); });
 
-kKab.addEventListener('change', function() {
+mkKab.addEventListener('change', function() {
     const kode = this.options[this.selectedIndex]?.dataset.kode;
-    kDesa.innerHTML = '<option value="">— Pilih kecamatan dulu —</option>';
-    if (!kode) { kKec.innerHTML = '<option value="">— Pilih kabupaten dulu —</option>'; return; }
-    fetch('/api/wilayah/kecamatan/' + kode).then(r => r.json()).then(list => fillWilayah(kKec, list, '— Pilih Kecamatan —'));
+    mkDesa.innerHTML = '<option value="">— Pilih kecamatan dulu —</option>';
+    if (!kode) { mkKec.innerHTML = '<option value="">— Pilih kabupaten dulu —</option>'; return; }
+    fetch('/api/wilayah/kecamatan/' + kode).then(r => r.json()).then(list => fillWilayah(mkKec, list, '— Pilih Kecamatan —'));
 });
 
-kKec.addEventListener('change', function() {
+mkKec.addEventListener('change', function() {
     const kode = this.options[this.selectedIndex]?.dataset.kode;
-    if (!kode) { kDesa.innerHTML = '<option value="">— Pilih kecamatan dulu —</option>'; return; }
-    fetch('/api/wilayah/desa/' + kode).then(r => r.json()).then(list => fillWilayah(kDesa, list, '— Pilih Desa —'));
+    if (!kode) { mkDesa.innerHTML = '<option value="">— Pilih kecamatan dulu —</option>'; return; }
+    fetch('/api/wilayah/desa/' + kode).then(r => r.json()).then(list => fillWilayah(mkDesa, list, '— Pilih Desa —'));
 });
 
 // ===== Modal edit =====
