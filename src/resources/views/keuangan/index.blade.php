@@ -112,9 +112,96 @@
                 </div>
                 <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end;">
                     <button type="submit" class="btn btn-green" style="background:#017723;color:white;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;border:none;cursor:pointer;">💾 Simpan Biaya</button>
-                </div>
-            </form>
-        </div>
+{{-- Ringkasan Anggaran & Pembelian --}}
+<div class="card">
+    <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;">
+        <h3 style="font-size:15px;font-weight:600;">📊 Ringkasan Anggaran Kegiatan & Pembelian</h3>
+    </div>
+    <div style="padding:20px;">
+        <table class="table-data">
+            <thead><tr><th>Total Anggaran</th><th>Total Realisasi</th><th>Sisa Anggaran</th><th>% Realisasi</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td style="font-size:18px;font-weight:800;color:#00034a;">Rp {{ number_format($total_anggaran_all ?? 0,0,',','.') }}</td>
+                    <td style="font-size:18px;font-weight:800;color:#017723;">Rp {{ number_format($total_realisasi_all ?? 0,0,',','.') }}</td>
+                    <td style="font-size:18px;font-weight:800;color:#b07d14;">Rp {{ number_format(($total_anggaran_all ?? 0) - ($total_realisasi_all ?? 0),0,',','.') }}</td>
+                    <td style="font-size:18px;font-weight:800;">{{ $total_anggaran_all > 0 ? round(($total_realisasi_all/$total_anggaran_all)*100,1) : 0 }}%</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{{-- Box 1: Realisasi Anggaran Kegiatan (Batch 1) --}}
+<div class="card" style="margin-top:20px;">
+    <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;">
+        <div><h3 style="font-size:15px;font-weight:600;">📦 Realisasi Anggaran Kegiatan</h3>
+        <p style="font-size:12px;color:#6b7280;">Total: <strong>Rp {{ number_format($anggarans->sum('anggaran'),0,',','.') }}</strong> — Realisasi: <strong>Rp {{ number_format($anggarans->sum('realisasi'),0,',','.') }}</strong></p></div>
+        <button onclick="alert('Form tambah menyusul di versi berikutnya')" class="btn btn-primary btn-sm">+ Tambah</button>
+    </div>
+    <div style="padding:16px 20px;overflow-x:auto;">
+        <table class="table-data">
+            <thead><tr><th>No</th><th>Komponen</th><th>Target</th><th>Anggaran</th><th>Realisasi</th><th>%</th><th>Status</th></tr></thead>
+            <tbody>
+                @foreach($anggarans as $i => $a)
+                <tr>
+                    <td>{{ $i + 1 }}</td>
+                    <td style="font-weight:500;">{{ $a->nama_anggaran ?? $a->kategori }}</td>
+                    <td>{{ $a->target_paket ? number_format($a->target_paket) . ' ' . ($a->satuan ?? '') : '-' }}</td>
+                    <td>Rp {{ number_format($a->anggaran,0,',','.') }}</td>
+                    <td>Rp {{ number_format($a->realisasi,0,',','.') }}</td>
+                    <td>
+                        @php $pct = $a->anggaran > 0 ? round(($a->realisasi/$a->anggaran)*100,1) : 0; @endphp
+                        <div class="progress-bar" style="width:80px;display:inline-block;"><div class="progress-fill" style="width:{{ $pct }}%;background:{{ $pct >= 100 ? '#017723' : '#e5a820' }};"></div></div>
+                        <span style="font-size:12px;margin-left:4px;">{{ $pct }}%</span>
+                    </td>
+                    <td><span class="badge badge-green">✅ {{ $a->catatan ?? 'Lunas' }}</span></td>
+                </tr>
+                @endforeach
+            </tbody>
+            <tfoot>
+                <tr style="background:#f8f9fa;"><td></td><td><strong>TOTAL</strong></td><td></td>
+                    <td><strong>Rp {{ number_format($anggarans->sum('anggaran'),0,',','.') }}</strong></td>
+                    <td><strong>Rp {{ number_format($anggarans->sum('realisasi'),0,',','.') }}</strong></td>
+                    <td><strong>{{ $anggarans->sum('anggaran') > 0 ? round(($anggarans->sum('realisasi')/$anggarans->sum('anggaran'))*100,1) : 0 }}%</strong></td>
+                    <td><span class="badge badge-green">✅ Lunas</span></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+{{-- Box 2: Rekap Pembelian Barang (Batch 2) --}}
+<div class="card" style="margin-top:20px;">
+    <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;">
+        <div><h3 style="font-size:15px;font-weight:600;">📋 Rekap Pembelian Barang</h3>
+        <p style="font-size:12px;color:#6b7280;">Total: <strong>Rp {{ number_format($pembelian->sum('anggaran'),0,',','.') }}</strong> — Realisasi: <strong>Rp {{ number_format($pembelian->sum('realisasi'),0,',','.') }}</strong></p></div>
+        <button onclick="alert('Form tambah menyusul di versi berikutnya')" class="btn btn-primary btn-sm">+ Tambah</button>
+    </div>
+    <div style="padding:16px 20px;overflow-x:auto;">
+        <table class="table-data">
+            <thead><tr><th>No</th><th>Nama Barang</th><th>Batch</th><th>Qty Rencana</th><th>Qty Terbeli</th><th>Qty Belum</th><th>Harga Satuan</th><th>Anggaran</th><th>Realisasi</th><th>Sisa</th><th>%</th></tr></thead>
+            <tbody>
+                @foreach($pembelian as $i => $p)
+                <tr>
+                    <td>{{ $i + 1 }}</td>
+                    <td style="font-weight:500;">{{ $p->nama_barang }}</td>
+                    <td style="font-size:12px;">{{ $p->batch ?? '-' }}</td>
+                    <td>{{ number_format($p->qty_rencana) }}</td>
+                    <td>{{ number_format($p->qty_terbeli) }}</td>
+                    <td style="color:#dc2626;">{{ $p->qty_belum > 0 ? number_format($p->qty_belum) : '<span style="color:#017723;">0</span>' }}</td>
+                    <td>Rp {{ number_format($p->harga_satuan,0,',','.') }}</td>
+                    <td>Rp {{ number_format($p->anggaran,0,',','.') }}</td>
+                    <td>Rp {{ number_format($p->realisasi,0,',','.') }}</td>
+                    <td>Rp {{ number_format($p->sisa,0,',','.') }}</td>
+                    <td>
+                        <div class="progress-bar" style="width:60px;display:inline-block;"><div class="progress-fill" style="width:{{ $p->persen_real }}%;background:{{ $p->persen_real >= 100 ? '#017723' : '#e5a820' }};"></div></div>
+                        <span style="font-size:12px;">{{ $p->persen_real }}%</span>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
     </div>
 </div>
 
