@@ -4,124 +4,122 @@
 
 @section('content')
 {{-- Stats --}}
-<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-    <div class="bg-white rounded-xl border p-4">
-        <div class="flex items-center gap-3 mb-2">
-            <div class="w-10 h-10 bg-navy/10 rounded-lg flex items-center justify-center text-lg">👥</div>
-            <span class="text-sm text-gray-500">Penerima</span>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:24px;">
+    <div class="stat-card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <div style="width:40px;height:40px;background:#e8e8f0;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;">👥</div>
+            <span style="font-size:13px;color:#6b7280;">Penerima</span>
         </div>
-        <div class="text-2xl font-bold text-navy">{{ number_format($stats['penerima']) }}</div>
-        <div class="flex gap-2 mt-1 text-xs">
-            <span class="text-green-600">✅ {{ $stats['penerima_terverifikasi'] }} siap</span>
-            <span class="text-yellow-600">⏳ {{ $stats['penerima_pending'] }} pending</span>
-        </div>
-    </div>
-    <div class="bg-white rounded-xl border p-4">
-        <div class="flex items-center gap-3 mb-2">
-            <div class="w-10 h-10 bg-green/10 rounded-lg flex items-center justify-center text-lg">📋</div>
-            <span class="text-sm text-gray-500">Kelompok</span>
-        </div>
-        <div class="text-2xl font-bold text-green">{{ number_format($stats['kelompok']) }}</div>
-        <div class="text-xs text-gray-500 mt-1">📍 Tersebar di Aceh</div>
-    </div>
-    <div class="bg-white rounded-xl border p-4">
-        <div class="flex items-center gap-3 mb-2">
-            <div class="w-10 h-10 bg-gold/10 rounded-lg flex items-center justify-center text-lg">🚚</div>
-            <span class="text-sm text-gray-500">Distribusi</span>
-        </div>
-        <div class="text-2xl font-bold text-yellow-700">{{ number_format($stats['distribusi']) }}</div>
-        <div class="flex gap-2 mt-1 text-xs">
-            <span class="text-green-600">✅ {{ $stats['distribusi_selesai'] }} selesai</span>
-            <span class="text-yellow-600">⏳ {{ $stats['distribusi_berlangsung'] }} berlangsung</span>
+        <div class="stat-value">{{ number_format($stats['penerima']) }}</div>
+        <div style="display:flex;gap:12px;margin-top:6px;font-size:12px;">
+            <span style="color:#017723;">✅ {{ $stats['penerima_terverifikasi'] }} siap</span>
+            <span style="color:#b07d14;">⏳ {{ $stats['penerima_pending'] }} pending</span>
         </div>
     </div>
-    <div class="bg-white rounded-xl border p-4">
-        <div class="flex items-center gap-3 mb-2">
-            <div class="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center text-lg">💰</div>
-            <span class="text-sm text-gray-500">Nilai Bantuan</span>
+    <div class="stat-card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <div style="width:40px;height:40px;background:#e8f5ec;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;">📋</div>
+            <span style="font-size:13px;color:#6b7280;">Kelompok</span>
         </div>
-        <div class="text-2xl font-bold text-navy">Rp {{ number_format($stats['total_nilai_bantuan'], 0, ',', '.') }}</div>
-        <div class="text-xs text-gray-500 mt-1">💵 Dana masuk: Rp {{ number_format($stats['total_dana_masuk'], 0, ',', '.') }}</div>
+        <div class="stat-value" style="color:#017723;">{{ number_format($stats['kelompok']) }}</div>
+        <div style="font-size:12px;color:#6b7280;margin-top:4px;">📍 Tersebar di Aceh</div>
+    </div>
+    <div class="stat-card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <div style="width:40px;height:40px;background:#fef7e6;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;">🚚</div>
+            <span style="font-size:13px;color:#6b7280;">Distribusi</span>
+        </div>
+        <div class="stat-value" style="color:#b07d14;">{{ number_format($stats['distribusi']) }}</div>
+        <div style="display:flex;gap:12px;margin-top:6px;font-size:12px;">
+            <span style="color:#017723;">✅ {{ $stats['distribusi_selesai'] }} selesai</span>
+            <span style="color:#b07d14;">⏳ {{ $stats['distribusi_berlangsung'] }} berlangsung</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <div style="width:40px;height:40px;background:#fef2f2;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;">💰</div>
+            <span style="font-size:13px;color:#6b7280;">Nilai Bantuan</span>
+        </div>
+        <div class="stat-value">Rp {{ number_format($stats['total_nilai_bantuan'],0,',','.') }}</div>
+        <div style="font-size:12px;color:#6b7280;margin-top:4px;">💵 Dana masuk: Rp {{ number_format($stats['total_dana_masuk'],0,',','.') }}</div>
     </div>
 </div>
 
-{{-- Cards --}}
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+{{-- Two columns --}}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;">
     {{-- Distribusi Terbaru --}}
-    <div class="bg-white rounded-xl border">
-        <div class="px-5 py-4 border-b flex items-center justify-between">
-            <h3 class="font-semibold">🚚 Distribusi Terbaru</h3>
-            <a href="{{ route('distribusi.index') }}" class="text-sm text-navy hover:underline">Lihat Semua</a>
+    <div class="card">
+        <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;">
+            <h3 style="font-size:15px;font-weight:600;">🚚 Distribusi Terbaru</h3>
+            <a href="{{ route('distribusi.index') }}" style="font-size:13px;color:#00034a;text-decoration:none;">Lihat Semua →</a>
         </div>
-        <div class="p-4">
-            <table class="w-full text-sm">
-                <thead><tr class="text-left text-gray-500"><th class="pb-2">Kegiatan</th><th class="pb-2">Daerah</th><th class="pb-2">Tanggal</th><th class="pb-2">Status</th></tr></thead>
+        <div style="padding:16px 20px;">
+            <table class="table-data">
+                <thead><tr><th>Kegiatan</th><th>Daerah</th><th>Tanggal</th><th>Status</th></tr></thead>
                 <tbody>
                     @forelse($distribusi_terbaru as $d)
-                    <tr class="border-t">
-                        <td class="py-2 font-medium">{{ $d->nama_kegiatan }}</td>
-                        <td class="py-2 text-gray-600">{{ $d->kelompok->daerah ?? '-' }}</td>
-                        <td class="py-2 text-gray-600">{{ $d->tanggal->format('d M Y') }}</td>
-                        <td class="py-2">
-                            @if($d->status == 'selesai') <span class="text-green-600 bg-green-50 px-2 py-1 rounded-full text-xs font-medium">✅ Selesai</span>
-                            @elseif($d->status == 'berlangsung') <span class="text-yellow-700 bg-yellow-50 px-2 py-1 rounded-full text-xs font-medium">⏳ Berlangsung</span>
-                            @else <span class="text-navy bg-navy/5 px-2 py-1 rounded-full text-xs font-medium">📋 Rencana</span>
+                    <tr>
+                        <td style="font-weight:500;">{{ $d->nama_kegiatan }}</td>
+                        <td style="color:#6b7280;">{{ $d->kelompok->daerah ?? '-' }}</td>
+                        <td style="color:#6b7280;">{{ $d->tanggal->format('d M Y') }}</td>
+                        <td>
+                            @if($d->status == 'selesai') <span class="badge badge-green">✅ Selesai</span>
+                            @elseif($d->status == 'berlangsung') <span class="badge badge-gold">⏳ Berlangsung</span>
+                            @else <span class="badge badge-navy">📋 Rencana</span>
                             @endif
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="4" class="py-8 text-center text-gray-400">Belum ada distribusi</td></tr>
+                    <tr><td colspan="4" style="padding:32px;text-align:center;color:#9ca3af;">Belum ada distribusi</td></tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
     </div>
 
-    {{-- Progress Distribusi --}}
-    <div class="bg-white rounded-xl border">
-        <div class="px-5 py-4 border-b">
-            <h3 class="font-semibold">📊 Progress Distribusi</h3>
+    {{-- Progress --}}
+    <div class="card">
+        <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;">
+            <h3 style="font-size:15px;font-weight:600;">📊 Progress Distribusi</h3>
         </div>
-        <div class="p-4 space-y-4">
+        <div style="padding:16px 20px;">
             @forelse($distribusi_terbaru->take(4) as $d)
-            <div>
-                <div class="flex justify-between text-sm mb-1">
+            @php $persen = $d->status == 'selesai' ? 100 : ($d->status == 'berlangsung' ? 45 : 0); @endphp
+            <div style="margin-bottom:14px;">
+                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
                     <span>{{ $d->nama_kegiatan }}</span>
-                    <span class="text-gray-500">{{ $d->jumlah_paket }} paket</span>
+                    <span style="color:#6b7280;">{{ $d->jumlah_paket }} paket</span>
                 </div>
-                <div class="w-full bg-gray-100 rounded-full h-2">
-                    @php $persen = $d->status == 'selesai' ? 100 : ($d->status == 'berlangsung' ? 45 : 0); @endphp
-                    <div class="h-2 rounded-full {{ $d->status == 'selesai' ? 'bg-green' : ($d->status == 'berlangsung' ? 'bg-gold' : 'bg-navy/30') }}" style="width: {{ $persen }}%"></div>
-                </div>
+                <div class="progress-bar"><div class="progress-fill" style="width:{{ $persen }}%;background:{{ $d->status == 'selesai' ? '#017723' : ($d->status == 'berlangsung' ? '#e5a820' : '#00034a') }};"></div></div>
             </div>
             @empty
-            <p class="text-gray-400 text-center py-4">Belum ada data</p>
+            <p style="text-align:center;padding:24px;color:#9ca3af;">Belum ada data</p>
             @endforelse
         </div>
     </div>
 </div>
 
 {{-- Ringkasan Keuangan --}}
-<div class="mt-6 bg-white rounded-xl border">
-    <div class="px-5 py-4 border-b">
-        <h3 class="font-semibold">💰 Ringkasan Keuangan</h3>
+<div class="card">
+    <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;">
+        <h3 style="font-size:15px;font-weight:600;">💰 Ringkasan Keuangan</h3>
     </div>
-    <div class="p-4 grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div class="bg-green-50 rounded-lg p-4 text-center">
-            <div class="text-sm text-gray-600">Dana Masuk</div>
-            <div class="text-xl font-bold text-green">Rp {{ number_format($stats['total_dana_masuk'], 0, ',', '.') }}</div>
+    <div style="padding:20px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+        <div style="background:#e8f5ec;border-radius:8px;padding:16px;text-align:center;">
+            <div style="font-size:13px;color:#6b7280;">Dana Masuk</div>
+            <div style="font-size:20px;font-weight:700;color:#017723;margin-top:4px;">Rp {{ number_format($stats['total_dana_masuk'],0,',','.') }}</div>
         </div>
-        <div class="bg-red-50 rounded-lg p-4 text-center">
-            <div class="text-sm text-gray-600">Nilai Bantuan</div>
-            <div class="text-xl font-bold text-red-600">Rp {{ number_format($stats['total_nilai_bantuan'], 0, ',', '.') }}</div>
+        <div style="background:#fef2f2;border-radius:8px;padding:16px;text-align:center;">
+            <div style="font-size:13px;color:#6b7280;">Nilai Bantuan</div>
+            <div style="font-size:20px;font-weight:700;color:#dc2626;margin-top:4px;">Rp {{ number_format($stats['total_nilai_bantuan'],0,',','.') }}</div>
         </div>
-        <div class="bg-yellow-50 rounded-lg p-4 text-center">
-            <div class="text-sm text-gray-600">Biaya Operasional</div>
-            <div class="text-xl font-bold text-yellow-700">Rp {{ number_format($stats['total_biaya'], 0, ',', '.') }}</div>
+        <div style="background:#fef7e6;border-radius:8px;padding:16px;text-align:center;">
+            <div style="font-size:13px;color:#6b7280;">Biaya Operasional</div>
+            <div style="font-size:20px;font-weight:700;color:#b07d14;margin-top:4px;">Rp {{ number_format($stats['total_biaya'],0,',','.') }}</div>
         </div>
-        <div class="bg-navy text-white rounded-lg p-4 text-center">
-            <div class="text-sm text-white/70">Sisa Dana</div>
-            <div class="text-xl font-bold">Rp {{ number_format($stats['total_dana_masuk'] - $stats['total_nilai_bantuan'] - $stats['total_biaya'], 0, ',', '.') }}</div>
+        <div style="background:#00034a;border-radius:8px;padding:16px;text-align:center;">
+            <div style="font-size:13px;color:rgba(255,255,255,0.6);">Sisa Dana</div>
+            <div style="font-size:20px;font-weight:700;color:white;margin-top:4px;">Rp {{ number_format($stats['total_dana_masuk'] - $stats['total_nilai_bantuan'] - $stats['total_biaya'],0,',','.') }}</div>
         </div>
     </div>
 </div>

@@ -1,60 +1,59 @@
 @extends('layouts.app')
 @section('title', 'Data Penerima')
 @section('content')
-<div class="bg-white rounded-xl border">
-    <div class="px-5 py-4 border-b flex items-center justify-between flex-wrap gap-4">
-        <h3 class="font-semibold">👥 Data Penerima Manfaat</h3>
-        <div class="flex gap-2">
-            <a href="{{ route('penerima.create') }}" class="px-4 py-2 bg-navy text-white rounded-lg text-sm font-medium hover:bg-navy/90">+ Tambah</a>
-            <a href="{{ route('penerima.export') }}" class="px-4 py-2 border rounded-lg text-sm font-medium hover:bg-gray-50">📥 Export</a>
+<div class="card">
+    <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <h3 style="font-size:15px;font-weight:600;">👥 Data Penerima Manfaat</h3>
+        <div style="display:flex;gap:8px;">
+            <a href="{{ route('penerima.create') }}" class="btn btn-primary btn-sm">+ Tambah</a>
         </div>
     </div>
-    <div class="p-4">
-        <form class="flex gap-2 mb-4 flex-wrap">
-            <input type="text" name="search" placeholder="Cari NIK/nama..." value="{{ request('search') }}" class="px-3 py-2 border rounded-lg text-sm flex-1 min-w-[200px]">
-            <select name="status" class="px-3 py-2 border rounded-lg text-sm">
+    <div style="padding:16px 20px;">
+        <form style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+            <input type="text" name="search" placeholder="Cari NIK/nama..." value="{{ request('search') }}" class="form-input" style="width:200px;padding:8px 12px;font-size:13px;">
+            <select name="status" class="form-input" style="width:140px;padding:8px 12px;font-size:13px;">
                 <option value="">Semua Status</option>
-                <option value="pending" @selected(request('status')=='pending')>Pending</option>
-                <option value="terverifikasi" @selected(request('status')=='terverifikasi')>Terverifikasi</option>
-                <option value="ditolak" @selected(request('status')=='ditolak')>Ditolak</option>
+                <option value="pending" {{ request('status')=='pending' ? 'selected' : '' }}>Pending</option>
+                <option value="terverifikasi" {{ request('status')=='terverifikasi' ? 'selected' : '' }}>Terverifikasi</option>
+                <option value="ditolak" {{ request('status')=='ditolak' ? 'selected' : '' }}>Ditolak</option>
             </select>
-            <button class="px-4 py-2 border rounded-lg text-sm">🔍 Cari</button>
+            <button class="btn btn-outline btn-sm">🔍 Cari</button>
         </form>
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead><tr class="text-left text-gray-500 border-b"><th class="pb-3">NIK</th><th class="pb-3">Nama</th><th class="pb-3">Kelompok</th><th class="pb-3">Sumber</th><th class="pb-3">Status</th><th class="pb-3"></th></tr></thead>
+        <div style="overflow-x:auto;">
+            <table class="table-data">
+                <thead><tr><th>NIK</th><th>Nama</th><th>Kelompok</th><th>Sumber</th><th>Status</th><th></th></tr></thead>
                 <tbody>
                     @forelse($penerima as $p)
-                    <tr class="border-b hover:bg-gray-50">
-                        <td class="py-3 text-gray-500">{{ $p->nik }}</td>
-                        <td class="py-3 font-medium">{{ $p->nama }}</td>
-                        <td class="py-3">{{ $p->kelompok->nama ?? '-' }}</td>
-                        <td class="py-3"><span class="text-xs bg-gray-100 px-2 py-1 rounded">{{ $p->sumber_data }}</span></td>
-                        <td class="py-3">
-                            @if($p->status == 'terverifikasi') <span class="text-green-600 bg-green-50 px-2 py-1 rounded-full text-xs font-medium">✅ Terverifikasi</span>
-                            @elseif($p->status == 'pending') <span class="text-yellow-700 bg-yellow-50 px-2 py-1 rounded-full text-xs font-medium">⏳ Pending</span>
-                            @else <span class="text-red-600 bg-red-50 px-2 py-1 rounded-full text-xs font-medium">❌ Ditolak</span>
+                    <tr>
+                        <td style="color:#6b7280;">{{ $p->nik }}</td>
+                        <td style="font-weight:500;">{{ $p->nama }}</td>
+                        <td>{{ $p->kelompok->nama ?? '-' }}</td>
+                        <td><span style="padding:2px 8px;background:#f0f0f0;border-radius:6px;font-size:12px;">{{ $p->sumber_data }}</span></td>
+                        <td>
+                            @if($p->status == 'terverifikasi') <span class="badge badge-green">✅ Terverifikasi</span>
+                            @elseif($p->status == 'pending') <span class="badge badge-gold">⏳ Pending</span>
+                            @else <span class="badge" style="background:#fce8e6;color:#dc2626;">❌ Ditolak</span>
                             @endif
                         </td>
-                        <td class="py-3">
-                            <a href="{{ route('penerima.show', $p) }}" class="text-navy hover:underline text-sm">Detail</a>
-                            <a href="{{ route('penerima.edit', $p) }}" class="text-gray-500 hover:text-navy ml-3 text-sm">Edit</a>
+                        <td>
+                            <a href="{{ route('penerima.show', $p) }}" style="color:#00034a;text-decoration:none;font-size:13px;">Detail</a>
+                            <a href="{{ route('penerima.edit', $p) }}" style="color:#6b7280;margin-left:12px;font-size:13px;">Edit</a>
                             @if($p->status == 'pending')
-                            <form method="POST" action="{{ route('penerima.verify', $p) }}" class="inline ml-3">
+                            <form method="POST" action="{{ route('penerima.verify', $p) }}" style="display:inline;margin-left:8px;">
                                 @csrf
                                 <input type="hidden" name="status" value="terverifikasi">
-                                <button class="text-green-600 hover:underline text-sm">✅ Verifikasi</button>
+                                <button style="color:#017723;border:none;background:none;cursor:pointer;font-size:13px;">✅ Verifikasi</button>
                             </form>
                             @endif
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="6" class="py-8 text-center text-gray-400">Belum ada data penerima</td></tr>
+                    <tr><td colspan="6" style="padding:32px;text-align:center;color:#9ca3af;">Belum ada data penerima</td></tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        <div class="mt-4">{{ $penerima->links() }}</div>
+        <div style="margin-top:16px;">{{ $penerima->links() }}</div>
     </div>
 </div>
 @endsection
