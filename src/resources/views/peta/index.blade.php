@@ -115,7 +115,7 @@ L.marker([4.92, 96.50], {icon:L.divIcon({html:'🏢',className:'',iconSize:[24,2
 // Data distribusi
 const data = [
     @foreach($distribusi as $d)
-    {name:'{{ $d['name'] }} ({{ $d['daerah'] }})',lat:{{ $d['lat'] }},lng:{{ $d['lng'] }},paket:{{ $d['paket'] }},nilai:'{{ $d['nilai'] }}',penerima:{{ $d['penerima'] }},status:'{{ $d['status'] }}',tgl:'{{ $d['tgl'] }}'},
+    {name:'{{ $d['name'] }} ({{ $d['daerah'] }})',lat:{{ $d['lat'] }},lng:{{ $d['lng'] }},paket:{{ $d['paket'] }},nilai:'{{ $d['nilai'] }}',penerima:{{ $d['penerima'] }},kelompok:'{{ $d['kelompok'] ?? '-' }}',ketua:'{{ $d['ketua'] ?? '-' }}',status:'{{ $d['status'] }}',tgl:'{{ $d['tgl'] }}'},
     @endforeach
 ];
 const colors = {done:'#017723',progress:'#e5a820',plan:'#00034a'};
@@ -136,10 +136,11 @@ data.forEach(d => {
                 <tr><td style="padding:3px 0;color:#6b7280;">📦 Distribusi</td><td style="padding:3px 0;font-weight:600;text-align:right;">${d.paket} paket</td></tr>
                 <tr><td style="padding:3px 0;color:#6b7280;">💰 Nilai Bantuan</td><td style="padding:3px 0;font-weight:600;text-align:right;">${d.nilai}</td></tr>
                 <tr><td style="padding:3px 0;color:#6b7280;">👥 Penerima</td><td style="padding:3px 0;font-weight:600;text-align:right;">${d.penerima} KK</td></tr>
-                <tr><td style="padding:3px 0;color:#6b7280;">📋 Kelompok</td><td style="padding:3px 0;font-weight:600;text-align:right;">${d.kelompok} kelompok</td></tr>
+                <tr><td style="padding:3px 0;color:#6b7280;">📋 Kelompok</td><td style="padding:3px 0;font-weight:600;text-align:right;">${d.kelompok}</td></tr>
+                <tr><td style="padding:3px 0;color:#6b7280;">👤 Ketua</td><td style="padding:3px 0;font-weight:600;text-align:right;">${d.ketua}</td></tr>
                 <tr><td style="padding:3px 0;color:#6b7280;">📅 Tanggal</td><td style="padding:3px 0;font-weight:600;text-align:right;">${d.tgl}</td></tr>
                 <tr><td style="padding:3px 0;color:#6b7280;">📊 Status</td>
-                    <td style="padding:3px 0;text-align:right;">${d.status=='done'?'<span style="color:#017723;font-weight:600;">✅ Selesai</span>':d.status=='progress'?'<span style="color:#e5a820;font-weight:600;">⏳ Berlangsung</span>':'<span style="color:#00034a;font-weight:600;">📋 Rencana</span>'}</td></tr>
+                    <td style="padding:3px 0;text-align:right;">${(d.status=='done'||d.status=='selesai')?'<span style="color:#017723;font-weight:600;">✅ Selesai</span>':(d.status=='progress'||d.status=='berlangsung')?'<span style="color:#e5a820;font-weight:600;">⏳ Berlangsung</span>':'<span style="color:#00034a;font-weight:600;">📋 Rencana</span>'}</td></tr>
             </table>
         </div>
     `);

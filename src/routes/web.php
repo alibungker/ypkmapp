@@ -42,7 +42,7 @@ Route::prefix('keuangan')->name('keuangan.')->group(function () {
 use App\Models\Distribusi;
 Route::get('peta', function () {
     $distribusi = Distribusi::whereNotNull('titik_koordinat')
-        ->with('kelompok')
+        ->with('kelompok.ketua')
         ->get()
         ->map(function ($d) {
             $coord = explode(',', $d->titik_koordinat);
@@ -53,6 +53,8 @@ Route::get('peta', function () {
                 'paket' => $d->jumlah_paket,
                 'nilai' => 'Rp ' . number_format($d->estimasi_nilai_total,0,',','.'),
                 'penerima' => $d->kelompok->jumlah_anggota ?? 0,
+                'kelompok' => $d->kelompok->nama ?? '-',
+                'ketua' => $d->kelompok->ketua->nama ?? '-',
                 'daerah' => $d->kelompok->daerah ?? '',
                 'status' => $d->status,
                 'tgl' => is_object($d->tanggal) ? $d->tanggal->format('d M Y') : date('d M Y', strtotime($d->tanggal)),

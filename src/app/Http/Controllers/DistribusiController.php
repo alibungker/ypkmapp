@@ -6,6 +6,7 @@ use App\Models\Kelompok;
 use App\Models\BarangBantuan;
 use App\Models\BiayaOperasional;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class DistribusiController extends Controller
 {
@@ -19,27 +20,52 @@ class DistribusiController extends Controller
 
     public function create()
     {
-        $kelompoks = Kelompok::all();
+        $kelompoks = Kelompok::with('ketua')->get();
         $barang = BarangBantuan::all();
         return view('distribusi.form', compact('kelompoks', 'barang'));
     }
 
     public function store(Request $request)
     {
-        $data = $request->validate([
+        $data = $this->validated($request);
+        $data['kode_distribusi'] = 'DST-' . now()->format('Ymd') . '-' . strtoupper(Str::random(4));
+        $data['created_by'] = auth()->id();
+        Distribusi::create($data);
+        return redirect()->route('distribusi.index')->with('success', 'Distribusi tersimpan & tampil di peta.');
+    }
+
+    public function edit(Distribusi $distribusi)
+    {
+        $kelompoks = Kelompok::with('ketua')->get();
+        return view('distribusi.form', compact('distribusi', 'kelompoks'));
+    }
+
+    public function update(Request $request, Distribusi $distribusi)
+    {
+        $distribusi->update($this->validated($request));
+        return redirect()->route('distribusi.index')->with('success', 'Distribusi diupdate.');
+    }
+
+    public function destroy(Distribusi $distribusi)
+    {
+        $distribusi->delete();
+        return redirect()->route('distribusi.index')->with('success', 'Distribusi dihapus.');
+    }
+
+    private function validated(Request $request): array
+    {
+        return $request->validate([
             'nama_kegiatan' => 'required',
             'tanggal' => 'required|date',
             'lokasi' => 'required',
+            'titik_koordinat' => 'required|regex:/^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$/',
             'kelompok_id' => 'required|exists:kelompoks,id',
             'jenis_bantuan' => 'required',
             'jumlah_paket' => 'required|integer',
             'estimasi_nilai_total' => 'nullable|numeric',
+            'sumber_dana' => 'nullable',
+            'status' => 'required|in:direncanakan,berlangsung,selesai',
         ]);
-        $data['kode_distribusi'] = 'DST-' . now()->format('Ymd') . '-' . strtoupper(\Str::random(4));
-        $data['status'] = 'direncanakan';
-        $data['created_by'] = auth()->id();
-        Distribusi::create($data);
-        return redirect()->route('distribusi.index')->with('success', 'Distribusi direncanakan.');
     }
 
     public function show(Distribusi $distribusi)
@@ -75,10 +101,10 @@ class DistribusiController extends Controller
                     'lng' => (float)($coord[1] ?? 0),
                     'paket' => $d->jumlah_paket,
                     'nilai' => $d->estimasi_nilai_total,
-                    'penerima' => $d->penerimaDistribusi()->count(),
+                    'penerima' => $d->kelompok->jumlah_anggota ?? 0,
                     'kelompok' => $d->kelompok->nama ?? '-',
                     'status' => $d->status,
-                    'tgl' => $d->tanggal->format('d M Y'),
+                    'tgl' => is_object($d->tanggal) ? $d->tanggal->format('d M Y') : date('d M Y', strtotime($d->tanggal)),
                 ];
             });
         return response()->json($distribusi);
