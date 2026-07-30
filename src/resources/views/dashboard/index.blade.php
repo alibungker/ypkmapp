@@ -61,7 +61,7 @@
                     <tr>
                         <td style="font-weight:500;">{{ $d->nama_kegiatan }}</td>
                         <td style="color:#6b7280;">{{ $d->kelompok->daerah ?? '-' }}</td>
-                        <td style="color:#6b7280;">{{ $d->tanggal->format('d M Y') }}</td>
+                        <td style="color:#6b7280;">{{ is_object($d->tanggal) ? $d->tanggal->format('d M Y') : date('d M Y', strtotime($d->tanggal)) }}</td>
                         <td>
                             @if($d->status == 'selesai') <span class="badge badge-green">✅ Selesai</span>
                             @elseif($d->status == 'berlangsung') <span class="badge badge-gold">⏳ Berlangsung</span>
