@@ -28,6 +28,8 @@ Route::get('api/distribusi/peta', [DistribusiController::class, 'dataPeta'])->na
 Route::prefix('keuangan')->name('keuangan.')->group(function () {
     Route::get('/', [KeuanganController::class, 'index'])->name('index');
     Route::post('dana', [KeuanganController::class, 'storeDana'])->name('dana.store');
+    Route::post('dana/{id}/update', [KeuanganController::class, 'updateDana'])->name('dana.update');
+    Route::post('dana/{id}/delete', [KeuanganController::class, 'destroyDana'])->name('dana.delete');
     Route::post('biaya', [KeuanganController::class, 'storeBiaya'])->name('biaya.store');
     Route::post('anggaran', [KeuanganController::class, 'storeAnggaran'])->name('anggaran.store');
     Route::get('rekap', [KeuanganController::class, 'rekap'])->name('rekap');

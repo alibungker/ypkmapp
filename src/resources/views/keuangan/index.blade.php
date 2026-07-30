@@ -125,7 +125,7 @@
     </div>
     <div style="padding:16px 20px;">
         <table class="table-data">
-            <thead><tr><th>Donatur</th><th>Tanggal</th><th>Jumlah</th><th>Jenis</th><th>Keterangan</th></tr></thead>
+            <thead><tr><th>Donatur</th><th>Tanggal</th><th>Jumlah</th><th>Jenis</th><th>Keterangan</th><th></th></tr></thead>
             <tbody>
                 @forelse($dana_masuk ?? [] as $d)
                 <tr>
@@ -134,12 +134,83 @@
                     <td style="font-weight:600;color:#017723;">Rp {{ number_format($d->jumlah,0,',','.') }}</td>
                     <td><span style="padding:2px 10px;background:#e8e8f0;border-radius:6px;font-size:12px;">{{ $d->jenis }}</span></td>
                     <td style="color:#6b7280;">{{ $d->keterangan ?? '-' }}</td>
-                </tr>
-                @empty
-                <tr><td colspan="5" style="padding:32px;text-align:center;color:#9ca3af;">Belum ada dana masuk. Silakan tambah melalui form di atas.</td></tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-</div>
-@endsection
+                    @forelse($dana_masuk ?? [] as $d)
+                                    <tr>
+                                        <td style="font-weight:500;">{{ $d->donatur }}</td>
+                                        <td style="color:#6b7280;">{{ is_object($d->tanggal_masuk) ? $d->tanggal_masuk->format('d M Y') : date('d M Y', strtotime($d->tanggal_masuk)) }}</td>
+                                        <td style="font-weight:600;color:#017723;">Rp {{ number_format($d->jumlah,0,',','.') }}</td>
+                                        <td><span style="padding:2px 10px;background:#e8e8f0;border-radius:6px;font-size:12px;">{{ $d->jenis }}</span></td>
+                                        <td style="color:#6b7280;">{{ $d->keterangan ?? '-' }}</td>
+                                        <td style="white-space:nowrap;">
+                                            <button onclick="editDana({{ $d->id }}, '{{ $d->donatur }}', '{{ is_object($d->tanggal_masuk) ? $d->tanggal_masuk->format('Y-m-d') : $d->tanggal_masuk }}', {{ $d->jumlah }}, '{{ $d->jenis }}', '{{ $d->keterangan ?? '' }}')" style="color:#00034a;border:none;background:none;cursor:pointer;font-size:13px;padding:4px 8px;">✏️ Edit</button>
+                                            <form method="POST" action="{{ route('keuangan.dana.delete', $d->id) }}" style="display:inline;" onsubmit="return confirm('Hapus data dana ini?')">
+                                                @csrf
+                                                <button style="color:#dc2626;border:none;background:none;cursor:pointer;font-size:13px;padding:4px 8px;">🗑️ Hapus</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    @empty
+                                    <tr><td colspan="6" style="padding:32px;text-align:center;color:#9ca3af;">Belum ada dana masuk. Silakan tambah melalui form di atas.</td></tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {{-- Edit Modal --}}
+                    <div id="editModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:999;align-items:center;justify-content:center;" onclick="if(event.target===this)closeEdit()">
+                        <div style="background:white;border-radius:12px;padding:24px;width:90%;max-width:500px;box-shadow:0 20px 60px rgba(0,0,0,0.3);" onclick="event.stopPropagation()">
+                            <h3 style="font-size:16px;font-weight:600;margin-bottom:16px;">✏️ Edit Dana Donatur</h3>
+                            <form id="editForm" method="POST">
+                                @csrf
+                                <div style="margin-bottom:12px;">
+                                    <label style="font-size:13px;font-weight:500;display:block;margin-bottom:4px;">Nama Donatur</label>
+                                    <input id="editDonatur" name="donatur" class="form-input" required>
+                                </div>
+                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                                    <div>
+                                        <label style="font-size:13px;font-weight:500;display:block;margin-bottom:4px;">Tanggal Masuk</label>
+                                        <input id="editTanggal" name="tanggal_masuk" type="date" class="form-input" required>
+                                    </div>
+                                    <div>
+                                        <label style="font-size:13px;font-weight:500;display:block;margin-bottom:4px;">Jumlah (Rp)</label>
+                                        <input id="editJumlah" name="jumlah" type="number" step="0.01" class="form-input" required>
+                                    </div>
+                                </div>
+                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
+                                    <div>
+                                        <label style="font-size:13px;font-weight:500;display:block;margin-bottom:4px;">Jenis</label>
+                                        <select id="editJenis" name="jenis" class="form-input">
+                                            <option value="transfer">Transfer</option>
+                                            <option value="uang_tunai">Uang Tunai</option>
+                                            <option value="barang">Barang</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label style="font-size:13px;font-weight:500;display:block;margin-bottom:4px;">Keterangan</label>
+                                        <input id="editKeterangan" name="keterangan" class="form-input" placeholder="Opsional">
+                                    </div>
+                                </div>
+                                <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid #e5e7eb;">
+                                    <button type="button" onclick="closeEdit()" class="btn btn-outline">Batal</button>
+                                    <button type="submit" class="btn btn-primary">💾 Simpan Perubahan</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <script>
+                    function editDana(id, donatur, tgl, jumlah, jenis, keterangan) {
+                        document.getElementById('editForm').action = '/keuangan/dana/' + id + '/update';
+                        document.getElementById('editDonatur').value = donatur;
+                        document.getElementById('editTanggal').value = tgl;
+                        document.getElementById('editJumlah').value = jumlah;
+                        document.getElementById('editJenis').value = jenis;
+                        document.getElementById('editKeterangan').value = keterangan;
+                        document.getElementById('editModal').style.display = 'flex';
+                    }
+                    function closeEdit() {
+                        document.getElementById('editModal').style.display = 'none';
+                    }
+                    </script>
+                    @endsection

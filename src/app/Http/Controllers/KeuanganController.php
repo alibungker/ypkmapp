@@ -40,6 +40,27 @@ class KeuanganController extends Controller
         return back()->with('success', 'Dana donatur dicatat.');
     }
 
+    public function updateDana(Request $request, $id)
+    {
+        $dana = DanaDonatur::findOrFail($id);
+        $data = $request->validate([
+            'donatur' => 'required',
+            'tanggal_masuk' => 'required|date',
+            'jumlah' => 'required|numeric',
+            'jenis' => 'required|in:uang_tunai,transfer,barang',
+            'keterangan' => 'nullable',
+        ]);
+        $dana->update($data);
+        return back()->with('success', 'Data dana donatur diperbarui.');
+    }
+
+    public function destroyDana($id)
+    {
+        $dana = DanaDonatur::findOrFail($id);
+        $dana->delete();
+        return back()->with('success', 'Data dana donatur dihapus.');
+    }
+
     public function storeBiaya(Request $request)
     {
         $data = $request->validate([
