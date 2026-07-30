@@ -106,7 +106,13 @@ class PenerimaController extends Controller
             'verified_by' => auth()->id(),
             'verified_at' => now(),
         ]);
-        return back()->with('success', 'Penerima diverifikasi.');
+        return back()->with('success', 'Status penerima diperbarui.');
+    }
+
+    public function formDaftar()
+    {
+        $kelompoks = Kelompok::all();
+        return view('penerima.daftar', compact('kelompoks'));
     }
 
     public function daftarMandiri(Request $request)

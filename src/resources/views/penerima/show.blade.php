@@ -84,6 +84,33 @@
                 </div>
                 @endif
             </div>
+
+            {{-- Panel Verifikasi (Admin / Relawan / Ketua Kelompok) --}}
+            @if($penerima->status == 'pending')
+            <div style="margin-top:20px;padding:16px;background:#fef7e6;border:1px solid #f0dcae;border-radius:10px;">
+                <div style="font-size:14px;font-weight:600;margin-bottom:10px;">🔍 Verifikasi Penerima</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <form method="POST" action="{{ route('penerima.verify', $penerima) }}">
+                        @csrf
+                        <input type="hidden" name="status" value="terverifikasi">
+                        <button class="btn btn-sm" style="background:#017723;color:white;">✅ Setujui</button>
+                    </form>
+                    <form method="POST" action="{{ route('penerima.verify', $penerima) }}" onsubmit="return confirm('Tolak penerima ini?')">
+                        @csrf
+                        <input type="hidden" name="status" value="ditolak">
+                        <button class="btn btn-sm" style="background:#dc2626;color:white;">❌ Tolak</button>
+                    </form>
+                </div>
+            </div>
+            @elseif($penerima->status == 'ditolak')
+            <div style="margin-top:20px;">
+                <form method="POST" action="{{ route('penerima.verify', $penerima) }}">
+                    @csrf
+                    <input type="hidden" name="status" value="terverifikasi">
+                    <button class="btn btn-sm" style="background:#017723;color:white;">✅ Setujui Ulang</button>
+                </form>
+            </div>
+            @endif
         </div>
     </div>
 </div>

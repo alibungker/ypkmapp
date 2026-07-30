@@ -22,6 +22,11 @@ echo "📦 Copying controllers..."
 mkdir -p app/Http/Controllers
 cp src/app/Http/Controllers/*.php app/Http/Controllers/
 
+# 3b. Copy middleware
+echo "📦 Copying middleware..."
+mkdir -p app/Http/Middleware
+cp src/app/Http/Middleware/*.php app/Http/Middleware/ 2>/dev/null || true
+
 # 4. Copy views
 echo "📦 Copying views..."
 cp -r src/resources/views/* resources/views/

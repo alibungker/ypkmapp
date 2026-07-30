@@ -63,12 +63,23 @@
             <a href="{{ route('penerima.index') }}" class="nav-item {{ request()->routeIs('penerima*') ? 'active' : '' }}">👥 <span>Penerima</span></a>
             <a href="{{ route('kelompok.index') }}" class="nav-item {{ request()->routeIs('kelompok*') ? 'active' : '' }}">📋 <span>Kelompok</span></a>
             <a href="{{ route('distribusi.index') }}" class="nav-item {{ request()->routeIs('distribusi*') ? 'active' : '' }}">🚚 <span>Distribusi</span></a>
-            <a href="#" class="nav-item">📦 <span>Barang</span></a>
-            <a href="{{ route('keuangan.index') }}" class="nav-item {{ request()->routeIs('keuangan*') ? 'active' : '' }}">💰 <span>Keuangan</span></a>
             <a href="{{ route('peta.index') }}" class="nav-item {{ request()->routeIs('peta*') ? 'active' : '' }}">🗺️ <span>Peta</span></a>
+            @if(auth()->check() && auth()->user()->isAdmin())
+            <div style="margin:12px 8px 4px;font-size:11px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:1px;">Admin</div>
+            <a href="{{ route('keuangan.index') }}" class="nav-item {{ request()->routeIs('keuangan*') ? 'active' : '' }}">💰 <span>Keuangan</span></a>
             <a href="{{ route('laporan.index') }}" class="nav-item {{ request()->routeIs('laporan*') ? 'active' : '' }}">📄 <span>Laporan</span></a>
+            @endif
         </nav>
         <div style="position:absolute;bottom:0;left:0;right:0;padding:16px;border-top:1px solid rgba(255,255,255,0.08);">
+            @auth
+            <div style="padding:0 8px 10px;display:flex;align-items:center;gap:8px;">
+                <div style="width:30px;height:30px;background:rgba(255,255,255,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;color:white;">{{ strtoupper(substr(auth()->user()->name,0,1)) }}</div>
+                <div style="min-width:0;">
+                    <div style="font-size:13px;color:white;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ auth()->user()->name }}</div>
+                    <div style="font-size:11px;color:#e5a820;">{{ ['admin'=>'👑 Admin','relawan'=>'🤝 Relawan','ketua_kelompok'=>'👤 Ketua Kelompok'][auth()->user()->role] ?? auth()->user()->role }}</div>
+                </div>
+            </div>
+            @endauth
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button class="flex items-center gap-3 text-white/40 hover:text-white w-full" style="padding:8px;border-radius:8px;font-size:14px;">
