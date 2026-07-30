@@ -90,11 +90,37 @@
             </div>
 
             <div style="margin-top:16px;">
-                <label class="form-label">Bukti Distribusi</label>
-                <input type="file" name="bukti_file" class="form-input" accept=".jpg,.jpeg,.png,.pdf">
-                <small style="color:#6b7280;">JPG, PNG, atau PDF; maksimum 5 MB.</small>
-                @if(isset($distribusi) && $distribusi->bukti_file)
-                    <div style="margin-top:6px;"><a href="{{ Storage::url($distribusi->bukti_file) }}" target="_blank" rel="noopener">Lihat bukti tersimpan</a></div>
+                <label class="form-label">Foto & Dokumen Hasil Lapangan</label>
+                <input type="file" name="lampiran[]" class="form-input" accept=".jpg,.jpeg,.png,.pdf" multiple>
+                <small style="color:#6b7280;display:block;margin-top:6px;line-height:1.5;">
+                    Pilih beberapa file sekaligus. Format JPG, JPEG, PNG, atau PDF; maksimum 5 MB per file dan 10 file setiap unggahan.
+                </small>
+
+                @if(isset($distribusi) && $distribusi->lampiran->isNotEmpty())
+                    <div style="margin-top:14px;padding:14px;border:1px solid #e5e7eb;border-radius:10px;background:#f8fafc;">
+                        <div style="font-size:13px;font-weight:700;color:#00034a;margin-bottom:10px;">Lampiran tersimpan ({{ $distribusi->lampiran->count() }})</div>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;">
+                            @foreach($distribusi->lampiran as $file)
+                                <div style="border:1px solid #e5e7eb;border-radius:9px;background:white;padding:10px;min-width:0;">
+                                    @if($file->jenis === 'foto')
+                                        <a href="{{ Storage::url($file->path) }}" target="_blank" rel="noopener" style="display:block;">
+                                            <img src="{{ Storage::url($file->path) }}" alt="{{ $file->nama_asli }}" style="width:100%;height:110px;object-fit:cover;border-radius:7px;background:#f3f4f6;">
+                                        </a>
+                                    @else
+                                        <div style="height:62px;display:flex;align-items:center;justify-content:center;border-radius:7px;background:#eef2ff;color:#00034a;font-weight:700;">PDF</div>
+                                    @endif
+                                    <a href="{{ Storage::url($file->path) }}" target="_blank" rel="noopener" style="display:block;margin-top:8px;font-size:12px;color:#00034a;overflow-wrap:anywhere;">{{ $file->nama_asli }}</a>
+                                    <div style="font-size:11px;color:#6b7280;margin-top:3px;">{{ $file->ukuran ? number_format($file->ukuran / 1024, 0, ',', '.') . ' KB' : 'File lama' }}</div>
+                                    <label style="display:flex;align-items:center;gap:7px;margin-top:8px;font-size:12px;color:#b91c1c;cursor:pointer;">
+                                        <input type="checkbox" name="hapus_lampiran[]" value="{{ $file->id }}">
+                                        Hapus saat disimpan
+                                    </label>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @elseif(isset($distribusi) && $distribusi->bukti_file)
+                    <div style="margin-top:8px;"><a href="{{ Storage::url($distribusi->bukti_file) }}" target="_blank" rel="noopener">Lihat bukti lama</a></div>
                 @endif
             </div>
 

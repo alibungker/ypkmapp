@@ -45,6 +45,16 @@ class Distribusi extends Model
     public function penerimaDistribusi() { return $this->hasMany(PenerimaDistribusi::class); }
     public function items() { return $this->hasMany(DistribusiItem::class); }
     public function biayaOperasional() { return $this->hasMany(BiayaOperasional::class); }
+    public function lampiran() { return $this->hasMany(DistribusiLampiran::class); }
+}
+
+class DistribusiLampiran extends Model
+{
+    protected $table = 'distribusi_lampirans';
+    protected $fillable = ['path', 'nama_asli', 'mime_type', 'ukuran', 'jenis', 'created_by'];
+
+    public function distribusi() { return $this->belongsTo(Distribusi::class); }
+    public function creator() { return $this->belongsTo(User::class, 'created_by'); }
 }
 
 class BarangBantuan extends Model

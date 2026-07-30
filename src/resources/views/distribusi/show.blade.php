@@ -27,7 +27,7 @@
                 @endif
                 <tr><td style="padding:6px 0;color:#6b7280;">💰 Estimasi Nilai</td><td style="font-weight:600;color:#017723;">Rp {{ number_format($distribusi->estimasi_nilai_total,0,',','.') }}</td></tr>
                 <tr><td style="padding:6px 0;color:#6b7280;">💵 Sumber Dana</td><td>{{ $distribusi->sumber_dana ?? '-' }}</td></tr>
-                <tr><td style="padding:6px 0;color:#6b7280;">📎 Bukti</td><td>@if($distribusi->bukti_file)<a href="{{ Storage::url($distribusi->bukti_file) }}" target="_blank" rel="noopener">Lihat file bukti</a>@else - @endif</td></tr>
+                <tr><td style="padding:6px 0;color:#6b7280;">📎 Lampiran</td><td>{{ $distribusi->lampiran->count() ? $distribusi->lampiran->count() . ' file' : ($distribusi->bukti_file ? '1 file lama' : '-') }}</td></tr>
                 <tr><td style="padding:6px 0;color:#6b7280;">📊 Status</td><td>
                     @if($distribusi->status == 'selesai') <span class="badge badge-green">✅ Selesai</span>
                     @elseif($distribusi->status == 'berlangsung') <span class="badge badge-gold">⏳ Berlangsung</span>
@@ -35,6 +35,27 @@
                     @endif
                 </td></tr>
             </table>
+
+            @if($distribusi->lampiran->isNotEmpty())
+                <div style="margin-top:16px;">
+                    <div style="font-size:13px;font-weight:700;color:#00034a;margin-bottom:9px;">Dokumentasi Lapangan</div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:9px;">
+                        @foreach($distribusi->lampiran as $file)
+                            <a href="{{ Storage::url($file->path) }}" target="_blank" rel="noopener" style="border:1px solid #e5e7eb;border-radius:9px;padding:8px;text-decoration:none;min-width:0;background:#fff;">
+                                @if($file->jenis === 'foto')
+                                    <img src="{{ Storage::url($file->path) }}" alt="{{ $file->nama_asli }}" style="display:block;width:100%;height:90px;object-fit:cover;border-radius:6px;background:#f3f4f6;">
+                                @else
+                                    <div style="height:90px;display:flex;align-items:center;justify-content:center;border-radius:6px;background:#eef2ff;color:#00034a;font-weight:800;">PDF</div>
+                                @endif
+                                <span style="display:block;margin-top:6px;font-size:11px;color:#00034a;overflow-wrap:anywhere;">{{ $file->nama_asli }}</span>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            @elseif($distribusi->bukti_file)
+                <div style="margin-top:12px;"><a href="{{ Storage::url($distribusi->bukti_file) }}" target="_blank" rel="noopener">Lihat bukti lama</a></div>
+            @endif
+
             <div style="margin-top:16px;display:flex;gap:8px;">
                 @if(auth()->user()->isAdmin())
                 <a href="{{ route('distribusi.edit', $distribusi) }}" class="btn btn-primary btn-sm">✏️ Edit</a>

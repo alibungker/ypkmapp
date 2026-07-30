@@ -56,20 +56,30 @@ class DistribusiController extends Controller
     public function store(Request $request)
     {
         $data = $this->validated($request);
-        $upload = $data['bukti_file'] ?? null;
-        unset($data['bukti_file']);
-        $newPath = $upload?->store('distribusi/bukti', 'public');
-        if ($newPath) $data['bukti_file'] = $newPath;
+        $legacyUpload = $data['bukti_file'] ?? null;
+        $uploads = $data['lampiran'] ?? [];
+        unset($data['bukti_file'], $data['lampiran'], $data['hapus_lampiran']);
+        $newPaths = [];
+
+        if ($legacyUpload) {
+            $legacyPath = $legacyUpload->store('distribusi/bukti', 'public');
+            $newPaths[] = $legacyPath;
+            $data['bukti_file'] = $legacyPath;
+        }
         $data['kode_distribusi'] = 'DST-' . now()->format('Ymd') . '-' . strtoupper(Str::random(4));
         $data['created_by'] = auth()->id();
 
         try {
-            DB::transaction(function () use ($data) {
+            DB::transaction(function () use ($data, $legacyUpload, $uploads, &$newPaths) {
                 $distribusi = Distribusi::create($data);
+                if ($legacyUpload && $distribusi->bukti_file) {
+                    $this->recordLampiran($distribusi, $legacyUpload, $distribusi->bukti_file);
+                }
+                $this->storeLampiran($distribusi, $uploads, $newPaths);
                 $this->syncPenerima($distribusi);
             });
         } catch (\Throwable $e) {
-            if ($newPath) Storage::disk('public')->delete($newPath);
+            Storage::disk('public')->delete($newPaths);
             throw $e;
         }
 
@@ -79,49 +89,101 @@ class DistribusiController extends Controller
     public function edit(Distribusi $distribusi)
     {
         $kelompoks = Kelompok::withCount('penerima')->with('ketuaUser')->get();
+        $distribusi->load('lampiran');
         return view('distribusi.form', compact('distribusi', 'kelompoks'));
     }
 
     public function update(Request $request, Distribusi $distribusi)
     {
         $data = $this->validated($request);
-        $upload = $data['bukti_file'] ?? null;
-        unset($data['bukti_file']);
-        $newPath = $upload?->store('distribusi/bukti', 'public');
-        if ($newPath) $data['bukti_file'] = $newPath;
-        $oldPath = $distribusi->bukti_file;
-        $kelompokBerubah = (int) $distribusi->kelompok_id !== (int) $data['kelompok_id'];
+        $legacyUpload = $data['bukti_file'] ?? null;
+        $uploads = $data['lampiran'] ?? [];
+        $deleteIds = $data['hapus_lampiran'] ?? [];
+        unset($data['bukti_file'], $data['lampiran'], $data['hapus_lampiran']);
 
+        $oldLegacyPath = $distribusi->bukti_file;
+        $kelompokBerubah = (int) $distribusi->kelompok_id !== (int) $data['kelompok_id'];
         if ($kelompokBerubah && $distribusi->penerimaDistribusi()->where('status', 'diterima')->exists()) {
-            if ($newPath) Storage::disk('public')->delete($newPath);
             return back()->withInput()->withErrors([
                 'kelompok_id' => 'Kelompok tidak dapat diubah karena sudah ada tanda terima bantuan.',
             ]);
         }
 
+        $newPaths = [];
+        $pathsToDelete = [];
         try {
-            DB::transaction(function () use ($distribusi, $data, $kelompokBerubah) {
+            DB::transaction(function () use ($distribusi, &$data, $legacyUpload, $oldLegacyPath, $uploads, $deleteIds, $kelompokBerubah, &$newPaths, &$pathsToDelete) {
+                if ($legacyUpload) {
+                    $legacyPath = $legacyUpload->store('distribusi/bukti', 'public');
+                    $newPaths[] = $legacyPath;
+                    $data['bukti_file'] = $legacyPath;
+                }
+
+                $selected = $distribusi->lampiran()->whereIn('id', $deleteIds)->get();
+                if ($legacyUpload && $oldLegacyPath) {
+                    $selected = $selected->merge(
+                        $distribusi->lampiran()->where('path', $oldLegacyPath)->get()
+                    )->unique('id');
+                }
+                $pathsToDelete = $selected->pluck('path')->all();
+                if (!$legacyUpload && $oldLegacyPath && $selected->contains('path', $oldLegacyPath)) {
+                    $data['bukti_file'] = null;
+                }
+                if ($selected->isNotEmpty()) {
+                    $distribusi->lampiran()->whereKey($selected->pluck('id'))->delete();
+                }
+
                 $distribusi->update($data);
+                if ($legacyUpload && $distribusi->bukti_file) {
+                    $this->recordLampiran($distribusi, $legacyUpload, $distribusi->bukti_file);
+                }
+                $this->storeLampiran($distribusi, $uploads, $newPaths);
                 if ($kelompokBerubah) {
                     $distribusi->penerimaDistribusi()->delete();
                     $this->syncPenerima($distribusi);
                 }
             });
         } catch (\Throwable $e) {
-            if ($newPath) Storage::disk('public')->delete($newPath);
+            Storage::disk('public')->delete($newPaths);
             throw $e;
         }
 
-        if ($newPath && $oldPath) Storage::disk('public')->delete($oldPath);
+        if ($legacyUpload && $oldLegacyPath) $pathsToDelete[] = $oldLegacyPath;
+        Storage::disk('public')->delete(array_values(array_unique(array_filter($pathsToDelete))));
         return redirect()->route('distribusi.index')->with('success', 'Distribusi diupdate.');
     }
 
     public function destroy(Distribusi $distribusi)
     {
-        $path = $distribusi->bukti_file;
-        $distribusi->delete();
-        if ($path) Storage::disk('public')->delete($path);
+        $paths = $distribusi->lampiran()->pluck('path')->push($distribusi->bukti_file)
+            ->filter()->unique()->values()->all();
+        DB::transaction(function () use ($distribusi) {
+            $distribusi->delete();
+        });
+        Storage::disk('public')->delete($paths);
         return redirect()->route('distribusi.index')->with('success', 'Distribusi dihapus.');
+    }
+
+    private function storeLampiran(Distribusi $distribusi, array $uploads, array &$storedPaths): void
+    {
+        foreach ($uploads as $upload) {
+            $path = $upload->store('distribusi/lampiran', 'public');
+            $storedPaths[] = $path;
+            $this->recordLampiran($distribusi, $upload, $path);
+        }
+    }
+
+    private function recordLampiran(Distribusi $distribusi, $upload, string $path): void
+    {
+        $mime = $upload->getMimeType();
+        $distribusi->lampiran()->create([
+            'path' => $path,
+            'nama_asli' => $upload->getClientOriginalName(),
+            'mime_type' => $mime,
+            'ukuran' => $upload->getSize(),
+            'jenis' => str_starts_with((string) $mime, 'image/') ? 'foto' : 'dokumen',
+            'created_by' => auth()->id(),
+        ]);
     }
 
     private function syncPenerima(Distribusi $distribusi): void
@@ -156,9 +218,16 @@ class DistribusiController extends Controller
             'sumber_dana' => 'nullable|string|max:255',
             'catatan' => 'nullable|string|max:5000',
             'bukti_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+            'lampiran' => 'nullable|array|max:10',
+            'lampiran.*' => 'file|mimes:jpg,jpeg,png,pdf|max:5120',
+            'hapus_lampiran' => 'nullable|array',
+            'hapus_lampiran.*' => 'integer|distinct',
             'status' => 'required|in:direncanakan,berlangsung,selesai,dibatalkan',
         ], [
             'titik_koordinat.regex' => 'Format koordinat harus latitude,longitude, contoh: 4.2991424,97.8653578.',
+            'lampiran.max' => 'Maksimal 10 file dapat diunggah dalam satu kali penyimpanan.',
+            'lampiran.*.mimes' => 'Lampiran harus berupa JPG, JPEG, PNG, atau PDF.',
+            'lampiran.*.max' => 'Ukuran setiap lampiran maksimal 5 MB.',
         ]);
 
         // Hindari NULL eksplisit pada kolom database yang mempunyai default.
@@ -173,7 +242,7 @@ class DistribusiController extends Controller
         abort_unless($this->bolehLihat($distribusi), 403, 'Distribusi di luar wilayah atau penugasan Anda.');
         $distribusi->load([
             'kelompok' => fn ($q) => $q->withCount('penerima')->with('ketuaUser'),
-            'creator', 'penerimaDistribusi.penerima', 'items.barang', 'biayaOperasional'
+            'creator', 'penerimaDistribusi.penerima', 'items.barang', 'biayaOperasional', 'lampiran'
         ]);
         return view('distribusi.show', compact('distribusi'));
     }

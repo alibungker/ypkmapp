@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -98,6 +99,258 @@ class PhaseTwoFeaturesTest extends TestCase
             'penerima_id' => $penerima->id,
             'status' => 'terjadwal',
         ]);
+    }
+
+    public function test_distribusi_can_store_multiple_photos_and_documents(): void
+    {
+        $admin = $this->admin();
+        $kelompok = $this->kelompok();
+        Storage::fake('public');
+
+        $payload = array_merge($this->payload($kelompok), [
+            'lampiran' => [
+                UploadedFile::fake()->create('foto-lapangan-1.jpg', 100, 'image/jpeg'),
+                UploadedFile::fake()->create('foto-lapangan-2.png', 120, 'image/png'),
+                UploadedFile::fake()->create('berita-acara.pdf', 200, 'application/pdf'),
+            ],
+        ]);
+
+        $this->actingAs($admin)->post('/distribusi', $payload)
+            ->assertRedirect(route('distribusi.index'));
+
+        $distribusi = Distribusi::where('nama_kegiatan', 'Distribusi Uji Tahap Dua')->firstOrFail();
+        $lampiran = DB::table('distribusi_lampirans')
+            ->where('distribusi_id', $distribusi->id)
+            ->orderBy('id')
+            ->get();
+
+        $this->assertCount(3, $lampiran);
+        $this->assertSame(
+            ['foto-lapangan-1.jpg', 'foto-lapangan-2.png', 'berita-acara.pdf'],
+            $lampiran->pluck('nama_asli')->all()
+        );
+        $this->assertSame(['foto', 'foto', 'dokumen'], $lampiran->pluck('jenis')->all());
+        foreach ($lampiran as $file) {
+            Storage::disk('public')->assertExists($file->path);
+        }
+
+        $this->get(route('distribusi.edit', $distribusi))
+            ->assertOk()
+            ->assertSee('name="lampiran[]"', false)
+            ->assertSee('multiple', false)
+            ->assertSee('foto-lapangan-1.jpg')
+            ->assertSee('berita-acara.pdf');
+
+        $this->get(route('distribusi.show', $distribusi))
+            ->assertOk()
+            ->assertSee('Dokumentasi Lapangan')
+            ->assertSee('foto-lapangan-2.png')
+            ->assertSee('berita-acara.pdf');
+    }
+
+    public function test_distribusi_rejects_unsupported_and_oversized_attachments(): void
+    {
+        $admin = $this->admin();
+        $kelompok = $this->kelompok();
+        Storage::fake('public');
+
+        $this->actingAs($admin)->from(route('distribusi.create'))->post('/distribusi', array_merge($this->payload($kelompok), [
+            'lampiran' => [UploadedFile::fake()->create('program.exe', 100, 'application/octet-stream')],
+        ]))->assertRedirect(route('distribusi.create'))
+            ->assertSessionHasErrors('lampiran.0');
+
+        $this->from(route('distribusi.create'))->post('/distribusi', array_merge($this->payload($kelompok), [
+            'lampiran' => [UploadedFile::fake()->create('terlalu-besar.pdf', 5121, 'application/pdf')],
+        ]))->assertRedirect(route('distribusi.create'))
+            ->assertSessionHasErrors('lampiran.0');
+
+        $this->assertDatabaseCount('distribusis', 0);
+        $this->assertSame([], Storage::disk('public')->allFiles());
+    }
+
+    public function test_distribusi_rejects_more_than_ten_attachments_per_request(): void
+    {
+        $admin = $this->admin();
+        $kelompok = $this->kelompok();
+        Storage::fake('public');
+        $files = [];
+        for ($i = 1; $i <= 11; $i++) {
+            $files[] = UploadedFile::fake()->create("foto-{$i}.jpg", 10, 'image/jpeg');
+        }
+
+        $this->actingAs($admin)->from(route('distribusi.create'))->post('/distribusi', array_merge($this->payload($kelompok), [
+            'lampiran' => $files,
+        ]))->assertRedirect(route('distribusi.create'))
+            ->assertSessionHasErrors('lampiran');
+
+        $this->assertDatabaseCount('distribusis', 0);
+        $this->assertSame([], Storage::disk('public')->allFiles());
+    }
+
+    public function test_distribusi_update_can_add_and_remove_selected_attachments(): void
+    {
+        $admin = $this->admin();
+        $kelompok = $this->kelompok();
+        Storage::fake('public');
+
+        $this->actingAs($admin)->post('/distribusi', array_merge($this->payload($kelompok), [
+            'lampiran' => [
+                UploadedFile::fake()->create('hapus-saya.jpg', 100, 'image/jpeg'),
+                UploadedFile::fake()->create('tetap-ada.pdf', 100, 'application/pdf'),
+            ],
+        ]))->assertRedirect(route('distribusi.index'));
+
+        $distribusi = Distribusi::where('nama_kegiatan', 'Distribusi Uji Tahap Dua')->firstOrFail();
+        $existing = DB::table('distribusi_lampirans')
+            ->where('distribusi_id', $distribusi->id)
+            ->orderBy('id')
+            ->get();
+
+        $this->put(route('distribusi.update', $distribusi), array_merge($this->payload($kelompok), [
+            'hapus_lampiran' => [$existing[0]->id],
+            'lampiran' => [UploadedFile::fake()->create('tambahan-lapangan.png', 150, 'image/png')],
+        ]))->assertRedirect(route('distribusi.index'));
+
+        $remaining = DB::table('distribusi_lampirans')
+            ->where('distribusi_id', $distribusi->id)
+            ->orderBy('id')
+            ->get();
+
+        $this->assertCount(2, $remaining);
+        $this->assertSame(['tetap-ada.pdf', 'tambahan-lapangan.png'], $remaining->pluck('nama_asli')->all());
+        $this->assertDatabaseMissing('distribusi_lampirans', ['id' => $existing[0]->id]);
+        Storage::disk('public')->assertMissing($existing[0]->path);
+        Storage::disk('public')->assertExists($existing[1]->path);
+        Storage::disk('public')->assertExists($remaining->last()->path);
+    }
+
+    public function test_non_admin_cannot_upload_distribution_attachments(): void
+    {
+        $kelompok = $this->kelompok();
+        $ketua = User::create([
+            'name' => 'Ketua Uji Lampiran',
+            'email' => 'ketua-lampiran@example.test',
+            'password' => Hash::make('test-password'),
+            'role' => 'ketua_kelompok',
+            'status' => 'aktif',
+            'kelompok_id' => $kelompok->id,
+        ]);
+        Storage::fake('public');
+
+        $this->actingAs($ketua)->post('/distribusi', array_merge($this->payload($kelompok), [
+            'lampiran' => [UploadedFile::fake()->create('tidak-boleh.jpg', 100, 'image/jpeg')],
+        ]))->assertForbidden();
+
+        $this->assertDatabaseCount('distribusis', 0);
+        $this->assertSame([], Storage::disk('public')->allFiles());
+    }
+
+    public function test_removing_legacy_attachment_clears_legacy_column_and_file(): void
+    {
+        $admin = $this->admin();
+        $kelompok = $this->kelompok();
+        Storage::fake('public');
+
+        $this->actingAs($admin)->post('/distribusi', array_merge($this->payload($kelompok), [
+            'bukti_file' => UploadedFile::fake()->create('bukti-tunggal-lama.pdf', 100, 'application/pdf'),
+        ]));
+        $distribusi = Distribusi::where('nama_kegiatan', 'Distribusi Uji Tahap Dua')->firstOrFail();
+        $legacy = DB::table('distribusi_lampirans')->where('distribusi_id', $distribusi->id)->first();
+
+        $this->put(route('distribusi.update', $distribusi), array_merge($this->payload($kelompok), [
+            'hapus_lampiran' => [$legacy->id],
+        ]))->assertRedirect(route('distribusi.index'));
+
+        $this->assertNull($distribusi->fresh()->bukti_file);
+        $this->assertDatabaseMissing('distribusi_lampirans', ['id' => $legacy->id]);
+        Storage::disk('public')->assertMissing($legacy->path);
+    }
+
+    public function test_deleting_distribusi_cleans_up_all_attachment_files(): void
+    {
+        $admin = $this->admin();
+        $kelompok = $this->kelompok();
+        Storage::fake('public');
+
+        $this->actingAs($admin)->post('/distribusi', array_merge($this->payload($kelompok), [
+            'lampiran' => [
+                UploadedFile::fake()->create('foto-hapus.jpg', 100, 'image/jpeg'),
+                UploadedFile::fake()->create('dokumen-hapus.pdf', 100, 'application/pdf'),
+            ],
+        ]));
+
+        $distribusi = Distribusi::where('nama_kegiatan', 'Distribusi Uji Tahap Dua')->firstOrFail();
+        $paths = DB::table('distribusi_lampirans')
+            ->where('distribusi_id', $distribusi->id)
+            ->pluck('path');
+
+        $this->delete(route('distribusi.destroy', $distribusi))
+            ->assertRedirect(route('distribusi.index'));
+
+        $this->assertDatabaseMissing('distribusis', ['id' => $distribusi->id]);
+        $this->assertDatabaseCount('distribusi_lampirans', 0);
+        foreach ($paths as $path) {
+            Storage::disk('public')->assertMissing($path);
+        }
+    }
+
+    public function test_multi_attachment_migration_preserves_legacy_single_proof(): void
+    {
+        $admin = $this->admin();
+        $kelompok = $this->kelompok();
+        $distribusi = Distribusi::create(array_merge($this->payload($kelompok), [
+            'kode_distribusi' => 'DST-LEGACY-01',
+            'bukti_file' => 'distribusi/bukti/bukti-lama.pdf',
+            'created_by' => $admin->id,
+        ]));
+
+        Schema::drop('distribusi_lampirans');
+        $migration = require database_path('migrations/2026_07_30_150000_create_distribusi_lampirans_table.php');
+        $migration->up();
+
+        $this->assertDatabaseHas('distribusi_lampirans', [
+            'distribusi_id' => $distribusi->id,
+            'path' => 'distribusi/bukti/bukti-lama.pdf',
+            'nama_asli' => 'bukti-lama.pdf',
+            'jenis' => 'dokumen',
+            'created_by' => $admin->id,
+        ]);
+
+        $migration->down();
+        $this->assertFalse(Schema::hasTable('distribusi_lampirans'));
+        $this->assertSame('distribusi/bukti/bukti-lama.pdf', $distribusi->fresh()->bukti_file);
+        $migration->up();
+    }
+
+    public function test_multi_attachment_migration_refuses_lossy_rollback(): void
+    {
+        $admin = $this->admin();
+        $kelompok = $this->kelompok();
+        $distribusi = Distribusi::create(array_merge($this->payload($kelompok), [
+            'kode_distribusi' => 'DST-MULTI-01',
+            'created_by' => $admin->id,
+        ]));
+        foreach (['foto-1.jpg', 'foto-2.jpg'] as $name) {
+            DB::table('distribusi_lampirans')->insert([
+                'distribusi_id' => $distribusi->id,
+                'path' => 'distribusi/lampiran/' . $name,
+                'nama_asli' => $name,
+                'jenis' => 'foto',
+                'created_by' => $admin->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $migration = require database_path('migrations/2026_07_30_150000_create_distribusi_lampirans_table.php');
+        try {
+            $migration->down();
+            $this->fail('Rollback seharusnya ditolak agar beberapa lampiran tidak hilang.');
+        } catch (\RuntimeException $e) {
+            $this->assertStringContainsString('Rollback dibatalkan', $e->getMessage());
+        }
+        $this->assertTrue(Schema::hasTable('distribusi_lampirans'));
+        $this->assertDatabaseCount('distribusi_lampirans', 2);
     }
 
     public function test_peta_and_laporan_render_database_data(): void
