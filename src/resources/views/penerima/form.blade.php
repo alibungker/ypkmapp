@@ -73,15 +73,21 @@
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:16px;">
                 <div>
                     <label class="form-label">Kabupaten <span style="color:#dc2626;">*</span></label>
-                    <input type="text" name="kabupaten" class="form-input" required value="{{ old('kabupaten', $penerima->kabupaten ?? '') }}" placeholder="Aceh Tamiang">
+                    <select name="kabupaten" id="w_kab" class="form-input" required data-selected="{{ old('kabupaten', $penerima->kabupaten ?? '') }}">
+                        <option value="">— Pilih —</option>
+                    </select>
                 </div>
                 <div>
                     <label class="form-label">Kecamatan <span style="color:#dc2626;">*</span></label>
-                    <input type="text" name="kecamatan" class="form-input" required value="{{ old('kecamatan', $penerima->kecamatan ?? '') }}">
+                    <select name="kecamatan" id="w_kec" class="form-input" required data-selected="{{ old('kecamatan', $penerima->kecamatan ?? '') }}">
+                        <option value="">— Pilih kabupaten dulu —</option>
+                    </select>
                 </div>
                 <div>
                     <label class="form-label">Desa <span style="color:#dc2626;">*</span></label>
-                    <input type="text" name="desa" class="form-input" required value="{{ old('desa', $penerima->desa ?? '') }}">
+                    <select name="desa" id="w_desa" class="form-input" required data-selected="{{ old('desa', $penerima->desa ?? '') }}">
+                        <option value="">— Pilih kecamatan dulu —</option>
+                    </select>
                 </div>
             </div>
 
@@ -112,4 +118,61 @@
         </form>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+// Cascading dropdown wilayah terpadu (Kepmendagri)
+const wKab = document.getElementById('w_kab');
+const wKec = document.getElementById('w_kec');
+const wDesa = document.getElementById('w_desa');
+
+function fillSelect(sel, list, selectedName, placeholder) {
+    sel.innerHTML = '<option value="">' + placeholder + '</option>';
+    list.forEach(w => {
+        const opt = document.createElement('option');
+        opt.value = w.nama;
+        opt.dataset.kode = w.kode;
+        opt.textContent = w.nama;
+        if (selectedName && w.nama.toLowerCase() === selectedName.toLowerCase()) opt.selected = true;
+        sel.appendChild(opt);
+    });
+}
+
+function selectedKode(sel) {
+    const opt = sel.options[sel.selectedIndex];
+    return opt ? opt.dataset.kode : null;
+}
+
+// Load kabupaten on page load
+fetch('/api/wilayah/kabupaten')
+    .then(r => r.json())
+    .then(list => {
+        fillSelect(wKab, list, wKab.dataset.selected, '— Pilih —');
+        if (wKab.value) loadKecamatan(true);
+    });
+
+function loadKecamatan(usePreselect) {
+    const kode = selectedKode(wKab);
+    if (!kode) { wKec.innerHTML = '<option value="">— Pilih kabupaten dulu —</option>'; return; }
+    fetch('/api/wilayah/kecamatan/' + kode)
+        .then(r => r.json())
+        .then(list => {
+            fillSelect(wKec, list, usePreselect ? wKec.dataset.selected : null, '— Pilih —');
+            if (wKec.value) loadDesa(usePreselect);
+            else wDesa.innerHTML = '<option value="">— Pilih kecamatan dulu —</option>';
+        });
+}
+
+function loadDesa(usePreselect) {
+    const kode = selectedKode(wKec);
+    if (!kode) { wDesa.innerHTML = '<option value="">— Pilih kecamatan dulu —</option>'; return; }
+    fetch('/api/wilayah/desa/' + kode)
+        .then(r => r.json())
+        .then(list => fillSelect(wDesa, list, usePreselect ? wDesa.dataset.selected : null, '— Pilih —'));
+}
+
+wKab.addEventListener('change', () => loadKecamatan(false));
+wKec.addEventListener('change', () => loadDesa(false));
+</script>
 @endsection

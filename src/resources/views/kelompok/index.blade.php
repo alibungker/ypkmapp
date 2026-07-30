@@ -24,20 +24,21 @@
                 </div>
                 <div style="margin-bottom:12px;">
                     <label class="form-label">Kabupaten/Daerah <span style="color:#dc2626;">*</span></label>
-                    <select name="daerah" class="form-input" required>
+                    <select name="daerah" id="k_kab" class="form-input" required>
                         <option value="">— Pilih Kabupaten/Kota —</option>
-                        @foreach($kabupatens ?? [] as $kode => $nama)
-                        <option value="{{ preg_replace('/^(Kabupaten|Kota)\s/', '', $nama) }}" {{ old('daerah') == preg_replace('/^(Kabupaten|Kota)\s/', '', $nama) ? 'selected' : '' }}>{{ $nama }}</option>
-                        @endforeach
                     </select>
                 </div>
                 <div style="margin-bottom:12px;">
                     <label class="form-label">Kecamatan</label>
-                    <input type="text" name="kecamatan" class="form-input" value="{{ old('kecamatan') }}" placeholder="Sekerak">
+                    <select name="kecamatan" id="k_kec" class="form-input">
+                        <option value="">— Pilih kabupaten dulu —</option>
+                    </select>
                 </div>
                 <div style="margin-bottom:12px;">
                     <label class="form-label">Desa</label>
-                    <input type="text" name="desa" class="form-input" value="{{ old('desa') }}" placeholder="Juar">
+                    <select name="desa" id="k_desa" class="form-input">
+                        <option value="">— Pilih kecamatan dulu —</option>
+                    </select>
                 </div>
                 <div style="margin-bottom:12px;">
                     <label class="form-label">Keterangan</label>
@@ -138,14 +139,47 @@
 
 @section('scripts')
 <script>
+// ===== Cascading dropdown wilayah (form tambah) =====
+let wilayahKab = [];
+const kKab = document.getElementById('k_kab');
+const kKec = document.getElementById('k_kec');
+const kDesa = document.getElementById('k_desa');
+
+function fillWilayah(sel, list, placeholder) {
+    sel.innerHTML = '<option value="">' + placeholder + '</option>';
+    list.forEach(w => {
+        const opt = document.createElement('option');
+        opt.value = w.nama.replace(/^(Kabupaten|Kota)\s/, '');
+        opt.dataset.kode = w.kode;
+        opt.textContent = w.nama;
+        sel.appendChild(opt);
+    });
+}
+
+fetch('/api/wilayah/kabupaten').then(r => r.json()).then(list => { wilayahKab = list; fillWilayah(kKab, list, '— Pilih Kabupaten/Kota —'); });
+
+kKab.addEventListener('change', function() {
+    const kode = this.options[this.selectedIndex]?.dataset.kode;
+    kDesa.innerHTML = '<option value="">— Pilih kecamatan dulu —</option>';
+    if (!kode) { kKec.innerHTML = '<option value="">— Pilih kabupaten dulu —</option>'; return; }
+    fetch('/api/wilayah/kecamatan/' + kode).then(r => r.json()).then(list => fillWilayah(kKec, list, '— Pilih Kecamatan —'));
+});
+
+kKec.addEventListener('change', function() {
+    const kode = this.options[this.selectedIndex]?.dataset.kode;
+    if (!kode) { kDesa.innerHTML = '<option value="">— Pilih kecamatan dulu —</option>'; return; }
+    fetch('/api/wilayah/desa/' + kode).then(r => r.json()).then(list => fillWilayah(kDesa, list, '— Pilih Desa —'));
+});
+
+// ===== Modal edit =====
 function editKelompok(id, nama, kode, daerah, kecamatan, desa, ketuaId, desc) {
     document.getElementById('editForm').action = '/kelompok/' + id;
     document.getElementById('e_nama').value = nama;
     document.getElementById('e_kode').value = kode;
-    document.getElementById('e_daerah').value = daerah;
     document.getElementById('e_kecamatan').value = kecamatan;
     document.getElementById('e_desa').value = desa;
     document.getElementById('e_desc').value = desc;
+    document.getElementById('e_daerah').value = daerah;
     document.getElementById('editModal').style.display = 'flex';
 
     // Load anggota untuk pilihan ketua

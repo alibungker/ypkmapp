@@ -76,3 +76,20 @@ Route::get('api/wilayah', function () {
             ->get()
     );
 });
+
+// API Wilayah terpadu (Kepmendagri): kab/kota → kecamatan → desa
+Route::get('api/wilayah/kabupaten', function () {
+    return response()->json(
+        DB::table('wilayah')->whereRaw("kode LIKE '11.%' AND LENGTH(kode)=5")->orderBy('nama')->get(['kode', 'nama'])
+    );
+});
+Route::get('api/wilayah/kecamatan/{kab}', function ($kab) {
+    return response()->json(
+        DB::table('wilayah')->whereRaw("kode LIKE ? AND LENGTH(kode)=8", [$kab . '.%'])->orderBy('nama')->get(['kode', 'nama'])
+    );
+});
+Route::get('api/wilayah/desa/{kec}', function ($kec) {
+    return response()->json(
+        DB::table('wilayah')->whereRaw("kode LIKE ? AND LENGTH(kode)=13", [$kec . '.%'])->orderBy('nama')->get(['kode', 'nama'])
+    );
+});
