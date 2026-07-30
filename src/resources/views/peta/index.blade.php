@@ -13,10 +13,10 @@
 @section('content')
 {{-- Stats --}}
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:20px;">
-    <div class="stat-card"><div class="stat-value">7</div><div class="stat-label">Daerah Distribusi</div></div>
-    <div class="stat-card"><div class="stat-value" style="color:#017723;">13</div><div class="stat-label">Total Distribusi</div></div>
-    <div class="stat-card"><div class="stat-value">1.477</div><div class="stat-label">Penerima Manfaat</div><div style="font-size:12px;color:#6b7280;margin-top:4px;">📋 55 kelompok</div></div>
-    <div class="stat-card"><div class="stat-value">Rp 258 Jt</div><div class="stat-label">Nilai Bantuan</div><div style="font-size:12px;color:#6b7280;margin-top:4px;">🟢 Tersalurkan Rp 112,5 Jt</div></div>
+    <div class="stat-card"><div class="stat-value">{{ count($distribusi) }}</div><div class="stat-label">Distribusi</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:#017723;">{{ number_format($distribusi->sum('paket')) }}</div><div class="stat-label">Total Paket</div></div>
+    <div class="stat-card"><div class="stat-value">{{ number_format($distribusi->sum('penerima')) }}</div><div class="stat-label">Penerima Manfaat</div></div>
+    <div class="stat-card"><div class="stat-value">{{ count(collect($distribusi)->pluck('daerah')->unique()) }}</div><div class="stat-label">Daerah</div></div>
 </div>
 
 {{-- Map + Legend --}}
@@ -114,13 +114,9 @@ L.marker([4.92, 96.50], {icon:L.divIcon({html:'🏢',className:'',iconSize:[24,2
 
 // Data distribusi
 const data = [
-    {name:'Aceh Tamiang (Sekerak)',lat:4.25,lng:97.95,paket:500,nilai:'Rp 75 Juta',penerima:342,kelompok:12,status:'done',tgl:'25 Jul 2026'},
-    {name:'Aceh Tamiang (Karang Baru)',lat:4.30,lng:97.85,paket:250,nilai:'Rp 37,5 Juta',penerima:180,kelompok:6,status:'done',tgl:'25 Jul 2026'},
-    {name:'Pidie (Mutiara)',lat:5.25,lng:95.95,paket:300,nilai:'Rp 45 Juta',penerima:281,kelompok:10,status:'progress',tgl:'28 Jul 2026'},
-    {name:'Aceh Utara (Lhoksukon)',lat:5.05,lng:97.30,paket:200,nilai:'Rp 30 Juta',penerima:198,kelompok:8,status:'progress',tgl:'30 Jul 2026'},
-    {name:'Bireuen (Jeunieb)',lat:5.20,lng:96.70,paket:150,nilai:'Rp 22,5 Juta',penerima:156,kelompok:6,status:'plan',tgl:'2 Agu 2026'},
-    {name:'Subulussalam (Penanggalan)',lat:2.65,lng:98.00,paket:120,nilai:'Rp 18 Juta',penerima:120,kelompok:5,status:'plan',tgl:'5 Agu 2026'},
-    {name:'Aceh Besar (Indrapuri)',lat:5.40,lng:95.55,paket:200,nilai:'Rp 30 Juta',penerima:200,kelompok:8,status:'plan',tgl:'10 Agu 2026'}
+    @foreach($distribusi as $d)
+    {name:'{{ $d['name'] }} ({{ $d['daerah'] }})',lat:{{ $d['lat'] }},lng:{{ $d['lng'] }},paket:{{ $d['paket'] }},nilai:'{{ $d['nilai'] }}',penerima:{{ $d['penerima'] }},status:'{{ $d['status'] }}',tgl:'{{ $d['tgl'] }}'},
+    @endforeach
 ];
 const colors = {done:'#017723',progress:'#e5a820',plan:'#00034a'};
 data.forEach(d => {

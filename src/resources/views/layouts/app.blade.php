@@ -44,7 +44,7 @@
         .alert-success{background:#e8f5ec;border:1px solid #c6e6d0;color:#017723;}
         @@media(max-width:768px){.sidebar{width:200px;}.main-content{margin-left:200px;}}
     </style>
-    @stack('styles')
+    @yield('styles')
 </head>
 <body>
     {{-- Sidebar --}}

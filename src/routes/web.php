@@ -39,7 +39,27 @@ Route::prefix('keuangan')->name('keuangan.')->group(function () {
 // Route::resource('barang', BarangController::class)->only(['index', 'store']);
 
 // Peta
-Route::view('peta', 'peta.index')->name('peta.index');
+use App\Models\Distribusi;
+Route::get('peta', function () {
+    $distribusi = Distribusi::whereNotNull('titik_koordinat')
+        ->with('kelompok')
+        ->get()
+        ->map(function ($d) {
+            $coord = explode(',', $d->titik_koordinat);
+            return [
+                'name' => $d->nama_kegiatan,
+                'lat' => (float)($coord[0] ?? 0),
+                'lng' => (float)($coord[1] ?? 0),
+                'paket' => $d->jumlah_paket,
+                'nilai' => 'Rp ' . number_format($d->estimasi_nilai_total,0,',','.'),
+                'penerima' => $d->kelompok->jumlah_anggota ?? 0,
+                'daerah' => $d->kelompok->daerah ?? '',
+                'status' => $d->status,
+                'tgl' => is_object($d->tanggal) ? $d->tanggal->format('d M Y') : date('d M Y', strtotime($d->tanggal)),
+            ];
+        });
+    return view('peta.index', compact('distribusi'));
+})->name('peta.index');
 
 // Laporan
 Route::get('laporan', function () { return view('laporan.index'); })->name('laporan.index');
