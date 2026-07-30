@@ -60,11 +60,11 @@
                 </div>
                 <div>
                     <label class="form-label">Jumlah Paket <span style="color:#dc2626;">*</span></label>
-                    <input type="number" name="jumlah_paket" id="jmlPaket" class="form-input" required value="{{ old('jumlah_paket', $distribusi->jumlah_paket ?? '') }}" placeholder="250">
+                    <input type="number" name="jumlah_paket" id="jmlPaket" class="form-input" required min="1" max="10000000" value="{{ old('jumlah_paket', $distribusi->jumlah_paket ?? '') }}" placeholder="250">
                 </div>
                 <div>
                     <label class="form-label">Estimasi Nilai (Rp)</label>
-                    <input type="number" name="estimasi_nilai_total" class="form-input" step="0.01" value="{{ old('estimasi_nilai_total', $distribusi->estimasi_nilai_total ?? '') }}" placeholder="37500000">
+                    <input type="number" name="estimasi_nilai_total" class="form-input" step="0.01" min="0" value="{{ old('estimasi_nilai_total', $distribusi->estimasi_nilai_total ?? 0) }}" placeholder="37500000">
                 </div>
             </div>
 
@@ -79,8 +79,14 @@
                         <option value="direncanakan" {{ old('status', $distribusi->status ?? '') == 'direncanakan' ? 'selected' : '' }}>📋 Direncanakan</option>
                         <option value="berlangsung" {{ old('status', $distribusi->status ?? '') == 'berlangsung' ? 'selected' : '' }}>⏳ Berlangsung</option>
                         <option value="selesai" {{ old('status', $distribusi->status ?? '') == 'selesai' ? 'selected' : '' }}>✅ Selesai</option>
+                        <option value="dibatalkan" {{ old('status', $distribusi->status ?? '') == 'dibatalkan' ? 'selected' : '' }}>❌ Dibatalkan</option>
                     </select>
                 </div>
+            </div>
+
+            <div style="margin-top:16px;">
+                <label class="form-label">Catatan</label>
+                <textarea name="catatan" class="form-input" rows="3" maxlength="5000" placeholder="Catatan tambahan distribusi...">{{ old('catatan', $distribusi->catatan ?? '') }}</textarea>
             </div>
 
             <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid #e5e7eb;">

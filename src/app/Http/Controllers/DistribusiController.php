@@ -80,18 +80,26 @@ class DistribusiController extends Controller
 
     private function validated(Request $request): array
     {
-        return $request->validate([
-            'nama_kegiatan' => 'required',
+        $data = $request->validate([
+            'nama_kegiatan' => 'required|string|max:255',
             'tanggal' => 'required|date',
-            'lokasi' => 'required',
-            'titik_koordinat' => 'required|regex:/^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$/',
+            'lokasi' => 'required|string|max:255',
+            'titik_koordinat' => ['required', 'regex:/^-?\d{1,2}(?:\.\d+)?,\s*-?\d{1,3}(?:\.\d+)?$/'],
             'kelompok_id' => 'required|exists:kelompoks,id',
-            'jenis_bantuan' => 'required',
-            'jumlah_paket' => 'required|integer',
-            'estimasi_nilai_total' => 'nullable|numeric',
-            'sumber_dana' => 'nullable',
-            'status' => 'required|in:direncanakan,berlangsung,selesai',
+            'jenis_bantuan' => 'required|string|max:100',
+            'jumlah_paket' => 'required|integer|min:1|max:10000000',
+            'estimasi_nilai_total' => 'nullable|numeric|min:0',
+            'sumber_dana' => 'nullable|string|max:255',
+            'catatan' => 'nullable|string|max:5000',
+            'status' => 'required|in:direncanakan,berlangsung,selesai,dibatalkan',
+        ], [
+            'titik_koordinat.regex' => 'Format koordinat harus latitude,longitude, contoh: 4.2991424,97.8653578.',
         ]);
+
+        // Hindari NULL eksplisit pada kolom database yang mempunyai default numerik.
+        $data['estimasi_nilai_total'] = $data['estimasi_nilai_total'] ?? 0;
+
+        return $data;
     }
 
     public function show(Distribusi $distribusi)

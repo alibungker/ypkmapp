@@ -21,6 +21,10 @@
                 <tr><td style="padding:6px 0;color:#6b7280;">👤 Ketua Kelompok</td><td style="font-weight:600;">{{ optional(optional($distribusi->kelompok)->ketuaUser)->name ?? '-' }}</td></tr>
                 <tr><td style="padding:6px 0;color:#6b7280;">👥 Jumlah Penerima</td><td style="font-weight:600;">{{ number_format($distribusi->kelompok->penerima_count ?? 0) }} orang</td></tr>
                 <tr><td style="padding:6px 0;color:#6b7280;">📦 Jenis / Paket</td><td style="font-weight:600;">{{ $distribusi->jenis_bantuan }} — {{ number_format($distribusi->jumlah_paket) }} paket</td></tr>
+                @php($selisihPaket = (int) $distribusi->jumlah_paket - (int) ($distribusi->kelompok->penerima_count ?? 0))
+                @if($selisihPaket !== 0)
+                <tr><td style="padding:6px 0;color:#6b7280;">⚖️ Selisih Paket</td><td style="font-weight:700;color:{{ $selisihPaket > 0 ? '#e5a820' : '#dc2626' }};">{{ $selisihPaket > 0 ? '+' : '' }}{{ number_format($selisihPaket) }} paket terhadap anggota</td></tr>
+                @endif
                 <tr><td style="padding:6px 0;color:#6b7280;">💰 Estimasi Nilai</td><td style="font-weight:600;color:#017723;">Rp {{ number_format($distribusi->estimasi_nilai_total,0,',','.') }}</td></tr>
                 <tr><td style="padding:6px 0;color:#6b7280;">💵 Sumber Dana</td><td>{{ $distribusi->sumber_dana ?? '-' }}</td></tr>
                 <tr><td style="padding:6px 0;color:#6b7280;">📊 Status</td><td>
@@ -31,8 +35,10 @@
                 </td></tr>
             </table>
             <div style="margin-top:16px;display:flex;gap:8px;">
+                @if(auth()->user()->isAdmin())
                 <a href="{{ route('distribusi.edit', $distribusi) }}" class="btn btn-primary btn-sm">✏️ Edit</a>
-                @if($distribusi->status != 'selesai')
+                @endif
+                @if($distribusi->status != 'selesai' && (auth()->user()->isAdmin() || auth()->user()->isRelawan()))
                 <form method="POST" action="{{ route('distribusi.selesai', $distribusi) }}">
                     @csrf
                     <button class="btn btn-sm" style="background:#017723;color:white;">✅ Tandai Selesai</button>

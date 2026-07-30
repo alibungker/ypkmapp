@@ -1,102 +1,88 @@
 @extends('layouts.app')
 @section('title', 'Peta Distribusi')
-@section('subtitle', 'Peta interaktif distribusi bantuan PEDULI YPKM di Aceh')
+@section('subtitle', 'Data distribusi aktual berdasarkan hak akses dan wilayah kerja')
+
 @section('styles')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
-#map{height:480px;border-radius:12px;border:1px solid #e5e7eb}
-.legend-item{display:flex;align-items:center;gap:8px;font-size:13px}
-.legend-dot{width:14px;height:14px;border-radius:50%;border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,0.3)}
+#map{height:520px;border-radius:12px;border:1px solid #e5e7eb}
+.legend{display:flex;gap:18px;margin-top:12px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:7px;font-size:13px;color:#4b5563}
+.legend-dot{width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.peta-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr);gap:20px}
+@media(max-width:900px){.peta-grid{grid-template-columns:1fr}#map{height:420px}}
 </style>
 @endsection
 
 @section('content')
-{{-- Stats --}}
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:20px;">
-    <div class="stat-card"><div class="stat-value">{{ count($distribusi) }}</div><div class="stat-label">Distribusi</div></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:20px;">
+    <div class="stat-card"><div class="stat-value">{{ number_format($distribusi->count()) }}</div><div class="stat-label">Distribusi</div></div>
     <div class="stat-card"><div class="stat-value" style="color:#017723;">{{ number_format($distribusi->sum('paket')) }}</div><div class="stat-label">Total Paket</div></div>
-    <div class="stat-card"><div class="stat-value">{{ number_format($distribusi->sum('penerima')) }}</div><div class="stat-label">Penerima Manfaat</div></div>
-    <div class="stat-card"><div class="stat-value">{{ count(collect($distribusi)->pluck('daerah')->unique()) }}</div><div class="stat-label">Daerah</div></div>
+    <div class="stat-card"><div class="stat-value">{{ number_format($distribusi->sum('penerima')) }}</div><div class="stat-label">Target Penerima</div></div>
+    <div class="stat-card"><div class="stat-value" style="font-size:24px;">Rp {{ number_format($distribusi->sum('nilai_raw'),0,',','.') }}</div><div class="stat-label">Nilai Bantuan</div></div>
 </div>
 
-{{-- Map + Legend --}}
 <div class="card" style="margin-bottom:20px;">
-    <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;">
-        <h3 style="font-size:15px;font-weight:600;">🗺️ Peta Sebaran Distribusi</h3>
+    <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div><h3 style="font-size:15px;font-weight:600;">🗺️ Peta Sebaran Distribusi</h3><small style="color:#6b7280;">Polygon dan marker bersumber dari database</small></div>
+        <div style="font-size:12px;color:#6b7280;">{{ $wilayahStats['kabupaten'] }} kab/kota · {{ $wilayahStats['kecamatan'] }} kecamatan · {{ $wilayahStats['desa'] }} desa</div>
     </div>
     <div style="padding:16px 20px;">
         <div id="map"></div>
-        <div style="display:flex;gap:24px;margin-top:12px;">
-            <div class="legend-item"><span class="legend-dot" style="background:#017723;"></span> Selesai (5)</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#e5a820;"></span> Berlangsung (2)</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#00034a;"></span> Rencana (3)</div>
-            <div class="legend-item"><span class="legend-dot" style="background:#ef4444;"></span> Kantor YPKM</div>
+        <div class="legend">
+            <div class="legend-item"><span class="legend-dot" style="background:#017723;"></span>Selesai ({{ $statusCounts['selesai'] ?? 0 }})</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#e5a820;"></span>Berlangsung ({{ $statusCounts['berlangsung'] ?? 0 }})</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#00034a;"></span>Direncanakan ({{ $statusCounts['direncanakan'] ?? 0 }})</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#dc2626;"></span>Dibatalkan ({{ $statusCounts['dibatalkan'] ?? 0 }})</div>
         </div>
     </div>
 </div>
 
-{{-- Table + Charts --}}
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-    {{-- Table --}}
+<div class="peta-grid">
     <div class="card">
-        <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;">
-            <h3 style="font-size:15px;font-weight:600;">📍 Daftar Distribusi</h3>
-        </div>
+        <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;"><h3 style="font-size:15px;font-weight:600;">📍 Daftar Distribusi Aktual</h3></div>
         <div style="padding:16px 20px;overflow-x:auto;">
             <table class="table-data">
-                <thead><tr><th>Daerah</th><th>Kec.</th><th>Paket</th><th>Nilai</th><th>Penerima</th><th>Status</th></tr></thead>
+                <thead><tr><th>Kegiatan/Wilayah</th><th>Tanggal</th><th>Paket</th><th>Nilai</th><th>Penerima</th><th>Status</th></tr></thead>
                 <tbody>
-                    <tr><td><strong>Aceh Tamiang</strong></td><td>Sekerak</td><td>500</td><td>Rp 75 Jt</td><td>342 KK</td><td><span class="badge badge-green">✅</span></td></tr>
-                    <tr><td><strong>Aceh Tamiang</strong></td><td>Karang Baru</td><td>250</td><td>Rp 37,5 Jt</td><td>180 KK</td><td><span class="badge badge-green">✅</span></td></tr>
-                    <tr><td><strong>Pidie</strong></td><td>Mutiara</td><td>300</td><td>Rp 45 Jt</td><td>281 KK</td><td><span class="badge badge-gold">⏳</span></td></tr>
-                    <tr><td><strong>Aceh Utara</strong></td><td>Lhoksukon</td><td>200</td><td>Rp 30 Jt</td><td>198 KK</td><td><span class="badge badge-gold">⏳</span></td></tr>
-                    <tr><td><strong>Bireuen</strong></td><td>Jeunieb</td><td>150</td><td>Rp 22,5 Jt</td><td>156 KK</td><td><span class="badge badge-navy">📋</span></td></tr>
-                    <tr><td><strong>Subulussalam</strong></td><td>Penanggalan</td><td>120</td><td>Rp 18 Jt</td><td>120 KK</td><td><span class="badge badge-navy">📋</span></td></tr>
-                    <tr><td><strong>Aceh Besar</strong></td><td>Indrapuri</td><td>200</td><td>Rp 30 Jt</td><td>200 KK</td><td><span class="badge badge-navy">📋</span></td></tr>
-                    <tr style="background:#f8f9fa;font-weight:600;"><td colspan="2">Total</td><td>1.720</td><td>Rp 258 Jt</td><td>1.477 KK</td><td></td></tr>
+                    @forelse($distribusi as $d)
+                    <tr>
+                        <td><a href="{{ $d['url'] }}" style="font-weight:600;color:#00034a;text-decoration:none;">{{ $d['name'] }}</a><br><small style="color:#6b7280;">{{ $d['daerah'] }} · {{ $d['kecamatan'] }} · {{ $d['desa'] }}</small></td>
+                        <td>{{ $d['tgl'] }}</td>
+                        <td>{{ number_format($d['paket']) }}</td>
+                        <td>{{ $d['nilai'] }}</td>
+                        <td>{{ number_format($d['penerima']) }}</td>
+                        <td>
+                            @if($d['status']==='selesai')<span class="badge badge-green">✅ Selesai</span>
+                            @elseif($d['status']==='berlangsung')<span class="badge badge-gold">⏳ Berlangsung</span>
+                            @elseif($d['status']==='dibatalkan')<span class="badge" style="background:#fee2e2;color:#b91c1c;">❌ Dibatalkan</span>
+                            @else<span class="badge badge-navy">📋 Rencana</span>@endif
+                        </td>
+                    </tr>
+                    @empty
+                    <tr><td colspan="6" style="padding:32px;text-align:center;color:#9ca3af;">Belum ada distribusi dengan koordinat.</td></tr>
+                    @endforelse
                 </tbody>
+                @if($distribusi->isNotEmpty())
+                <tfoot><tr style="font-weight:700;background:#f8f9fa;"><td colspan="2">Total</td><td>{{ number_format($distribusi->sum('paket')) }}</td><td>Rp {{ number_format($distribusi->sum('nilai_raw'),0,',','.') }}</td><td>{{ number_format($distribusi->sum('penerima')) }}</td><td></td></tr></tfoot>
+                @endif
             </table>
         </div>
     </div>
 
-    {{-- Chart --}}
     <div class="card">
-        <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;">
-            <h3 style="font-size:15px;font-weight:600;">📊 Distribusi per Daerah</h3>
-        </div>
-        <div style="padding:16px 20px;">
-            <div style="margin-bottom:10px;">
-                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span>Aceh Tamiang</span><span>750 paket</span></div>
-                <div class="progress-bar"><div class="progress-fill" style="width:100%;background:#017723;"></div></div>
+        <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;"><h3 style="font-size:15px;font-weight:600;">📊 Paket per Daerah</h3></div>
+        <div style="padding:20px;">
+            @php($maxPaket = max(1, (int) ($perDaerah->max('paket') ?? 1)))
+            @forelse($perDaerah as $row)
+            <div style="margin-bottom:14px;">
+                <div style="display:flex;justify-content:space-between;gap:12px;font-size:13px;margin-bottom:5px;"><span style="font-weight:600;">{{ $row['daerah'] }}</span><span>{{ number_format($row['paket']) }} paket</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width:{{ round(($row['paket']/$maxPaket)*100,1) }}%;background:#017723;"></div></div>
+                <small style="color:#6b7280;">{{ $row['distribusi'] }} kegiatan · {{ number_format($row['penerima']) }} target · Rp {{ number_format($row['nilai'],0,',','.') }}</small>
             </div>
-            <div style="margin-bottom:10px;">
-                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span>Pidie</span><span>300 paket</span></div>
-                <div class="progress-bar"><div class="progress-fill" style="width:40%;background:#e5a820;"></div></div>
-            </div>
-            <div style="margin-bottom:10px;">
-                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span>Aceh Utara</span><span>200 paket</span></div>
-                <div class="progress-bar"><div class="progress-fill" style="width:27%;background:#e5a820;"></div></div>
-            </div>
-            <div style="margin-bottom:10px;">
-                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span>Bireuen</span><span>150 paket</span></div>
-                <div class="progress-bar"><div class="progress-fill" style="width:20%;background:#00034a;"></div></div>
-            </div>
-            <div style="margin-bottom:10px;">
-                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span>Subulussalam</span><span>120 paket</span></div>
-                <div class="progress-bar"><div class="progress-fill" style="width:16%;background:#00034a;"></div></div>
-            </div>
-            <div style="margin-bottom:10px;">
-                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span>Aceh Besar</span><span>200 paket</span></div>
-                <div class="progress-bar"><div class="progress-fill" style="width:27%;background:#00034a;"></div></div>
-            </div>
-            <div style="margin-top:16px;background:#f8f9fa;border-radius:8px;padding:16px;">
-                <div style="font-size:13px;font-weight:600;margin-bottom:8px;">📍 Jangkauan Wilayah</div>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                    <span style="padding:4px 10px;background:white;border-radius:6px;font-size:12px;border:1px solid #e5e7eb;">🏛️ 6 Kabupaten/Kota</span>
-                    <span style="padding:4px 10px;background:white;border-radius:6px;font-size:12px;border:1px solid #e5e7eb;">📌 13 Kecamatan</span>
-                    <span style="padding:4px 10px;background:white;border-radius:6px;font-size:12px;border:1px solid #e5e7eb;">👥 48 Gampong</span>
-                </div>
-            </div>
+            @empty
+            <div style="padding:24px;text-align:center;color:#9ca3af;">Belum ada data daerah.</div>
+            @endforelse
         </div>
     </div>
 </div>
@@ -105,49 +91,31 @@
 @section('scripts')
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-const map = L.map('map').setView([4.9, 96.5], 8);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:18}).addTo(map);
+const map = L.map('map').setView([4.2, 96.9], 7);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:18, attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
+const data = @json($distribusi->values());
+const polygons = @json($polygons);
+const colors = {selesai:'#017723',berlangsung:'#e5a820',direncanakan:'#00034a',dibatalkan:'#dc2626'};
+const layers = [];
 
-// Kantor YPKM
-L.marker([4.92, 96.50], {icon:L.divIcon({html:'🏢',className:'',iconSize:[24,24]})})
- .addTo(map).bindPopup('<b>📍 Kantor YPKM</b><br>Banda Aceh');
-
-// Data distribusi
-const data = [
-    @foreach($distribusi as $d)
-    {name:'{{ $d['name'] }} ({{ $d['daerah'] }})',lat:{{ $d['lat'] }},lng:{{ $d['lng'] }},paket:{{ $d['paket'] }},nilai:'{{ $d['nilai'] }}',penerima:{{ $d['penerima'] }},kelompok:'{{ $d['kelompok'] ?? '-' }}',ketua:'{{ $d['ketua'] ?? '-' }}',status:'{{ $d['status'] }}',tgl:'{{ $d['tgl'] }}'},
-    @endforeach
-];
-const colors = {done:'#017723',progress:'#e5a820',plan:'#00034a'};
-const giftIcon = function(size) {
-    return L.divIcon({
-        html: '<div style="font-size:15px;text-align:center;line-height:1;">🎁</div>',
-        className: '',
-        iconSize: [24, 24],
-        iconAnchor: [12, 12]
-    });
-};
-data.forEach(d => {
-    L.marker([d.lat,d.lng], {icon: giftIcon()})
-    .addTo(map).bindPopup(`
-        <div style="min-width:220px;">
-            <div style="font-size:15px;font-weight:700;color:#00034a;margin-bottom:8px;">📍 ${d.name}</div>
-            <table style="width:100%;font-size:13px;border-collapse:collapse;">
-                <tr><td style="padding:3px 0;color:#6b7280;">📦 Distribusi</td><td style="padding:3px 0;font-weight:600;text-align:right;">${d.paket} paket</td></tr>
-                <tr><td style="padding:3px 0;color:#6b7280;">💰 Nilai Bantuan</td><td style="padding:3px 0;font-weight:600;text-align:right;">${d.nilai}</td></tr>
-                <tr><td style="padding:3px 0;color:#6b7280;">👥 Penerima</td><td style="padding:3px 0;font-weight:600;text-align:right;">${d.penerima} KK</td></tr>
-                <tr><td style="padding:3px 0;color:#6b7280;">📋 Kelompok</td><td style="padding:3px 0;font-weight:600;text-align:right;">${d.kelompok}</td></tr>
-                <tr><td style="padding:3px 0;color:#6b7280;">👤 Ketua</td><td style="padding:3px 0;font-weight:600;text-align:right;">${d.ketua}</td></tr>
-                <tr><td style="padding:3px 0;color:#6b7280;">📅 Tanggal</td><td style="padding:3px 0;font-weight:600;text-align:right;">${d.tgl}</td></tr>
-                <tr><td style="padding:3px 0;color:#6b7280;">📊 Status</td>
-                    <td style="padding:3px 0;text-align:right;">${(d.status=='done'||d.status=='selesai')?'<span style="color:#017723;font-weight:600;">✅ Selesai</span>':(d.status=='progress'||d.status=='berlangsung')?'<span style="color:#e5a820;font-weight:600;">⏳ Berlangsung</span>':'<span style="color:#00034a;font-weight:600;">📋 Rencana</span>'}</td></tr>
-            </table>
-        </div>
-    `);
+polygons.forEach(p => {
+    if (!Array.isArray(p.path)) return;
+    const layer = L.polygon(p.path, {color:'#00034a',weight:1.5,fillColor:'#017723',fillOpacity:.07}).addTo(map);
+    layer.bindTooltip(p.nama, {sticky:true});
+    layers.push(layer);
 });
 
-// Fit bounds
-const group = L.featureGroup(data.map(d=>L.marker([d.lat,d.lng])));
-map.fitBounds(group.getBounds().pad(.15));
+data.forEach(d => {
+    if (!Number.isFinite(d.lat) || !Number.isFinite(d.lng) || (!d.lat && !d.lng)) return;
+    const marker = L.circleMarker([d.lat,d.lng], {radius:9,color:'#fff',weight:2,fillColor:colors[d.status] || '#00034a',fillOpacity:1}).addTo(map);
+    marker.bindPopup(`<div style="min-width:230px"><div style="font-size:15px;font-weight:700;color:#00034a;margin-bottom:8px">${d.name}</div><div style="font-size:13px;line-height:1.65"><b>Wilayah:</b> ${d.daerah} · ${d.kecamatan} · ${d.desa}<br><b>Lokasi:</b> ${d.lokasi}<br><b>Paket:</b> ${Number(d.paket).toLocaleString('id-ID')}<br><b>Nilai:</b> ${d.nilai}<br><b>Target:</b> ${Number(d.penerima).toLocaleString('id-ID')} penerima<br><b>Kelompok:</b> ${d.kelompok}<br><b>Ketua:</b> ${d.ketua}<br><b>Tanggal:</b> ${d.tgl}</div><a href="${d.url}" style="display:inline-block;margin-top:9px;color:#017723;font-weight:700">Lihat detail →</a></div>`);
+    layers.push(marker);
+});
+
+if (layers.length) {
+    const group = L.featureGroup(layers);
+    const bounds = group.getBounds();
+    if (bounds.isValid()) map.fitBounds(bounds.pad(.12), {maxZoom:13});
+}
 </script>
 @endsection

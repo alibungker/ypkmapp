@@ -9,23 +9,41 @@
         </div>
     </div>
     <div style="padding:16px 20px;">
-        <form style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
-            <input type="text" name="search" placeholder="Cari NIK/nama..." value="{{ request('search') }}" class="form-input" style="width:160px;padding:8px 12px;font-size:13px;">
-            <select name="status" class="form-input" style="width:120px;padding:8px 12px;font-size:13px;">
-                <option value="">Semua Status</option>
+        <form method="GET" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+            <input type="text" name="search" placeholder="Cari NIK/nama..." value="{{ request('search') }}" class="form-input" style="width:170px;padding:8px 12px;font-size:13px;">
+            <select name="status" class="form-input" style="width:145px;padding:8px 12px;font-size:13px;">
+                <option value="">Semua status data</option>
                 <option value="pending" {{ request('status')=='pending' ? 'selected' : '' }}>Pending</option>
                 <option value="terverifikasi" {{ request('status')=='terverifikasi' ? 'selected' : '' }}>Terverifikasi</option>
                 <option value="ditolak" {{ request('status')=='ditolak' ? 'selected' : '' }}>Ditolak</option>
             </select>
-            <select name="kabupaten" class="form-input" style="width:170px;padding:8px 12px;font-size:13px;">
+            <select name="kabupaten" id="f_kab" data-selected="{{ request('kabupaten') }}" class="form-input" style="width:170px;padding:8px 12px;font-size:13px;">
                 <option value="">Semua Kabupaten</option>
-                @foreach($kabupatens ?? [] as $kode => $nama)
-                <option value="{{ preg_replace('/^(Kabupaten|Kota)\s/', '', $nama) }}" {{ request('kabupaten') == preg_replace('/^(Kabupaten|Kota)\s/', '', $nama) ? 'selected' : '' }}>{{ $nama }}</option>
+            </select>
+            <select name="kecamatan" id="f_kec" data-selected="{{ request('kecamatan') }}" class="form-input" style="width:155px;padding:8px 12px;font-size:13px;">
+                <option value="">Semua Kecamatan</option>
+            </select>
+            <select name="desa" id="f_desa" data-selected="{{ request('desa') }}" class="form-input" style="width:150px;padding:8px 12px;font-size:13px;">
+                <option value="">Semua Desa</option>
+            </select>
+            <select name="kelompok_id" class="form-input" style="width:170px;padding:8px 12px;font-size:13px;">
+                <option value="">Semua Kelompok</option>
+                @foreach($kelompoks as $k)
+                <option value="{{ $k->id }}" {{ (string) request('kelompok_id') === (string) $k->id ? 'selected' : '' }}>{{ $k->nama }}</option>
                 @endforeach
             </select>
-            <input type="text" name="kecamatan" placeholder="Kecamatan..." value="{{ request('kecamatan') }}" class="form-input" style="width:140px;padding:8px 12px;font-size:13px;">
-            <input type="text" name="desa" placeholder="Desa..." value="{{ request('desa') }}" class="form-input" style="width:130px;padding:8px 12px;font-size:13px;">
-            <button class="btn btn-outline btn-sm">🔍 Cari</button>
+            <select name="sumber_data" class="form-input" style="width:145px;padding:8px 12px;font-size:13px;">
+                <option value="">Semua sumber</option>
+                @foreach(['relawan' => 'Relawan', 'mandiri' => 'Mandiri', 'ketua_kelompok' => 'Ketua Kelompok'] as $value => $label)
+                <option value="{{ $value }}" {{ request('sumber_data') === $value ? 'selected' : '' }}>{{ $label }}</option>
+                @endforeach
+            </select>
+            <select name="status_terima" class="form-input" style="width:155px;padding:8px 12px;font-size:13px;">
+                <option value="">Semua penerimaan</option>
+                <option value="1" {{ request('status_terima') === '1' ? 'selected' : '' }}>Sudah menerima</option>
+                <option value="0" {{ request('status_terima') === '0' ? 'selected' : '' }}>Belum menerima</option>
+            </select>
+            <button class="btn btn-outline btn-sm">🔍 Terapkan</button>
             <a href="{{ route('penerima.index') }}" class="btn btn-outline btn-sm">↩️ Reset</a>
         </form>
         <div style="overflow-x:auto;">
@@ -48,7 +66,7 @@
                         <td>
                             <a href="{{ route('penerima.show', $p) }}" style="color:#00034a;text-decoration:none;font-size:13px;">Detail</a>
                             <a href="{{ route('penerima.edit', $p) }}" style="color:#6b7280;margin-left:12px;font-size:13px;">Edit</a>
-                            @if($p->status == 'pending')
+                            @if($p->status == 'pending' && (auth()->user()->isAdmin() || auth()->user()->isRelawan()))
                             <form method="POST" action="{{ route('penerima.verify', $p) }}" style="display:inline;margin-left:8px;">
                                 @csrf
                                 <input type="hidden" name="status" value="terverifikasi">
@@ -66,4 +84,54 @@
         <div style="margin-top:16px;">{{ $penerima->links() }}</div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+const fKab = document.getElementById('f_kab');
+const fKec = document.getElementById('f_kec');
+const fDesa = document.getElementById('f_desa');
+
+function cleanWilayahName(item, kabupaten = false) {
+    return kabupaten ? item.nama.replace(/^(Kabupaten|Kota)\s/, '') : item.nama;
+}
+function fillWilayah(select, rows, selected, placeholder, kabupaten = false) {
+    select.innerHTML = `<option value="">${placeholder}</option>`;
+    rows.forEach(item => {
+        const option = document.createElement('option');
+        option.value = cleanWilayahName(item, kabupaten);
+        option.dataset.kode = item.kode;
+        option.textContent = item.nama;
+        if (selected && option.value.toLowerCase() === selected.toLowerCase()) option.selected = true;
+        select.appendChild(option);
+    });
+}
+function selectedKode(select) {
+    return select.options[select.selectedIndex]?.dataset.kode || '';
+}
+async function loadFilterDesa(preselect = false) {
+    const kode = selectedKode(fKec);
+    if (!kode) return fillWilayah(fDesa, [], '', 'Semua Desa');
+    const rows = await fetch(`/api/wilayah/desa/${encodeURIComponent(kode)}`).then(r => r.json());
+    fillWilayah(fDesa, rows, preselect ? fDesa.dataset.selected : '', 'Semua Desa');
+}
+async function loadFilterKecamatan(preselect = false) {
+    const kode = selectedKode(fKab);
+    if (!kode) {
+        fillWilayah(fKec, [], '', 'Semua Kecamatan');
+        fillWilayah(fDesa, [], '', 'Semua Desa');
+        return;
+    }
+    const rows = await fetch(`/api/wilayah/kecamatan/${encodeURIComponent(kode)}`).then(r => r.json());
+    fillWilayah(fKec, rows, preselect ? fKec.dataset.selected : '', 'Semua Kecamatan');
+    if (fKec.value) await loadFilterDesa(preselect);
+}
+
+fetch('/api/wilayah/kabupaten').then(r => r.json()).then(async rows => {
+    fillWilayah(fKab, rows, fKab.dataset.selected, 'Semua Kabupaten', true);
+    if (fKab.value) await loadFilterKecamatan(true);
+});
+fKab.addEventListener('change', () => loadFilterKecamatan(false));
+fKec.addEventListener('change', () => loadFilterDesa(false));
+</script>
 @endsection

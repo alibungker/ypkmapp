@@ -6,6 +6,7 @@ use App\Http\Controllers\PenerimaController;
 use App\Http\Controllers\KelompokController;
 use App\Http\Controllers\DistribusiController;
 use App\Http\Controllers\KeuanganController;
+use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RelawanController;
 use App\Models\Distribusi;
@@ -87,20 +88,57 @@ Route::middleware('auth')->group(function () {
             ->map(function ($d) {
                 $coord = explode(',', $d->titik_koordinat);
                 return [
+                    'id' => $d->id,
                     'name' => $d->nama_kegiatan,
                     'lat' => (float)($coord[0] ?? 0),
                     'lng' => (float)($coord[1] ?? 0),
-                    'paket' => $d->jumlah_paket,
+                    'paket' => (int) $d->jumlah_paket,
+                    'nilai_raw' => (float) $d->estimasi_nilai_total,
                     'nilai' => 'Rp ' . number_format($d->estimasi_nilai_total,0,',','.'),
-                    'penerima' => $d->kelompok->penerima_count ?? 0,
+                    'penerima' => (int) ($d->kelompok->penerima_count ?? 0),
                     'kelompok' => $d->kelompok->nama ?? '-',
                     'ketua' => $d->kelompok->ketuaUser->name ?? '-',
                     'daerah' => $d->kelompok->daerah ?? '',
+                    'kecamatan' => $d->kelompok->kecamatan ?? '',
+                    'desa' => $d->kelompok->desa ?? '',
+                    'lokasi' => $d->lokasi,
                     'status' => $d->status,
                     'tgl' => is_object($d->tanggal) ? $d->tanggal->format('d M Y') : date('d M Y', strtotime($d->tanggal)),
+                    'url' => route('distribusi.show', $d),
                 ];
             });
-        return view('peta.index', compact('distribusi'));
+
+        $statusCounts = $distribusi->countBy('status');
+        $perDaerah = $distribusi->groupBy('daerah')->map(function ($rows, $daerah) {
+            return [
+                'daerah' => $daerah ?: 'Tanpa wilayah',
+                'paket' => $rows->sum('paket'),
+                'nilai' => $rows->sum('nilai_raw'),
+                'penerima' => $rows->sum('penerima'),
+                'distribusi' => $rows->count(),
+            ];
+        })->sortByDesc('paket')->values();
+
+        $daerahNames = $distribusi->pluck('daerah')->filter()->unique();
+        $boundaryNames = $daerahNames->flatMap(fn ($nama) => [$nama, 'Kabupaten '.$nama, 'Kota '.$nama])->unique();
+        $polygons = DB::table('wilayah_boundaries')
+            ->whereIn('nama', $boundaryNames)
+            ->get(['kode', 'nama', 'path'])
+            ->map(fn ($row) => [
+                'kode' => $row->kode,
+                'nama' => $row->nama,
+                'path' => json_decode($row->path, true),
+            ])
+            ->filter(fn ($row) => is_array($row['path']))
+            ->values();
+
+        $wilayahStats = [
+            'kabupaten' => $distribusi->pluck('daerah')->filter()->unique()->count(),
+            'kecamatan' => $distribusi->pluck('kecamatan')->filter()->unique()->count(),
+            'desa' => $distribusi->pluck('desa')->filter()->unique()->count(),
+        ];
+
+        return view('peta.index', compact('distribusi', 'statusCounts', 'perDaerah', 'polygons', 'wilayahStats'));
     })->name('peta.index');
 
     // ============================================================
@@ -158,6 +196,7 @@ Route::middleware('auth')->group(function () {
             Route::get('rekap', [KeuanganController::class, 'rekap'])->name('rekap');
         });
 
-        Route::get('laporan', function () { return view('laporan.index'); })->name('laporan.index');
+        Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index');
+        Route::get('laporan/export-csv', [LaporanController::class, 'exportCsv'])->name('laporan.export-csv');
     });
 });

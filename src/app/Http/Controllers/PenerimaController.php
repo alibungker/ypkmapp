@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 use App\Models\Penerima;
 use App\Models\Kelompok;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\DB;
 
 class PenerimaController extends Controller
 {
@@ -71,14 +69,27 @@ class PenerimaController extends Controller
         if ($request->desa) {
             $query->where('desa', $request->desa);
         }
+        if ($request->filled('kelompok_id')) {
+            $query->where('kelompok_id', $request->integer('kelompok_id'));
+        }
+        if (in_array((string) $request->status_terima, ['0', '1'], true)) {
+            $query->where('status_terima', (bool) $request->integer('status_terima'));
+        }
 
         $penerima = $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
-        $kelompoks = Kelompok::all();
-        $kabupatens = DB::table('wilayah_boundaries')
-            ->where('kode', 'LIKE', '11.%')
-            ->orderBy('nama')
-            ->pluck('nama', 'kode');
-        return view('penerima.index', compact('penerima', 'kelompoks', 'kabupatens'));
+
+        $kelompokQuery = Kelompok::query()->orderBy('nama');
+        $user = auth()->user();
+        if ($user->isKetuaKelompok()) {
+            $kelompokQuery->whereKey($user->kelompok_id);
+        } elseif ($user->isRelawan()) {
+            if ($user->wilayah_kabupaten) $kelompokQuery->where('daerah', $user->wilayah_kabupaten);
+            if ($user->wilayah_kecamatan) $kelompokQuery->where('kecamatan', $user->wilayah_kecamatan);
+            if ($user->wilayah_desa) $kelompokQuery->where('desa', $user->wilayah_desa);
+        }
+        $kelompoks = $kelompokQuery->get();
+
+        return view('penerima.index', compact('penerima', 'kelompoks'));
     }
 
     public function create()
