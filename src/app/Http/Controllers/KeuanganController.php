@@ -22,7 +22,9 @@ class KeuanganController extends Controller
         $biaya = BiayaOperasional::with('distribusi', 'pencatat')->orderBy('tanggal', 'desc')->take(20)->get();
         $anggarans = Anggaran::with('distribusi')->get();
 
-        return view('keuangan.index', compact('total_masuk', 'total_biaya', 'total_bantuan', 'sisa', 'dana_masuk', 'biaya', 'anggarans'));
+        $distribusi_list = Distribusi::whereIn('status', ['direncanakan', 'berlangsung'])->orderBy('tanggal', 'desc')->get();
+
+        return view('keuangan.index', compact('total_masuk', 'total_biaya', 'total_bantuan', 'sisa', 'dana_masuk', 'biaya', 'anggarans', 'distribusi_list'));
     }
 
     public function storeDana(Request $request)
