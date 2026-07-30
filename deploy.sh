@@ -45,17 +45,9 @@ if [ -d src/public/img ]; then
     cp -r src/public/img/* public/img/
 fi
 
-# 5. Add routes
+# 5. Replace runtime route entrypoint (hindari route lama/duplikat)
 echo "📦 Updating routes..."
-# Cek apakah sudah ada require, jika belum tambahkan
-if ! grep -q "require.*src/routes" routes/web.php 2>/dev/null; then
-    echo "" >> routes/web.php
-    echo "// Routes PEDULI YPKM" >> routes/web.php
-    echo "require __DIR__.'/../src/routes/web.php';" >> routes/web.php
-    echo "✅ Routes added"
-else
-    echo "⏩ Routes already exist"
-fi
+cp src/routes/runtime-web.php routes/web.php
 
 # 6. Run migrations
 echo "🗄️ Running migrations..."
