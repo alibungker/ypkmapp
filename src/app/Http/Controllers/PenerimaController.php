@@ -52,6 +52,12 @@ class PenerimaController extends Controller
         if ($request->kabupaten) {
             $query->where('kabupaten', $request->kabupaten);
         }
+        if ($request->kecamatan) {
+            $query->where('kecamatan', $request->kecamatan);
+        }
+        if ($request->desa) {
+            $query->where('desa', $request->desa);
+        }
 
         $penerima = $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
         $kelompoks = Kelompok::all();
