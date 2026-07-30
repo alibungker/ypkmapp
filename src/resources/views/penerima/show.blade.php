@@ -133,6 +133,7 @@
                 <div style="font-size:14px;font-weight:600;">⏳ Menunggu Checklist Relawan</div>
                 <p style="font-size:12px;color:#6b7280;margin-top:4px;">Data sudah diverifikasi. Menunggu relawan melakukan checklist terima bantuan.</p>
             </div>
+            @endif
         </div>
     </div>
 </div>

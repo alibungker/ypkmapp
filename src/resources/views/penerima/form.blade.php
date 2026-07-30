@@ -131,10 +131,11 @@ function fillSelect(sel, list, selectedName, placeholder) {
     sel.innerHTML = '<option value="">' + placeholder + '</option>';
     list.forEach(w => {
         const opt = document.createElement('option');
-        opt.value = w.nama;
+        opt.value = w.nama.replace(/^(Kabupaten|Kota)\s/, '');
         opt.dataset.kode = w.kode;
         opt.textContent = w.nama;
-        if (selectedName && w.nama.toLowerCase() === selectedName.toLowerCase()) opt.selected = true;
+        const clean = w.nama.replace(/^(Kabupaten|Kota)\s/, '');
+        if (selectedName && clean.toLowerCase() === selectedName.toLowerCase()) opt.selected = true;
         sel.appendChild(opt);
     });
 }
