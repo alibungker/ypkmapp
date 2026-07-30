@@ -29,31 +29,14 @@ php artisan breeze:install blade
 npm install && npm run build
 ```
 
-### 3. Copy Source Code Aplikasi
+### 3. Deploy Source Code Aplikasi
 
 ```bash
-# Copy migrations
-cp -r src/database/migrations/* database/migrations/
-
-# Copy models
-cp src/app/Models/*.php app/Models/
-
-# Copy routes
-cp src/routes/*.php routes/
-
-# Copy controllers
-cp -r src/app/Http/Controllers/* app/Http/Controllers/
-
-# Copy views
-cp -r src/resources/views/* resources/views/
+# Dari root runtime Laravel
+bash deploy.sh
 ```
 
-### 4. Tambah Route ke routes/web.php
-
-Buka `routes/web.php` dan tambahkan di bagian bawah:
-```php
-require __DIR__.'/../../src/routes/web.php';
-```
+`deploy.sh` menyalin source custom dari `src/`, memasang entrypoint route terversi, menjalankan migration, membersihkan cache, menyalin automated tests, dan mengatur permission minimum. Jangan menyalin `src/routes/web.php` langsung ke `routes/web.php` karena entrypoint runtime juga harus memuat route autentikasi.
 
 ### 4. Konfigurasi Database
 
@@ -80,7 +63,9 @@ php artisan storage:link
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
-chmod -R 777 storage bootstrap/cache
+find storage bootstrap/cache -type d -exec chmod 775 {} \;
+find storage bootstrap/cache -type f -exec chmod 664 {} \;
+chmod 640 .env
 ```
 
 ### 6. Selesai!

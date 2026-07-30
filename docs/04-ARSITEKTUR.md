@@ -83,9 +83,23 @@
 
 ## 4. Keamanan
 
-- Role-based middleware untuk setiap route
-- Enkripsi data sensitif (NIK, no HP) di database
-- CSRF protection
-- Rate limiting API
-- Logging aktivitas admin
-\n**Domain:** peduli.ypkm.info\n**Warna Brand:** Navy #00034a, Green #017723, Gold #e5a820
+### Kontrol aktif
+
+- Middleware `AdminOnly` untuk fungsi administrasi.
+- Middleware `OperationalOnly` untuk Admin/Relawan.
+- Scope Ketua Kelompok berdasarkan `users.kelompok_id`.
+- Scope Relawan berdasarkan kabupaten/kecamatan/desa kerja.
+- CSRF protection Laravel.
+- Satu akun Ketua per kelompok melalui unique index.
+- Route runtime terversi dan pemeriksaan route duplikat.
+
+### Kontrol yang masih direncanakan
+
+- Enkripsi/transformasi data sensitif NIK dan nomor HP.
+- Rate limiting khusus endpoint publik/API.
+- Audit log aktivitas yang lengkap.
+- PWA, queue notifikasi, dan integrasi WhatsApp belum menjadi fitur aktif.
+
+**Domain:** peduli.ypkm.info
+
+**Warna Brand:** Navy #00034a, Green #017723, Gold #e5a820

@@ -58,6 +58,8 @@ php artisan migrate
 
 ## 4. Deployment ke Production
 
+> **Mekanisme aktif 30 Juli 2026:** repository masih menggunakan source custom pada `src/`. Jalankan `git pull --ff-only origin main` lalu `bash deploy.sh`. Script menyalin migration/model/controller/middleware/view/test, mengganti `routes/web.php` dengan entrypoint terversi untuk mencegah route duplikat, menjalankan migration, membersihkan cache, dan menerapkan permission minimum. Migrasi ke repository Laravel penuh direncanakan pada Tahap 3.
+
 ### 4.1 Export dari Development
 ```bash
 # Buat archive project
@@ -91,9 +93,11 @@ php artisan view:cache
 # Storage link
 php artisan storage:link
 
-# Permission
-chown -R www-data:www-data storage bootstrap/cache
-chmod -R 755 storage bootstrap/cache
+# Permission minimum
+chown -R www:www storage bootstrap/cache
+find storage bootstrap/cache -type d -exec chmod 775 {} \;
+find storage bootstrap/cache -type f -exec chmod 664 {} \;
+chmod 640 .env
 
 # Queue worker (background)
 php artisan queue:work --daemon &

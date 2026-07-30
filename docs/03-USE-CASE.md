@@ -41,6 +41,20 @@
 └─────────────────────────────────────────────────────────────────┘
 ```
 
+## 2.1 Matriks Otorisasi Aktif
+
+| Fitur/Aksi | Admin | Relawan | Ketua Kelompok |
+|---|:---:|:---:|:---:|
+| Penerima | Semua wilayah | Wilayah kerja | Kelompok sendiri |
+| Verifikasi/checklist | ✅ | Wilayah kerja | ❌ |
+| Kelompok (lihat) | Semua | Wilayah kerja | Kelompok sendiri |
+| Kelompok (ubah) | ✅ | ❌ | ❌ |
+| Distribusi (lihat) | Semua | Wilayah kerja | Kelompok sendiri |
+| Distribusi (ubah) | ✅ | ❌ | ❌ |
+| User/keuangan/barang | ✅ | ❌ | ❌ |
+
+Ketua Kelompok ditetapkan melalui akun `users.kelompok_id`. Satu kelompok hanya boleh memiliki satu akun Ketua Kelompok.
+
 ## 3. User Stories
 
 ### Admin YPKM

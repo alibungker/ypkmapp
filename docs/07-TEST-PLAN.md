@@ -86,10 +86,26 @@
 | Postman | API testing |
 | Lighthouse | Performance audit |
 
-## 3. Kriteria Lolos
+## 3. Automated Test Aktif
 
-- ✅ Semua test case T-01 sampai T-26 pass
-- ✅ Waktu render halaman < 3 detik (Lighthouse)
-- ✅ Tidak ada error 500
-- ✅ Mobile responsif
-\n**Warna Brand:** #00034a (Navy), #017723 (Green), #e5a820 (Gold)
+File: `src/tests/Feature/PhaseOneAccessTest.php`
+
+| ID | Skenario | Status produksi 30-07-2026 |
+|---|---|---|
+| AT-01 | Ketua ditolak dari modul Relawan dan mutasi Admin | ✅ Lulus |
+| AT-02 | Relawan dapat mengakses operasional tetapi bukan User/Keuangan | ✅ Lulus |
+| AT-03 | Ketua hanya melihat kelompok sendiri | ✅ Lulus |
+| AT-04 | Admin dapat mengakses modul pengelolaan | ✅ Lulus |
+
+Hasil terakhir: **4 test, 12 assertion, seluruhnya lulus** menggunakan database SQLite terisolasi melalui `RefreshDatabase`.
+
+## 4. Kriteria Lolos
+
+- Automated test yang sudah diterapkan wajib lulus.
+- Tidak ada route method+URI duplikat.
+- Tidak ada error HTTP 500 pada smoke test halaman utama.
+- Scope kelompok/wilayah dan middleware role wajib menghasilkan 403 untuk akses tidak sah.
+- Skenario fitur yang belum diterapkan (import/export, filter peta, upload bukti) tetap berstatus **rencana**, bukan dianggap lulus.
+- Target render halaman < 3 detik dan tampilan mobile responsif.
+
+**Warna Brand:** #00034a (Navy), #017723 (Green), #e5a820 (Gold)
