@@ -58,6 +58,7 @@
 | **Storage** | Local server / S3 | Foto bukti distribusi |
 | **Auth** | Laravel Breeze / Jetstream | Role bawaan |
 | **Queue** | Laravel Queue + Database | Notifikasi async |
+| **Map** | Leaflet.js + OpenStreetMap | Peta distribusi gratis |
 | **Server** | VPS Proxmox (existing) | Sudah ada infra |
 
 ## 3. Struktur Database (Entity Overview)

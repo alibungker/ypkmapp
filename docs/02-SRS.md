@@ -15,6 +15,15 @@ Sistem mencakup: manajemen penerima, kelompok, distribusi, relawan, dan laporan.
 
 ## 2. Kebutuhan Fungsional
 
+### 2.0 Ringkasan Fitur (Update v1.1)
+| Fitur | Keterangan |
+|:---|---|
+| ✅ Reg. Mandiri/Relawan/Ketua | 3 jalur pendaftaran penerima |
+| ✅ Manajemen Keuangan | Dana donatur (6+ transaksi), anggaran, biaya operasional |
+| ✅ Inventaris Barang | Katalog barang, stok masuk/keluar, nilai per item |
+| ✅ Peta Distribusi | Leaflet.js, marker per daerah, popup detail, statistik |
+| ✅ Laporan Lengkap | Nilai bantuan + biaya + sisa dana + export Excel |
+
 ### 2.1 Manajemen Penerima
 
 | ID | Requirement | Prioritas |

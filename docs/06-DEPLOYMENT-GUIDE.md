@@ -8,16 +8,16 @@
 
 | Kebutuhan | Spesifikasi |
 |:---|---|
-| OS | Ubuntu 22.04 / Debian 12 |
-| CPU | 2 core |
-| RAM | 4 GB |
-| Disk | 20 GB |
-| Domain | peduli.ypkm.info (atau subdomain) |
-| Web Server | Nginx |
-| Database | MySQL 8+ |
-| PHP | 8.2+ |
-| Composer | Latest |
-| Node.js | 20+ (untuk build asset) |
+| 1 | OS | Ubuntu 22.04 / Debian 12 |
+| 2 | CPU | 2 core |
+| 3 | RAM | 4 GB |
+| 4 | Disk | 20 GB |
+| 5 | Domain | peduli.ypkm.info |
+| 6 | Web Server | Nginx |
+| 7 | Database | MySQL 8+ |
+| 8 | PHP | 8.2+ |
+| 9 | Composer | Latest |
+| 10 | Node.js | 20+ (untuk build asset) |
 
 ## 2. Lingkungan Pengembangan (via OpenCode)
 

@@ -33,18 +33,23 @@ Hari 8: deploy ke server
 ## 3. Prioritas Fitur
 
 ### Must Have (MVP)
-- [ ] Autentikasi & Role (Admin, Relawan, Ketua)
-- [ ] CRUD Penerima (3 jalur registrasi)
-- [ ] Manajemen Kelompok
-- [ ] Manajemen Distribusi
-- [ ] Tanda Terima Digital
-- [ ] Laporan Dasar
+- [x] Autentikasi & Role (Admin, Relawan, Ketua)
+- [x] CRUD Penerima (3 jalur registrasi)
+- [x] Manajemen Kelompok
+- [x] Manajemen Distribusi
+- [x] Tanda Terima Digital
+- [x] Laporan Dasar
 
-### Should Have (Fase 2)
-- [ ] Form Registrasi Publik (tanpa login)
+### Should Have (Fase 2) ✅ SUDAH DITAMBAHKAN
+- [x] Dana Donatur (pemasukan bertahap)
+- [x] Anggaran (rencana vs realisasi)
+- [x] Biaya Operasional (transport, konsumsi, sewa)
+- [x] Inventaris Barang (katalog, stok, nilai)
+- [x] Peta Distribusi Interaktif (Leaflet.js)
+- [x] Form Registrasi Publik (tanpa login)
 - [ ] Import Excel
-- [ ] Export PDF/Excel
-- [ ] Filter & Search lanjutan
+- [x] Export Excel/PDF
+- [x] Filter & Search lanjutan
 
 ### Nice to Have (Fase 3)
 - [ ] Notifikasi WhatsApp otomatis

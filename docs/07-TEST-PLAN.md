@@ -26,6 +26,27 @@
 | T-11 | Cari penerima (nama/NIK) | Hasil sesuai filter |
 | T-12 | Import Excel | 100 data masuk dalam < 5 detik |
 
+### 1.7 Manajemen Keuangan
+| ID | Skenario | Expected |
+|:---:|:---|---|
+| T-13 | Catat dana donatur baru (tunai) | Tersimpan, total dana bertambah |
+| T-14 | Catat dana donatur 6x bertahap | Semua masuk, total akurat |
+| T-15 | Buat anggaran per distribusi | Anggaran muncul |
+| T-16 | Catat biaya operasional | Biaya tercatat |
+| T-17 | Lihat rekap keuangan (dana masuk - pakai - sisa) | Angka balance |
+
+### 1.8 Peta Distribusi
+| ID | Skenario | Expected |
+|:---:|:---|---|
+| T-18 | Buka peta distribusi | Peta tampil dengan semua marker |
+| T-19 | Klik marker distribusi | Popup muncul (paket, nilai, status) |
+| T-20 | Filter peta berdasarkan status | Hanya marker sesuai status |
+| T-21 | Peta di perangkat mobile | Responsif, marker tetap terlihat |
+
+### 1.9 Distribusi
+| ID | Skenario | Expected |
+|:---:|:---|---|
+
 ### 1.3 Manajemen Kelompok
 | ID | Skenario | Expected |
 |:---:|:---|---:|

@@ -16,24 +16,29 @@
 ## 2. Use Case Diagram
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                    SISTEM YPKM                       │
-│                                                      │
-│  ┌──────────┐   ┌──────────┐   ┌──────────┐        │
-│  │ ADMIN    │   │ RELAWAN  │   │ KETUA    │        │
-│  │          │   │          │   │ KELOMPOK │        │
-│  └────┬─────┘   └────┬─────┘   └────┬─────┘        │
-│       │              │              │               │
-│  ┌────┴──────────────┴──────────────┴──────────┐    │
-│  │           MANAJEMEN PENERIMA                │    │
-│  │  (Verifikasi / Input / Import / Export)     │    │
-│  └────────────────────┬───────────────────────┘    │
-│                       │                            │
-│  ┌────────────────────┴───────────────────────┐    │
-│  │           MANAJEMEN DISTRIBUSI              │    │
-│  │  (Jadwal / Eksekusi / Tanda Terima)         │    │
-│  └────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────┐
+│                      SISTEM PEDULI YPKM                           │
+│                                                                   │
+│  ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐     │
+│  │ ADMIN    │   │ RELAWAN  │   │ KETUA    │   │ PENERIMA │     │
+│  │          │   │          │   │ KELOMPOK │   │ (Mandiri)│     │
+│  └────┬─────┘   └────┬─────┘   └────┬─────┘   └────┬─────┘     │
+│       │              │              │              │           │
+│  ┌────┴──────────────┴──────────────┴──────────────┴──┐       │
+│  │              MANAJEMEN PENERIMA                     │       │
+│  │       (Verifikasi / Input / Import / Export)        │       │
+│  └──────────────────────┬────────────────────────────┘       │
+│                         │                                     │
+│  ┌──────────────────────┴────────────────────────────┐       │
+│  │              MANAJEMEN DISTRIBUSI                   │       │
+│  │    (Jadwal / Eksekusi / Tanda Terima / Peta)       │       │
+│  └──────────────────────┬────────────────────────────┘       │
+│                         │                                     │
+│  ┌──────────────────────┴────────────────────────────┐       │
+│  │              MANAJEMEN KEUANGAN                    │       │
+│  │  (Dana Donatur / Anggaran / Biaya / Inventory)     │       │
+│  └────────────────────────────────────────────────────┘       │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ## 3. User Stories
@@ -69,6 +74,22 @@
 |:---|:---|---:|---|
 | US-15 | Penerima | mendaftar via link WhatsApp | tidak perlu datang ke kantor |
 | US-16 | Penerima | tahu status pendaftaran saya | tidak bingung |
+
+### Keuangan
+| ID | Sebagai... | Saya ingin... | Sehingga... |
+|:---|:---|---:|---|
+| US-17 | Admin | mencatat dana masuk dari donatur | pemasukan tercatat rapi |
+| US-18 | Admin | melihat total dana masuk vs tersalurkan | tahu sisa dana |
+| US-19 | Admin | membuat anggaran per distribusi | biaya terkontrol |
+| US-20 | Admin | mencatat biaya operasional (transport, konsumsi) | laporan keuangan akurat |
+| US-21 | Admin | melihat laporan nilai barang + biaya | akuntabilitas ke donatur |
+
+### Peta Distribusi
+| ID | Sebagai... | Saya ingin... | Sehingga... |
+|:---|:---|---:|---|
+| US-22 | Admin/Donatur | melihat peta sebaran distribusi | tahu jangkauan bantuan |
+| US-23 | Admin | klik marker distribusi | lihat detail paket & nilai |
+| US-24 | Donatur | melihat peta publik | transparansi penyaluran |
 
 ## 4. Skenario Utama
 
