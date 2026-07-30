@@ -35,7 +35,7 @@ Route::prefix('keuangan')->name('keuangan.')->group(function () {
 });
 
 // Barang
-Route::resource('barang', BarangController::class)->only(['index', 'store']);
+// Route::resource('barang', BarangController::class)->only(['index', 'store']);
 
 // Peta
 Route::view('peta', 'peta.index')->name('peta.index');
