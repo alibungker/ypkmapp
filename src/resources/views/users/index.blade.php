@@ -25,10 +25,10 @@
                         <td>
                             @if($u->role == 'admin') <span class="badge badge-navy">👑 Admin</span>
                             @elseif($u->role == 'relawan') <span class="badge badge-green">🤝 Relawan</span>
-                            @else <span class="badge badge-gold">👤 {{ $u->kelompok->nama ?? 'Ketua' }}</span>
+                            @else <span class="badge badge-gold">👤 {{ optional($u->kelompok)->nama ?? 'Ketua' }}</span>
                             @endif
                         </td>
-                        <td style="font-size:13px;">{{ $u->kelompok->nama ?? ($u->role == 'ketua_kelompok' ? '<span style="color:#dc2626;">Belum ditentukan</span>' : '-') }}</td>
+                        <td style="font-size:13px;">{{ optional($u->kelompok)->nama ?? ($u->role == 'ketua_kelompok' ? 'Belum ditentukan' : '-') }}</td>
                         <td style="font-size:13px;color:#6b7280;">🔒 {{ $u->wilayahLabel() }}</td>
                         <td style="white-space:nowrap;">
                             <button onclick='editUser(@json($u))' style="color:#00034a;border:none;background:none;cursor:pointer;font-size:13px;padding:4px 8px;">✏️ Edit</button>
