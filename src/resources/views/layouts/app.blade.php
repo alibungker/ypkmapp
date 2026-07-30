@@ -68,10 +68,12 @@
                     <p class="text-sm text-gray-500">@yield('subtitle', '')</p>
                 </div>
                 <div class="flex items-center gap-4">
+                    @auth
                     <span class="text-sm text-gray-600">{{ auth()->user()->name }}</span>
                     <div class="w-8 h-8 bg-navy/10 rounded-full flex items-center justify-center text-navy font-semibold text-sm">
                         {{ substr(auth()->user()->name, 0, 1) }}
                     </div>
+                    @endauth
                 </div>
             </header>
 

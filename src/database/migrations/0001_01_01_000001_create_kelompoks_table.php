@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('kode')->unique();
             $table->string('daerah');
             $table->string('kecamatan')->nullable();
-            $table->foreignId('ketua_id')->nullable()->constrained('penerimas')->nullOnDelete();
+            $table->unsignedBigInteger('ketua_id')->nullable();
             $table->integer('jumlah_anggota')->default(0);
             $table->text('description')->nullable();
             $table->timestamps();
