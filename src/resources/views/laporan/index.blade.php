@@ -5,6 +5,8 @@
 @section('styles')
 <style>
 .report-filter{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end}
+.report-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+@media(max-width:640px){.report-filter{grid-template-columns:1fr}.report-actions .btn{width:100%}}
 @media print{.sidebar,.topbar,.no-print{display:none!important}.main-content{margin:0!important;padding:0!important}.card{box-shadow:none!important;break-inside:avoid}body{background:#fff!important}}
 </style>
 @endsection
@@ -22,11 +24,11 @@
             <div><label class="form-label">Desa</label><select name="desa" id="r_desa" data-selected="{{ request('desa') }}" class="form-input"><option value="">Semua desa</option></select></div>
             <div><label class="form-label">Kelompok</label><select name="kelompok_id" class="form-input"><option value="">Semua kelompok</option>@foreach($kelompoks as $k)<option value="{{ $k->id }}" {{ (string)request('kelompok_id')===(string)$k->id?'selected':'' }}>{{ $k->nama }}</option>@endforeach</select></div>
         </div>
-        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap;">
-            <a href="{{ route('laporan.index') }}" class="btn btn-outline">↩️ Reset</a>
-            <button class="btn btn-primary">🔍 Terapkan</button>
-            <a href="{{ route('laporan.export-csv', request()->query()) }}" class="btn btn-outline">📊 Export CSV</a>
-            <button type="button" onclick="window.print()" class="btn btn-outline">🖨️ Cetak/PDF</button>
+        <div class="report-actions">
+            <a href="{{ route('laporan.index') }}" class="btn btn-outline">Bersihkan filter</a>
+            <button class="btn btn-primary">Terapkan</button>
+            <a href="{{ route('laporan.export-csv', request()->query()) }}" class="btn btn-outline">Unduh CSV</a>
+            <button type="button" onclick="window.print()" class="btn btn-outline">Cetak/PDF</button>
         </div>
     </form>
 </div>
@@ -38,7 +40,7 @@
     <div class="stat-card"><div class="stat-value" style="font-size:24px;color:{{ $totals['sisa_dana'] < 0 ? '#dc2626' : '#017723' }};">Rp {{ number_format($totals['sisa_dana'],0,',','.') }}</div><div class="stat-label">Saldo Terhitung</div></div>
 </div>
 
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:18px;">
+<div class="mobile-two" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:18px;">
     <div class="stat-card"><div class="stat-value">{{ number_format($distribusi->count()) }}</div><div class="stat-label">Kegiatan Distribusi</div></div>
     <div class="stat-card"><div class="stat-value">{{ number_format($totals['paket']) }}</div><div class="stat-label">Paket</div></div>
     <div class="stat-card"><div class="stat-value">{{ number_format($totals['penerima']) }}</div><div class="stat-label">Target Penerima</div></div>

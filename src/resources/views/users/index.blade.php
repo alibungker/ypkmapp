@@ -17,7 +17,7 @@
                 <tbody>
                     @forelse($users as $u)
                     <tr>
-                        <td style="font-family:monospace;color:#6b7280;font-size:13px;">{{ $u->nik ?? '-' }}</td>
+                        <td style="font-family:monospace;color:#6b7280;font-size:13px;"><x-masked-nik :value="$u->nik" /></td>
                         <td style="font-weight:500;">
                             <a href="{{ route('users.show', $u) }}" style="color:#00034a;text-decoration:none;">{{ $u->name }}</a>
                         </td>
@@ -31,7 +31,18 @@
                         <td style="font-size:13px;">{{ optional($u->kelompok)->nama ?? ($u->role == 'ketua_kelompok' ? 'Belum ditentukan' : '-') }}</td>
                         <td style="font-size:13px;color:#6b7280;">🔒 {{ $u->wilayahLabel() }}</td>
                         <td style="white-space:nowrap;">
-                            <button onclick='editUser(@json($u))' style="color:#00034a;border:none;background:none;cursor:pointer;font-size:13px;padding:4px 8px;">✏️ Edit</button>
+                            <button type="button"
+                                onclick="editUser(this.dataset)"
+                                data-id="{{ $u->id }}"
+                                data-name="{{ $u->name }}"
+                                data-email="{{ $u->email }}"
+                                data-role="{{ $u->role }}"
+                                data-phone="{{ $u->phone }}"
+                                data-kelompok-id="{{ $u->kelompok_id }}"
+                                data-wilayah-kabupaten="{{ $u->wilayah_kabupaten }}"
+                                data-wilayah-kecamatan="{{ $u->wilayah_kecamatan }}"
+                                data-wilayah-desa="{{ $u->wilayah_desa }}"
+                                style="color:#00034a;border:none;background:none;cursor:pointer;font-size:13px;padding:4px 8px;">✏️ Edit</button>
                             @if($u->id !== auth()->id())
                             <form method="POST" action="{{ route('users.destroy', $u) }}" style="display:inline;" onsubmit="return confirm('Hapus user ini?')">
                                 @csrf @method('DELETE')
@@ -132,7 +143,7 @@ function editUser(u) {
     document.getElementById('e_email').value = u.email;
     document.getElementById('e_role').value = u.role;
     document.getElementById('e_phone').value = u.phone || '';
-    document.getElementById('e_kelompok').value = u.kelompok_id || '';
+    document.getElementById('e_kelompok').value = u.kelompokId || '';
     // Toggle kelompok field
     const eBox = document.getElementById('e_kelompok_box');
     eBox.style.display = u.role === 'ketua_kelompok' ? 'block' : 'none';
@@ -141,7 +152,7 @@ function editUser(u) {
         document.getElementById('e_kab'),
         document.getElementById('e_kec'),
         document.getElementById('e_desa'),
-        u.wilayah_kabupaten, u.wilayah_kecamatan, u.wilayah_desa
+        u.wilayahKabupaten, u.wilayahKecamatan, u.wilayahDesa
     );
 }
 function closeEdit() { document.getElementById('editModal').style.display = 'none'; }

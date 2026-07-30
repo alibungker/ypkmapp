@@ -87,6 +87,11 @@
         @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 
         .footer-note{position:absolute;bottom:18px;left:0;right:0;text-align:center;font-size:12px;color:rgba(255,255,255,0.5);z-index:2;}
+        .login-card,h1,.sub,.field,.row,.btn-login,.daftar-link,.logo-ring,.logo-ring img{animation:none;}
+        .shape{animation:none;opacity:.24;}
+        :focus-visible{outline:3px solid rgba(229,168,32,.85);outline-offset:3px;}
+        @media(max-width:480px){body{padding:14px;align-items:center;justify-content:flex-start;flex-direction:column;overflow-y:auto}.login-card{margin-top:18px;padding:28px 22px;border-radius:16px}.logo-ring{width:78px;height:78px}.footer-note{position:relative;margin:18px 12px 4px}.field input,.btn-login{min-height:46px}}
+        @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important;}}
     </style>
 </head>
 <body>

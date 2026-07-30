@@ -24,7 +24,13 @@
         .btn:hover{background:#01611c;}
         .alert-ok{background:#e8f5ec;border:1px solid #c6e6d0;color:#017723;padding:12px 16px;border-radius:8px;font-size:14px;margin-bottom:16px;}
         .alert-err{background:#fce8e6;border:1px solid #f5c6c0;color:#dc2626;padding:12px 16px;border-radius:8px;font-size:14px;margin-bottom:16px;}
-        .note{font-size:12px;color:#6b7280;text-align:center;margin-top:16px;}
+        .note{font-size:12px;color:#6b7280;text-align:center;margin-top:16px;line-height:1.6;}
+        .consent{display:flex;align-items:flex-start;gap:10px;padding:12px;background:#f7f8fb;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;color:#4b5563;line-height:1.55;}
+        .consent input{width:18px;height:18px;margin-top:1px;accent-color:#017723;flex:0 0 auto;}
+        .consent a{color:#00034a;font-weight:600;}
+        :focus-visible{outline:3px solid rgba(229,168,32,.75);outline-offset:2px;}
+        @media(max-width:560px){body{padding:14px;align-items:flex-start}.head{padding:22px 18px}.card{padding:20px}.grid2{grid-template-columns:1fr}.form-input{min-height:44px}.btn{min-height:46px}}
+        @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important;}}
     </style>
 </head>
 <body>
@@ -62,9 +68,13 @@
                 <label class="form-label">Alamat Lengkap *</label>
                 <input type="text" name="alamat" class="form-input" required value="{{ old('alamat') }}" placeholder="Dusun/Jalan, Desa, Kecamatan">
             </div>
-            <button type="submit" class="btn">📝 Daftar Sekarang</button>
+            <div class="mb consent">
+                <input id="privacy_consent" type="checkbox" name="privacy_consent" value="1" required {{ old('privacy_consent') ? 'checked' : '' }}>
+                <label for="privacy_consent">Saya menyetujui <a href="#privacy-note">Kebijakan Privasi</a> dan pemrosesan NIK, nomor HP, serta alamat untuk verifikasi bantuan YPKM.</label>
+            </div>
+            <button type="submit" class="btn">Daftar sekarang</button>
         </form>
-        <p class="note">Data Anda akan diverifikasi oleh petugas YPKM.<br>Status kepesertaan akan diinformasikan melalui nomor HP.</p>
+        <p id="privacy-note" class="note">Data digunakan hanya untuk verifikasi dan penyaluran bantuan oleh petugas berwenang YPKM.<br>Status kepesertaan akan diinformasikan melalui nomor HP.</p>
     </div>
 </div>
 </body>

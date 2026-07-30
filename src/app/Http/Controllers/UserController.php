@@ -29,7 +29,7 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'nik' => 'nullable|digits_between:1,20|unique:users,nik',
+            'nik' => 'nullable|digits:16|unique:users,nik',
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6',
@@ -72,7 +72,7 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $data = $request->validate([
-            'nik' => 'nullable|digits_between:1,20|unique:users,nik,' . $user->id,
+            'nik' => 'nullable|digits:16|unique:users,nik,' . $user->id,
             'name' => 'required',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'password' => 'nullable|min:6',

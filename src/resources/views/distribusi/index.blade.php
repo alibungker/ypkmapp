@@ -3,13 +3,14 @@
 @section('content')
 @if(session('success'))<div class="alert alert-success">✅ {{ session('success') }}</div>@endif
 <div class="card">
-    <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;">
-        <h3 style="font-size:15px;font-weight:600;">🚚 Distribusi Bantuan</h3>
+    <div class="card-header">
+        <h3 style="font-size:15px;font-weight:600;">Distribusi bantuan</h3>
         @if(auth()->user()->isAdmin())
         <a href="{{ route('distribusi.create') }}" class="btn btn-primary btn-sm">+ Buat Distribusi</a>
         @endif
     </div>
-    <div style="padding:16px 20px;overflow-x:auto;">
+    <div class="card-body">
+        <div class="table-wrap desktop-table">
         <table class="table-data">
             <thead><tr><th>Kegiatan</th><th>Kelompok</th><th>Ketua</th><th>Koordinat</th><th>Paket</th><th>Penerima</th><th>Nilai</th><th>Tanggal</th><th>Status</th><th></th></tr></thead>
             <tbody>
@@ -47,6 +48,30 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
+        <div class="mobile-card-list" aria-label="Daftar distribusi">
+            @forelse($distribusi ?? [] as $d)
+            <article class="mobile-data-card">
+                <div class="mobile-data-card__title">{{ $d->nama_kegiatan }}</div>
+                <div class="mobile-data-card__meta">
+                    {{ $d->kelompok->nama ?? '-' }} · {{ is_object($d->tanggal) ? $d->tanggal->format('d/m/Y') : date('d/m/Y', strtotime($d->tanggal)) }}<br>
+                    {{ number_format($d->jumlah_paket) }} paket · Rp {{ number_format($d->estimasi_nilai_total,0,',','.') }}
+                </div>
+                <div style="margin-top:10px;">
+                    @if($d->status == 'selesai') <span class="badge badge-green">Selesai</span>
+                    @elseif($d->status == 'berlangsung') <span class="badge badge-gold">Berlangsung</span>
+                    @else <span class="badge badge-navy">Direncanakan</span>
+                    @endif
+                </div>
+                <div class="mobile-data-card__actions">
+                    <a href="{{ route('distribusi.show', $d) }}" class="btn btn-outline btn-sm">Detail</a>
+                    @if(auth()->user()->isAdmin())<a href="{{ route('distribusi.edit', $d) }}" class="btn btn-outline btn-sm">Edit</a>@endif
+                </div>
+            </article>
+            @empty
+            <div class="mobile-data-card" style="text-align:center;color:#667085;">Belum ada distribusi.</div>
+            @endforelse
+        </div>
         <div style="margin-top:12px;">{{ $distribusi->links() ?? '' }}</div>
     </div>
 </div>

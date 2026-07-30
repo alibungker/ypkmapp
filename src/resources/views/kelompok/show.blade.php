@@ -55,7 +55,7 @@
                 @forelse($anggota as $p)
                 <tr>
                     <td><strong>{{ $p->nama }}</strong></td>
-                    <td style="font-family:monospace;">{{ auth()->user()->isAdmin() ? $p->nik : substr($p->nik, 0, 6).'******'.substr($p->nik, -4) }}</td>
+                    <td style="font-family:monospace;"><x-masked-nik :value="$p->nik" /></td>
                     <td>{{ $p->pekerjaan ?: '-' }}</td>
                     <td>{{ $p->desa ?: '-' }}</td>
                     <td>

@@ -10,12 +10,13 @@
 .legend-item{display:flex;align-items:center;gap:7px;font-size:13px;color:#4b5563}
 .legend-dot{width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.3)}
 .peta-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr);gap:20px}
-@media(max-width:900px){.peta-grid{grid-template-columns:1fr}#map{height:420px}}
+@media(max-width:900px){.peta-grid{grid-template-columns:1fr}#map{height:55dvh;min-height:360px}.legend{gap:10px 14px}}
+@media(max-width:480px){#map{min-height:340px}.leaflet-control-zoom a{width:36px!important;height:36px!important;line-height:36px!important}}
 </style>
 @endsection
 
 @section('content')
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:20px;">
+<div class="mobile-two" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:20px;">
     <div class="stat-card"><div class="stat-value">{{ number_format($distribusi->count()) }}</div><div class="stat-label">Distribusi</div></div>
     <div class="stat-card"><div class="stat-value" style="color:#017723;">{{ number_format($distribusi->sum('paket')) }}</div><div class="stat-label">Total Paket</div></div>
     <div class="stat-card"><div class="stat-value">{{ number_format($distribusi->sum('penerima')) }}</div><div class="stat-label">Target Penerima</div></div>

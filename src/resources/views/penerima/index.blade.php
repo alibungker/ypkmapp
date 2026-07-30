@@ -2,24 +2,27 @@
 @section('title', 'Data Penerima')
 @section('content')
 <div class="card">
-    <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-        <h3 style="font-size:15px;font-weight:600;">👥 Data Penerima Manfaat</h3>
-        <div style="display:flex;gap:8px;">
+    <div class="card-header">
+        <h3 style="font-size:15px;font-weight:600;">Data penerima manfaat</h3>
+        <div class="button-row">
             <a href="{{ route('penerima.create') }}" class="btn btn-primary btn-sm">+ Tambah</a>
         </div>
     </div>
-    <div style="padding:16px 20px;">
-        <form method="GET" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+    <div class="card-body">
+        <form method="GET" class="filter-grid" style="margin-bottom:16px;">
             <input type="text" name="search" placeholder="Cari NIK/nama..." value="{{ request('search') }}" class="form-input" style="width:170px;padding:8px 12px;font-size:13px;">
             <select name="status" class="form-input" style="width:145px;padding:8px 12px;font-size:13px;">
                 <option value="">Semua status data</option>
-                <option value="pending" {{ request('status')=='pending' ? 'selected' : '' }}>Pending</option>
+                <option value="pending" {{ request('status')=='pending' ? 'selected' : '' }}>Menunggu verifikasi</option>
                 <option value="terverifikasi" {{ request('status')=='terverifikasi' ? 'selected' : '' }}>Terverifikasi</option>
                 <option value="ditolak" {{ request('status')=='ditolak' ? 'selected' : '' }}>Ditolak</option>
             </select>
             <select name="kabupaten" id="f_kab" data-selected="{{ request('kabupaten') }}" class="form-input" style="width:170px;padding:8px 12px;font-size:13px;">
                 <option value="">Semua Kabupaten</option>
             </select>
+            <details class="filter-advanced" {{ request()->hasAny(['kecamatan','desa','kelompok_id','sumber_data','status_terima']) ? 'open' : '' }}>
+                <summary>Filter lanjutan</summary>
+                <div class="filter-advanced__grid">
             <select name="kecamatan" id="f_kec" data-selected="{{ request('kecamatan') }}" class="form-input" style="width:155px;padding:8px 12px;font-size:13px;">
                 <option value="">Semua Kecamatan</option>
             </select>
@@ -43,17 +46,20 @@
                 <option value="1" {{ request('status_terima') === '1' ? 'selected' : '' }}>Sudah menerima</option>
                 <option value="0" {{ request('status_terima') === '0' ? 'selected' : '' }}>Belum menerima</option>
             </select>
-            <button class="btn btn-outline btn-sm">🔍 Terapkan</button>
-            <a href="{{ route('penerima.index') }}" class="btn btn-outline btn-sm">↩️ Reset</a>
+                </div>
+            </details>
+            <button class="btn btn-outline btn-sm">Terapkan</button>
+            <a href="{{ route('penerima.index') }}" class="btn btn-outline btn-sm">Bersihkan filter</a>
         </form>
-        <div style="overflow-x:auto;">
+        <p style="font-size:13px;color:#667085;margin:0 0 12px;">Menampilkan {{ number_format($penerima->total()) }} penerima</p>
+        <div class="table-wrap desktop-table">
             <table class="table-data">
-                <thead><tr><th>Nama Lengkap</th><th>NIK</th><th>Pekerjaan</th><th>Kecamatan</th><th>Desa</th><th>Status</th><th></th></tr></thead>
+                <thead><tr><th>Nama lengkap</th><th>NIK</th><th>Pekerjaan</th><th>Kecamatan</th><th>Desa</th><th>Status</th><th>Aksi</th></tr></thead>
                 <tbody>
                     @forelse($penerima as $p)
                     <tr>
                         <td style="font-weight:500;">{{ $p->nama }}</td>
-                        <td style="color:#6b7280;font-family:monospace;">{{ $p->nik }}</td>
+                        <td style="color:#6b7280;font-family:monospace;"><x-masked-nik :value="$p->nik" /></td>
                         <td>{{ $p->pekerjaan ?? '-' }}</td>
                         <td style="color:#6b7280;">{{ $p->kecamatan }}</td>
                         <td style="color:#6b7280;">{{ $p->desa }}</td>
@@ -80,6 +86,34 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+        <div class="mobile-card-list" aria-label="Daftar penerima">
+            @forelse($penerima as $p)
+            <article class="mobile-data-card">
+                <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;">
+                    <div>
+                        <div class="mobile-data-card__title">{{ $p->nama }}</div>
+                        <div class="mobile-data-card__meta">
+                            NIK <x-masked-nik :value="$p->nik" /><br>
+                            {{ $p->kecamatan ?: '-' }} · {{ $p->desa ?: '-' }}
+                        </div>
+                    </div>
+                    @if($p->status == 'terverifikasi') <span class="badge badge-green">Terverifikasi</span>
+                    @elseif($p->status == 'pending') <span class="badge badge-gold">Menunggu</span>
+                    @else <span class="badge" style="background:#fce8e6;color:#dc2626;">Ditolak</span>
+                    @endif
+                </div>
+                <div class="mobile-data-card__actions">
+                    <a href="{{ route('penerima.show', $p) }}" class="btn btn-outline btn-sm">Detail</a>
+                    <a href="{{ route('penerima.edit', $p) }}" class="btn btn-outline btn-sm">Edit</a>
+                    @if($p->status == 'pending' && (auth()->user()->isAdmin() || auth()->user()->isRelawan()))
+                    <form method="POST" action="{{ route('penerima.verify', $p) }}">@csrf<input type="hidden" name="status" value="terverifikasi"><button class="btn btn-primary btn-sm">Verifikasi</button></form>
+                    @endif
+                </div>
+            </article>
+            @empty
+            <div class="mobile-data-card" style="text-align:center;color:#667085;">Tidak ada penerima sesuai filter.</div>
+            @endforelse
         </div>
         <div style="margin-top:16px;">{{ $penerima->links() }}</div>
     </div>

@@ -13,7 +13,7 @@
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
                 <div>
                     <label class="form-label">NIK <span style="color:#dc2626;">*</span></label>
-                    <input type="text" name="nik" class="form-input" required value="{{ old('nik', $penerima->nik ?? '') }}" placeholder="16 digit NIK">
+                    <input type="text" name="nik" class="form-input" required maxlength="16" value="{{ old('nik', $penerima->nik ?? '') }}" placeholder="16 digit NIK">
                     @error('nik')<small style="color:#dc2626;">{{ $message }}</small>@enderror
                 </div>
                 <div>

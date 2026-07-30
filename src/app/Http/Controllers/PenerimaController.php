@@ -104,7 +104,7 @@ class PenerimaController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'nik' => 'required|unique:penerimas,nik',
+            'nik' => 'required|digits:16|unique:penerimas,nik',
             'no_kk' => 'nullable',
             'nama' => 'required',
             'tempat_lahir' => 'nullable',
@@ -175,7 +175,7 @@ class PenerimaController extends Controller
     {
         abort_unless($this->cekAksesWilayah($penerima), 403, 'Di luar wilayah kerja Anda.');
         $data = $request->validate([
-            'nik' => 'required|unique:penerimas,nik,' . $penerima->id,
+            'nik' => 'required|digits:16|unique:penerimas,nik,' . $penerima->id,
             'nama' => 'required',
             'no_kk' => 'nullable',
             'tempat_lahir' => 'nullable',
@@ -221,9 +221,19 @@ class PenerimaController extends Controller
         abort_if($u->isKetuaKelompok(), 403, 'Ketua kelompok tidak dapat memverifikasi. Verifikasi dilakukan relawan.');
         abort_unless($this->cekAksesWilayah($penerima), 403, 'Di luar wilayah kerja Anda.');
 
+        $data = request()->validate([
+            'status' => 'nullable|in:terverifikasi,ditolak',
+            'catatan' => 'nullable|string|max:1000',
+        ]);
+        $status = $data['status'] ?? 'terverifikasi';
+
+        if ($status === 'terverifikasi' && !$penerima->kelompok_id) {
+            return back()->with('error', 'Tetapkan kelompok penerima sebelum melakukan verifikasi.');
+        }
+
         $penerima->update([
-            'status' => request('status', 'terverifikasi'),
-            'catatan_verifikasi' => request('catatan'),
+            'status' => $status,
+            'catatan_verifikasi' => $data['catatan'] ?? null,
             'verified_by' => auth()->id(),
             'verified_at' => now(),
         ]);
@@ -258,20 +268,23 @@ class PenerimaController extends Controller
     public function daftarMandiri(Request $request)
     {
         $data = $request->validate([
-            'nik' => 'required|unique:penerimas,nik',
+            'nik' => 'required|digits:16|unique:penerimas,nik',
             'nama' => 'required',
             'alamat' => 'required',
             'phone' => 'required',
             'jumlah_keluarga' => 'nullable|integer',
+            'privacy_consent' => 'required|accepted',
         ]);
 
+        unset($data['privacy_consent']);
         $data['status'] = 'pending';
         $data['sumber_data'] = 'mandiri';
         $data['provinsi'] = 'Aceh';
         $data['kabupaten'] = $request->kabupaten ?? '-';
         $data['kecamatan'] = $request->kecamatan ?? '-';
         $data['desa'] = $request->desa ?? '-';
-        $data['kelompok_id'] = $request->kelompok_id ?? Kelompok::first()?->id;
+        // Pendaftaran publik belum terikat kelompok sampai diverifikasi petugas.
+        $data['kelompok_id'] = null;
 
         Penerima::create($data);
         return back()->with('success', 'Pendaftaran berhasil! Data Anda akan diverifikasi petugas YPKM.');

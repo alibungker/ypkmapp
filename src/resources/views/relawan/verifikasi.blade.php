@@ -49,7 +49,7 @@
             <tbody>
                 @foreach($pending as $p)
                 <tr>
-                    <td style="font-family:monospace;font-size:13px;color:#6b7280;">{{ $p->nik }}</td>
+                    <td style="font-family:monospace;font-size:13px;color:#6b7280;"><x-masked-nik :value="$p->nik" /></td>
                     <td style="font-weight:500;">{{ $p->nama }}</td>
                     <td>{{ $p->kelompok->nama ?? '-' }}</td>
                     <td style="color:#6b7280;">{{ $p->desa }}</td>
@@ -92,7 +92,7 @@
             <tbody>
                 @foreach($terverifikasi as $p)
                 <tr style="{{ $p->terima_bantuan ? 'background:#f0faf0;' : '' }}">
-                    <td style="font-family:monospace;font-size:13px;color:#6b7280;">{{ $p->nik }}</td>
+                    <td style="font-family:monospace;font-size:13px;color:#6b7280;"><x-masked-nik :value="$p->nik" /></td>
                     <td style="font-weight:500;">{{ $p->nama }}</td>
                     <td>{{ $p->kelompok->nama ?? '-' }}</td>
                     <td style="color:#6b7280;">{{ $p->desa }}</td>

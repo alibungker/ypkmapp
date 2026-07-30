@@ -1,13 +1,13 @@
 @extends('layouts.app')
-@section('title', 'Dashboard PEDULI YPKM')
+@section('title', 'Dashboard')
 @section('subtitle', 'Ringkasan aktivitas penyaluran bantuan')
 
 @section('content')
 {{-- Stats --}}
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:24px;">
+<div class="mobile-stack" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:24px;">
     <div class="stat-card">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-            <div style="width:40px;height:40px;background:#e8e8f0;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;">👥</div>
+            <div style="width:40px;height:40px;background:#e8e8f0;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#00034a;"><x-icon name="users" size="20"/></div>
             <span style="font-size:13px;color:#6b7280;">Penerima</span>
         </div>
         <div class="stat-value">{{ number_format($stats['penerima']) }}</div>
@@ -18,7 +18,7 @@
     </div>
     <div class="stat-card">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-            <div style="width:40px;height:40px;background:#e8f5ec;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;">📋</div>
+            <div style="width:40px;height:40px;background:#e8f5ec;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#017723;"><x-icon name="group" size="20"/></div>
             <span style="font-size:13px;color:#6b7280;">Kelompok</span>
         </div>
         <div class="stat-value" style="color:#017723;">{{ number_format($stats['kelompok']) }}</div>
@@ -26,7 +26,7 @@
     </div>
     <div class="stat-card">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-            <div style="width:40px;height:40px;background:#fef7e6;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;">🚚</div>
+            <div style="width:40px;height:40px;background:#fef7e6;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#9a6b0d;"><x-icon name="truck" size="20"/></div>
             <span style="font-size:13px;color:#6b7280;">Distribusi</span>
         </div>
         <div class="stat-value" style="color:#b07d14;">{{ number_format($stats['distribusi']) }}</div>
@@ -37,7 +37,7 @@
     </div>
     <div class="stat-card">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-            <div style="width:40px;height:40px;background:#fef2f2;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;">💰</div>
+            <div style="width:40px;height:40px;background:#fef2f2;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#b42318;"><x-icon name="wallet" size="20"/></div>
             <span style="font-size:13px;color:#6b7280;">Nilai Bantuan</span>
         </div>
         <div class="stat-value">Rp {{ number_format($stats['total_nilai_bantuan'],0,',','.') }}</div>
@@ -46,14 +46,14 @@
 </div>
 
 {{-- Two columns --}}
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;">
+<div class="mobile-stack" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;">
     {{-- Distribusi Terbaru --}}
     <div class="card">
         <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;">
-            <h3 style="font-size:15px;font-weight:600;">🚚 Distribusi Terbaru</h3>
+            <h3 style="font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;"><x-icon name="truck"/> Distribusi terbaru</h3>
             <a href="{{ route('distribusi.index') }}" style="font-size:13px;color:#00034a;text-decoration:none;">Lihat Semua →</a>
         </div>
-        <div style="padding:16px 20px;">
+        <div class="card-body table-wrap">
             <table class="table-data">
                 <thead><tr><th>Kegiatan</th><th>Daerah</th><th>Tanggal</th><th>Status</th></tr></thead>
                 <tbody>
@@ -80,7 +80,7 @@
     {{-- Progress --}}
     <div class="card">
         <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;">
-            <h3 style="font-size:15px;font-weight:600;">📊 Progress Distribusi</h3>
+            <h3 style="font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;"><x-icon name="report"/> Progres distribusi</h3>
         </div>
         <div style="padding:16px 20px;">
             @forelse($distribusi_terbaru->take(4) as $d)
@@ -102,9 +102,9 @@
 {{-- Ringkasan Keuangan --}}
 <div class="card">
     <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;">
-        <h3 style="font-size:15px;font-weight:600;">💰 Ringkasan Keuangan</h3>
+        <h3 style="font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;"><x-icon name="wallet"/> Ringkasan keuangan</h3>
     </div>
-    <div style="padding:20px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+    <div class="mobile-stack" style="padding:20px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
         <div style="background:#e8f5ec;border-radius:8px;padding:16px;text-align:center;">
             <div style="font-size:13px;color:#6b7280;">Dana Masuk</div>
             <div style="font-size:20px;font-weight:700;color:#017723;margin-top:4px;">Rp {{ number_format($stats['total_dana_masuk'],0,',','.') }}</div>

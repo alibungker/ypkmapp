@@ -13,7 +13,7 @@
 
             <div style="margin-bottom:12px;">
                 <label class="form-label">NIK <span style="font-weight:400;color:#9ca3af;">(KTP)</span></label>
-                <input type="text" name="nik" class="form-input" value="{{ old('nik') }}" maxlength="20" placeholder="16 digit NIK (opsional)">
+                <input type="text" name="nik" class="form-input" value="{{ old('nik') }}" maxlength="16" placeholder="16 digit NIK (opsional)">
             </div>
             <div style="margin-bottom:12px;">
                 <label class="form-label">Nama Lengkap <span style="color:#dc2626;">*</span></label>
