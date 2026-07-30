@@ -117,6 +117,27 @@ biaya_operasional
 ├── dicatat_oleh (FK -> users)
 └── timestamps
 
+dana_donatur
+├── id (PK)
+├── donatur (nama donatur/lembaga)
+├── tanggal_masuk
+├── jumlah (decimal 15,2)
+├── jenis: enum(uang_tunai,transfer,barang)
+├── keterangan
+├── bukti_transfer [nullable]
+├── dicatat_oleh (FK -> users)
+└── timestamps
+
+anggaran
+├── id (PK)
+├── distribusi_id (FK -> distribusi) [nullable]
+├── kategori: enum(barang_bantuan,transportasi,konsumsi,sewa,atk,cadangan)
+├── anggaran (decimal 15,2) — rencana
+├── realisasi (decimal 15,2) — actual [default 0]
+├── sisa: computed (anggaran - realisasi)
+├── catatan
+└── timestamps
+
 penerima_distribusi (pivot)
 ├── id (PK)
 ├── penerima_id (FK -> penerima)

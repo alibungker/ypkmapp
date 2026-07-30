@@ -93,6 +93,19 @@ Production:  https://peduli.ypkm.info/api
 | POST | `/stok/masuk` | ✅ | Catat barang masuk dari donatur |
 | GET | `/stok/{id}/mutasi` | ✅ | Riwayat mutasi stok |
 
+### 2.6 Keuangan
+
+| Method | Endpoint | Auth | Deskripsi |
+|:---|:---|---:|:---|
+| GET | `/dana-donatur` | ✅ | Daftar dana masuk dari donatur |
+| POST | `/dana-donatur` | ✅ | Catat dana donatur baru |
+| PUT | `/dana-donatur/{id}` | ✅ | Edit data donatur |
+| DELETE | `/dana-donatur/{id}` | ✅ | Hapus data donatur |
+| GET | `/anggaran` | ✅ | Daftar anggaran per kategori |
+| POST | `/anggaran` | ✅ | Buat anggaran baru |
+| PUT | `/anggaran/{id}` | ✅ | Update anggaran/realisasi |
+| GET | `/keuangan/rekap` | ✅ | Rekap keuangan (dana masuk - distribusi - biaya) |
+
 ### 2.5 Relawan
 
 | Method | Endpoint | Auth | Deskripsi |
