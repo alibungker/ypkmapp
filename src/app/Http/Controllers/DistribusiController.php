@@ -10,9 +10,35 @@ use Illuminate\Support\Str;
 
 class DistribusiController extends Controller
 {
+    private function bolehLihat(Distribusi $distribusi): bool
+    {
+        $user = auth()->user();
+        if ($user->isAdmin()) return true;
+        $distribusi->loadMissing('kelompok');
+        if ($user->isKetuaKelompok()) {
+            return (int) $user->kelompok_id === (int) $distribusi->kelompok_id;
+        }
+        $kelompok = $distribusi->kelompok;
+        if (!$kelompok) return false;
+        if ($user->wilayah_kabupaten && $kelompok->daerah !== $user->wilayah_kabupaten) return false;
+        if ($user->wilayah_kecamatan && $kelompok->kecamatan !== $user->wilayah_kecamatan) return false;
+        if ($user->wilayah_desa && $kelompok->desa !== $user->wilayah_desa) return false;
+        return true;
+    }
+
     public function index(Request $request)
     {
-        $query = Distribusi::with('kelompok', 'creator');
+        $query = Distribusi::with(['kelompok' => fn ($q) => $q->withCount('penerima')->with('ketuaUser'), 'creator']);
+        $user = auth()->user();
+        if ($user->isKetuaKelompok()) {
+            $query->where('kelompok_id', $user->kelompok_id);
+        } elseif ($user->isRelawan()) {
+            $query->whereHas('kelompok', function ($q) use ($user) {
+                if ($user->wilayah_kabupaten) $q->where('daerah', $user->wilayah_kabupaten);
+                if ($user->wilayah_kecamatan) $q->where('kecamatan', $user->wilayah_kecamatan);
+                if ($user->wilayah_desa) $q->where('desa', $user->wilayah_desa);
+            });
+        }
         if ($request->status) $query->where('status', $request->status);
         $distribusi = $query->orderBy('tanggal', 'desc')->paginate(15);
         return view('distribusi.index', compact('distribusi'));
@@ -20,7 +46,7 @@ class DistribusiController extends Controller
 
     public function create()
     {
-        $kelompoks = Kelompok::with('ketua')->get();
+        $kelompoks = Kelompok::withCount('penerima')->with('ketuaUser')->get();
         $barang = BarangBantuan::all();
         return view('distribusi.form', compact('kelompoks', 'barang'));
     }
@@ -36,7 +62,7 @@ class DistribusiController extends Controller
 
     public function edit(Distribusi $distribusi)
     {
-        $kelompoks = Kelompok::with('ketua')->get();
+        $kelompoks = Kelompok::withCount('penerima')->with('ketuaUser')->get();
         return view('distribusi.form', compact('distribusi', 'kelompoks'));
     }
 
@@ -70,29 +96,46 @@ class DistribusiController extends Controller
 
     public function show(Distribusi $distribusi)
     {
-        $distribusi->load('kelompok', 'creator', 'penerimaDistribusi.penerima', 'items.barang', 'biayaOperasional');
+        abort_unless($this->bolehLihat($distribusi), 403, 'Distribusi di luar wilayah atau penugasan Anda.');
+        $distribusi->load([
+            'kelompok' => fn ($q) => $q->withCount('penerima')->with('ketuaUser'),
+            'creator', 'penerimaDistribusi.penerima', 'items.barang', 'biayaOperasional'
+        ]);
         return view('distribusi.show', compact('distribusi'));
     }
 
     public function terima(Distribusi $distribusi, $penerimaId)
     {
-        $distribusi->penerimaDistribusi()
+        abort_unless($this->bolehLihat($distribusi), 403, 'Distribusi di luar wilayah kerja Anda.');
+        $updated = $distribusi->penerimaDistribusi()
             ->where('penerima_id', $penerimaId)
             ->update(['status' => 'diterima', 'tanda_terima' => true, 'received_by' => auth()->id(), 'received_at' => now()]);
+        abort_if($updated === 0, 404, 'Penerima tidak terdaftar pada distribusi ini.');
         return back()->with('success', 'Tanda terima dicatat.');
     }
 
     public function selesai(Distribusi $distribusi)
     {
+        abort_unless($this->bolehLihat($distribusi), 403, 'Distribusi di luar wilayah kerja Anda.');
         $distribusi->update(['status' => 'selesai']);
         return back()->with('success', 'Distribusi selesai.');
     }
 
     public function dataPeta()
     {
-        $distribusi = Distribusi::whereNotNull('titik_koordinat')
-            ->with('kelompok')
-            ->get()
+        $query = Distribusi::whereNotNull('titik_koordinat')
+            ->with(['kelompok' => fn ($q) => $q->withCount('penerima')]);
+        $user = auth()->user();
+        if ($user->isKetuaKelompok()) {
+            $query->where('kelompok_id', $user->kelompok_id);
+        } elseif ($user->isRelawan()) {
+            $query->whereHas('kelompok', function ($q) use ($user) {
+                if ($user->wilayah_kabupaten) $q->where('daerah', $user->wilayah_kabupaten);
+                if ($user->wilayah_kecamatan) $q->where('kecamatan', $user->wilayah_kecamatan);
+                if ($user->wilayah_desa) $q->where('desa', $user->wilayah_desa);
+            });
+        }
+        $distribusi = $query->get()
             ->map(function ($d) {
                 $coord = explode(',', $d->titik_koordinat);
                 return [
@@ -101,7 +144,7 @@ class DistribusiController extends Controller
                     'lng' => (float)($coord[1] ?? 0),
                     'paket' => $d->jumlah_paket,
                     'nilai' => $d->estimasi_nilai_total,
-                    'penerima' => $d->kelompok->jumlah_anggota ?? 0,
+                    'penerima' => $d->kelompok->penerima_count ?? 0,
                     'kelompok' => $d->kelompok->nama ?? '-',
                     'status' => $d->status,
                     'tgl' => is_object($d->tanggal) ? $d->tanggal->format('d M Y') : date('d M Y', strtotime($d->tanggal)),

@@ -24,7 +24,10 @@ class Kelompok extends Model
 {
     protected $fillable = ['nama', 'kode', 'daerah', 'kecamatan', 'desa', 'ketua_id', 'jumlah_anggota', 'description'];
 
+    // Ketua operasional bersumber dari akun User ber-role ketua_kelompok.
+    // Relasi legacy ketua_id (ke penerima) dipertahankan sementara untuk kompatibilitas data lama.
     public function ketua() { return $this->belongsTo(Penerima::class, 'ketua_id'); }
+    public function ketuaUser() { return $this->hasOne(User::class, 'kelompok_id')->where('role', 'ketua_kelompok'); }
     public function penerima() { return $this->hasMany(Penerima::class); }
     public function distribusi() { return $this->hasMany(Distribusi::class); }
 }

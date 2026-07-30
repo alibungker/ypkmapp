@@ -31,6 +31,11 @@ class User extends Authenticatable
     public function scopePenerima($query)
     {
         if ($this->isAdmin()) return $query;
+        if ($this->isKetuaKelompok()) {
+            return $this->kelompok_id
+                ? $query->where('kelompok_id', $this->kelompok_id)
+                : $query->whereRaw('1 = 0');
+        }
         if ($this->wilayah_kabupaten) $query->where('kabupaten', $this->wilayah_kabupaten);
         if ($this->wilayah_kecamatan) $query->where('kecamatan', $this->wilayah_kecamatan);
         if ($this->wilayah_desa) $query->where('desa', $this->wilayah_desa);

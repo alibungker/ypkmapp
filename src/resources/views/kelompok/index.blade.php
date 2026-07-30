@@ -8,7 +8,9 @@
 <div class="card">
     <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;">
         <h3 style="font-size:15px;font-weight:600;">📋 Data Kelompok</h3>
+        @if(auth()->user()->isAdmin())
         <button onclick="document.getElementById('tambahModal').style.display='flex'" class="btn btn-primary btn-sm">➕ Tambah Kelompok</button>
+        @endif
     </div>
     <div style="padding:16px 20px;overflow-x:auto;">
         <table class="table-data">
@@ -21,13 +23,16 @@
                         <td>{{ $k->daerah }}</td>
                         <td style="color:#6b7280;">{{ $k->kecamatan ?? '-' }}</td>
                         <td>👥 {{ number_format($k->penerima_count ?? 0) }}</td>
-                        <td>{{ $k->ketua->nama ?? '-' }}</td>
+                        <td>{{ optional($k->ketuaUser)->name ?? '-' }}</td>
                         <td style="white-space:nowrap;">
-                            <button onclick="editKelompok({{ $k->id }}, '{{ addslashes($k->nama) }}', '{{ addslashes($k->kode) }}', '{{ addslashes($k->daerah) }}', '{{ addslashes($k->kecamatan ?? '') }}', '{{ addslashes($k->desa ?? '') }}', {{ $k->ketua_id ?? 'null' }}, '{{ addslashes($k->description ?? '') }}')" style="color:#00034a;border:none;background:none;cursor:pointer;font-size:13px;padding:4px 8px;">✏️ Edit</button>
+                            <a href="{{ route('kelompok.show', $k) }}" style="color:#017723;text-decoration:none;font-size:13px;padding:4px 8px;">👁️ Detail</a>
+                            @if(auth()->user()->isAdmin())
+                            <button onclick="editKelompok({{ $k->id }}, '{{ addslashes($k->nama) }}', '{{ addslashes($k->kode) }}', '{{ addslashes($k->daerah) }}', '{{ addslashes($k->kecamatan ?? '') }}', '{{ addslashes($k->desa ?? '') }}', '{{ addslashes($k->description ?? '') }}')" style="color:#00034a;border:none;background:none;cursor:pointer;font-size:13px;padding:4px 8px;">✏️ Edit</button>
                             <form method="POST" action="{{ route('kelompok.destroy', $k) }}" style="display:inline;" onsubmit="return confirm('Hapus kelompok ini?')">
                                 @csrf @method('DELETE')
                                 <button style="color:#dc2626;border:none;background:none;cursor:pointer;font-size:13px;padding:4px 8px;">🗑️</button>
                             </form>
+                            @endif
                         </td>
                     </tr>
                     @empty
@@ -36,7 +41,6 @@
                 </tbody>
             </table>
         </div>
-    </div>
     </div>
 
 {{-- Modal Tambah --}}
@@ -123,12 +127,6 @@
                 </div>
             </div>
             <div style="margin-top:12px;">
-                <label class="form-label">Ketua Kelompok</label>
-                <select id="e_ketua" name="ketua_id" class="form-input">
-                    <option value="">— Pilih dari anggota —</option>
-                </select>
-            </div>
-            <div style="margin-top:12px;">
                 <label class="form-label">Keterangan</label>
                 <input id="e_desc" name="description" class="form-input">
             </div>
@@ -175,7 +173,7 @@ mkKec.addEventListener('change', function() {
 });
 
 // ===== Modal edit =====
-function editKelompok(id, nama, kode, daerah, kecamatan, desa, ketuaId, desc) {
+function editKelompok(id, nama, kode, daerah, kecamatan, desa, desc) {
     document.getElementById('editForm').action = '/kelompok/' + id;
     document.getElementById('e_nama').value = nama;
     document.getElementById('e_kode').value = kode;
@@ -184,23 +182,6 @@ function editKelompok(id, nama, kode, daerah, kecamatan, desa, ketuaId, desc) {
     document.getElementById('e_desc').value = desc;
     document.getElementById('e_daerah').value = daerah;
     document.getElementById('editModal').style.display = 'flex';
-
-    // Load anggota untuk pilihan ketua
-    const sel = document.getElementById('e_ketua');
-    sel.innerHTML = '<option value="">— Memuat anggota... —</option>';
-    fetch('/kelompok/' + id + '/anggota')
-        .then(r => r.json())
-        .then(list => {
-            sel.innerHTML = '<option value="">— Pilih dari anggota —</option>';
-            list.forEach(p => {
-                const opt = document.createElement('option');
-                opt.value = p.id;
-                opt.textContent = p.nama + ' (' + p.nik + ')';
-                if (ketuaId && p.id == ketuaId) opt.selected = true;
-                sel.appendChild(opt);
-            });
-        })
-        .catch(() => { sel.innerHTML = '<option value="">— Gagal memuat —</option>'; });
 }
 function closeEdit() { document.getElementById('editModal').style.display = 'none'; }
 </script>

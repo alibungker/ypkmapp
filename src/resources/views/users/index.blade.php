@@ -88,8 +88,8 @@
                 <label class="form-label">Kelompok <span style="color:#dc2626;">*</span></label>
                 <select name="kelompok_id" id="e_kelompok" class="form-input">
                     <option value="">— Pilih Kelompok —</option>
-                    @foreach(\App\Models\Kelompok::all() as $k)
-                    <option value="{{ $k->id }}">{{ $k->nama }} — {{ $k->daerah }} ({{ $k->jumlah_anggota }} anggota)</option>
+                    @foreach($kelompoks as $k)
+                    <option value="{{ $k->id }}">{{ $k->nama }} — {{ $k->daerah }} ({{ $k->penerima_count }} anggota)</option>
                     @endforeach
                 </select>
             </div>

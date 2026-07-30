@@ -10,7 +10,18 @@ class KelompokController extends Controller
 {
     public function index()
     {
-        $kelompoks = Kelompok::withCount('penerima')->with('ketua')->orderBy('daerah')->get();
+        $query = Kelompok::withCount('penerima')->with('ketuaUser')->orderBy('daerah');
+        $user = auth()->user();
+
+        if ($user->isKetuaKelompok()) {
+            $query->whereKey($user->kelompok_id);
+        } elseif ($user->isRelawan()) {
+            if ($user->wilayah_kabupaten) $query->where('daerah', $user->wilayah_kabupaten);
+            if ($user->wilayah_kecamatan) $query->where('kecamatan', $user->wilayah_kecamatan);
+            if ($user->wilayah_desa) $query->where('desa', $user->wilayah_desa);
+        }
+
+        $kelompoks = $query->get();
         $kabupatens = DB::table('wilayah_boundaries')
             ->where('kode', 'LIKE', '11.%')
             ->orderBy('nama')
@@ -57,15 +68,30 @@ class KelompokController extends Controller
         return redirect()->route('kelompok.index')->with('success', 'Kelompok dihapus.');
     }
 
+    private function bolehLihat(Kelompok $kelompok): bool
+    {
+        $user = auth()->user();
+        if ($user->isAdmin()) return true;
+        if ($user->isKetuaKelompok()) return (int) $user->kelompok_id === (int) $kelompok->id;
+        if ($user->wilayah_kabupaten && $kelompok->daerah !== $user->wilayah_kabupaten) return false;
+        if ($user->wilayah_kecamatan && $kelompok->kecamatan !== $user->wilayah_kecamatan) return false;
+        if ($user->wilayah_desa && $kelompok->desa !== $user->wilayah_desa) return false;
+        return true;
+    }
+
     public function show(Kelompok $kelompok)
     {
-        $kelompok->load('penerima', 'distribusi', 'ketua');
-        return view('kelompok.show', compact('kelompok'));
+        abort_unless($this->bolehLihat($kelompok), 403, 'Kelompok di luar wilayah atau penugasan Anda.');
+        $kelompok->load(['distribusi', 'ketuaUser']);
+        $kelompok->loadCount('penerima');
+        $anggota = $kelompok->penerima()->orderBy('nama')->paginate(25)->withQueryString();
+        return view('kelompok.show', compact('kelompok', 'anggota'));
     }
 
     public function anggota(Kelompok $kelompok)
     {
-        $penerima = $kelompok->penerima()->orderBy('nama')->get();
+        abort_unless($this->bolehLihat($kelompok), 403, 'Kelompok di luar wilayah atau penugasan Anda.');
+        $penerima = $kelompok->penerima()->orderBy('nama')->get(['id', 'nama', 'nik', 'status']);
         return response()->json($penerima);
     }
 }

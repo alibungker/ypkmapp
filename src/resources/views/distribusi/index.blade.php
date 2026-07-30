@@ -5,7 +5,9 @@
 <div class="card">
     <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;">
         <h3 style="font-size:15px;font-weight:600;">🚚 Distribusi Bantuan</h3>
+        @if(auth()->user()->isAdmin())
         <a href="{{ route('distribusi.create') }}" class="btn btn-primary btn-sm">+ Buat Distribusi</a>
+        @endif
     </div>
     <div style="padding:16px 20px;overflow-x:auto;">
         <table class="table-data">
@@ -15,12 +17,12 @@
                 <tr>
                     <td style="font-weight:500;">{{ $d->nama_kegiatan }}</td>
                     <td>{{ $d->kelompok->nama ?? '-' }}</td>
-                    <td style="color:#6b7280;">{{ $d->kelompok->ketua->nama ?? '-' }}</td>
+                    <td style="color:#6b7280;">{{ optional(optional($d->kelompok)->ketuaUser)->name ?? '-' }}</td>
                     <td style="color:#6b7280;font-size:12px;font-family:monospace;">
                         @if($d->titik_koordinat) 📍 {{ $d->titik_koordinat }} @else <span style="color:#dc2626;">Belum diset</span> @endif
                     </td>
                     <td style="font-weight:600;">{{ number_format($d->jumlah_paket) }}</td>
-                    <td>👥 {{ number_format($d->kelompok->jumlah_anggota ?? 0) }}</td>
+                    <td>👥 {{ number_format($d->kelompok->penerima_count ?? 0) }}</td>
                     <td>Rp {{ number_format($d->estimasi_nilai_total,0,',','.') }}</td>
                     <td style="color:#6b7280;">{{ is_object($d->tanggal) ? $d->tanggal->format('d M Y') : date('d M Y', strtotime($d->tanggal)) }}</td>
                     <td>
@@ -30,11 +32,14 @@
                         @endif
                     </td>
                     <td style="white-space:nowrap;">
+                        <a href="{{ route('distribusi.show', $d) }}" style="color:#017723;font-size:13px;padding:4px 8px;text-decoration:none;">👁️ Detail</a>
+                        @if(auth()->user()->isAdmin())
                         <a href="{{ route('distribusi.edit', $d) }}" style="color:#00034a;font-size:13px;padding:4px 8px;text-decoration:none;">✏️ Edit</a>
                         <form method="POST" action="{{ route('distribusi.destroy', $d) }}" style="display:inline;" onsubmit="return confirm('Hapus distribusi ini?')">
                             @csrf @method('DELETE')
                             <button style="color:#dc2626;border:none;background:none;cursor:pointer;font-size:13px;padding:4px 8px;">🗑️</button>
                         </form>
+                        @endif
                     </td>
                 </tr>
                 @empty

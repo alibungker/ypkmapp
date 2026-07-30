@@ -11,7 +11,8 @@ class UserController extends Controller
     public function index()
     {
         $users = User::with('kelompok')->orderBy('role')->orderBy('name')->get();
-        return view('users.index', compact('users'));
+        $kelompoks = \App\Models\Kelompok::withCount('penerima')->orderBy('nama')->get();
+        return view('users.index', compact('users', 'kelompoks'));
     }
 
     public function show(User $user)
@@ -21,7 +22,7 @@ class UserController extends Controller
 
     public function create()
     {
-        $kelompoks = \App\Models\Kelompok::all();
+        $kelompoks = \App\Models\Kelompok::withCount('penerima')->orderBy('nama')->get();
         return view('users.create', compact('kelompoks'));
     }
 
@@ -43,6 +44,21 @@ class UserController extends Controller
             'wilayah_desa' => 'nullable',
             'alamat_lengkap' => 'nullable',
         ]);
+
+        if ($data['role'] === 'ketua_kelompok') {
+            if (empty($data['kelompok_id'])) {
+                return back()->withInput()->withErrors(['kelompok_id' => 'Kelompok wajib dipilih untuk Ketua Kelompok.']);
+            }
+            $sudahAda = User::where('role', 'ketua_kelompok')
+                ->where('kelompok_id', $data['kelompok_id'])
+                ->exists();
+            if ($sudahAda) {
+                return back()->withInput()->withErrors(['kelompok_id' => 'Kelompok tersebut sudah memiliki akun Ketua Kelompok.']);
+            }
+        } else {
+            $data['kelompok_id'] = null;
+        }
+
         $data['password'] = Hash::make($data['password']);
 
         if ($request->hasFile('foto')) {
@@ -71,6 +87,21 @@ class UserController extends Controller
             'wilayah_desa' => 'nullable',
             'alamat_lengkap' => 'nullable',
         ]);
+
+        if ($data['role'] === 'ketua_kelompok') {
+            if (empty($data['kelompok_id'])) {
+                return back()->withInput()->withErrors(['kelompok_id' => 'Kelompok wajib dipilih untuk Ketua Kelompok.']);
+            }
+            $sudahAda = User::where('role', 'ketua_kelompok')
+                ->where('kelompok_id', $data['kelompok_id'])
+                ->where('id', '!=', $user->id)
+                ->exists();
+            if ($sudahAda) {
+                return back()->withInput()->withErrors(['kelompok_id' => 'Kelompok tersebut sudah memiliki akun Ketua Kelompok.']);
+            }
+        } else {
+            $data['kelompok_id'] = null;
+        }
 
         if (empty($data['password'])) {
             unset($data['password']);

@@ -18,8 +18,8 @@
                 <tr><td style="padding:6px 0;color:#6b7280;">📍 Lokasi</td><td style="font-weight:600;">{{ $distribusi->lokasi }}</td></tr>
                 <tr><td style="padding:6px 0;color:#6b7280;">🗺️ Koordinat</td><td style="font-family:monospace;font-size:13px;">{{ $distribusi->titik_koordinat ?? '-' }}</td></tr>
                 <tr><td style="padding:6px 0;color:#6b7280;">📋 Kelompok</td><td style="font-weight:600;">{{ $distribusi->kelompok->nama ?? '-' }}</td></tr>
-                <tr><td style="padding:6px 0;color:#6b7280;">👤 Ketua Kelompok</td><td style="font-weight:600;">{{ $distribusi->kelompok->ketua->nama ?? '-' }}</td></tr>
-                <tr><td style="padding:6px 0;color:#6b7280;">👥 Jumlah Penerima</td><td style="font-weight:600;">{{ number_format($distribusi->kelompok->jumlah_anggota ?? 0) }} orang</td></tr>
+                <tr><td style="padding:6px 0;color:#6b7280;">👤 Ketua Kelompok</td><td style="font-weight:600;">{{ optional(optional($distribusi->kelompok)->ketuaUser)->name ?? '-' }}</td></tr>
+                <tr><td style="padding:6px 0;color:#6b7280;">👥 Jumlah Penerima</td><td style="font-weight:600;">{{ number_format($distribusi->kelompok->penerima_count ?? 0) }} orang</td></tr>
                 <tr><td style="padding:6px 0;color:#6b7280;">📦 Jenis / Paket</td><td style="font-weight:600;">{{ $distribusi->jenis_bantuan }} — {{ number_format($distribusi->jumlah_paket) }} paket</td></tr>
                 <tr><td style="padding:6px 0;color:#6b7280;">💰 Estimasi Nilai</td><td style="font-weight:600;color:#017723;">Rp {{ number_format($distribusi->estimasi_nilai_total,0,',','.') }}</td></tr>
                 <tr><td style="padding:6px 0;color:#6b7280;">💵 Sumber Dana</td><td>{{ $distribusi->sumber_dana ?? '-' }}</td></tr>
@@ -62,7 +62,7 @@ if (coord.includes(',')) {
     const parts = coord.split(',').map(Number);
     L.marker(parts, {icon: L.divIcon({html:'<div style="font-size:15px;text-align:center;line-height:1;">🎁</div>',className:'',iconSize:[24,24],iconAnchor:[12,12]})})
         .addTo(showmap)
-        .bindPopup("<b>{{ $distribusi->nama_kegiatan }}</b><br>📦 {{ number_format($distribusi->jumlah_paket) }} paket<br>👥 {{ number_format($distribusi->kelompok->jumlah_anggota ?? 0) }} penerima");
+        .bindPopup("<b>{{ $distribusi->nama_kegiatan }}</b><br>📦 {{ number_format($distribusi->jumlah_paket) }} paket<br>👥 {{ number_format($distribusi->kelompok->penerima_count ?? 0) }} penerima");
     showmap.setView(parts, 12);
 }
 </script>

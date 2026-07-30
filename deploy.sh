@@ -31,7 +31,14 @@ cp src/app/Http/Middleware/*.php app/Http/Middleware/ 2>/dev/null || true
 echo "📦 Copying views..."
 cp -r src/resources/views/* resources/views/
 
-# 4b. Copy public assets (logo, img, dll)
+# 4b. Copy automated tests
+if [ -d src/tests ]; then
+    echo "🧪 Copying tests..."
+    mkdir -p tests/Feature
+    cp -r src/tests/Feature/* tests/Feature/
+fi
+
+# 4c. Copy public assets (logo, img, dll)
 echo "📦 Copying public assets..."
 if [ -d src/public/img ]; then
     mkdir -p public/img
@@ -64,9 +71,11 @@ php artisan view:clear
 echo "🔗 Storage link..."
 php artisan storage:link 2>/dev/null || true
 
-# 9. Permission
-echo "🔐 Setting permissions..."
-chmod -R 777 storage bootstrap/cache 2>/dev/null || true
+# 9. Permission minimum (hindari chmod 777)
+echo "🔐 Setting minimum permissions..."
+find storage bootstrap/cache -type d -exec chmod 775 {} \; 2>/dev/null || true
+find storage bootstrap/cache -type f -exec chmod 664 {} \; 2>/dev/null || true
+chmod 640 .env 2>/dev/null || true
 
 echo ""
 echo "✅ Deploy selesai!"

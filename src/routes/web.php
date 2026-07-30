@@ -52,24 +52,38 @@ Route::middleware('auth')->group(function () {
 
     // Penerima — semua role bisa lihat & input; verifikasi utk admin/relawan
     Route::resource('penerima', PenerimaController::class);
-    Route::post('penerima/{penerima}/verify', [PenerimaController::class, 'verify'])->name('penerima.verify');
-    Route::post('penerima/{penerima}/terima-bantuan', [PenerimaController::class, 'terimaBantuan'])->name('penerima.terima-bantuan');
+    Route::middleware(\App\Http\Middleware\OperationalOnly::class)->group(function () {
+        Route::post('penerima/{penerima}/verify', [PenerimaController::class, 'verify'])->name('penerima.verify');
+        Route::post('penerima/{penerima}/terima-bantuan', [PenerimaController::class, 'terimaBantuan'])->name('penerima.terima-bantuan');
+    });
 
-    // Kelompok
-    Route::resource('kelompok', KelompokController::class);
+    // Kelompok — semua role dapat melihat; hanya Admin yang dapat mengubah
+    Route::resource('kelompok', KelompokController::class)->only(['index', 'show']);
     Route::get('kelompok/{kelompok}/anggota', [KelompokController::class, 'anggota'])->name('kelompok.anggota');
 
-    // Distribusi
-    Route::resource('distribusi', DistribusiController::class);
-    Route::post('distribusi/{distribusi}/terima/{penerima}', [DistribusiController::class, 'terima'])->name('distribusi.terima');
-    Route::post('distribusi/{distribusi}/selesai', [DistribusiController::class, 'selesai'])->name('distribusi.selesai');
+    // Distribusi — semua role dapat melihat; pengelolaan dibatasi di bawah
+    Route::resource('distribusi', DistribusiController::class)->only(['index', 'show'])->whereNumber('distribusi');
+    Route::middleware(\App\Http\Middleware\OperationalOnly::class)->group(function () {
+        Route::post('distribusi/{distribusi}/terima/{penerima}', [DistribusiController::class, 'terima'])->name('distribusi.terima');
+        Route::post('distribusi/{distribusi}/selesai', [DistribusiController::class, 'selesai'])->name('distribusi.selesai');
+    });
     Route::get('api/distribusi/peta', [DistribusiController::class, 'dataPeta'])->name('distribusi.peta.data');
 
     // Peta
     Route::get('peta', function () {
-        $distribusi = Distribusi::whereNotNull('titik_koordinat')
-            ->with('kelompok.ketua')
-            ->get()
+        $query = Distribusi::whereNotNull('titik_koordinat')
+            ->with(['kelompok' => fn ($q) => $q->withCount('penerima')->with('ketuaUser')]);
+        $user = auth()->user();
+        if ($user->isKetuaKelompok()) {
+            $query->where('kelompok_id', $user->kelompok_id);
+        } elseif ($user->isRelawan()) {
+            $query->whereHas('kelompok', function ($q) use ($user) {
+                if ($user->wilayah_kabupaten) $q->where('daerah', $user->wilayah_kabupaten);
+                if ($user->wilayah_kecamatan) $q->where('kecamatan', $user->wilayah_kecamatan);
+                if ($user->wilayah_desa) $q->where('desa', $user->wilayah_desa);
+            });
+        }
+        $distribusi = $query->get()
             ->map(function ($d) {
                 $coord = explode(',', $d->titik_koordinat);
                 return [
@@ -78,9 +92,9 @@ Route::middleware('auth')->group(function () {
                     'lng' => (float)($coord[1] ?? 0),
                     'paket' => $d->jumlah_paket,
                     'nilai' => 'Rp ' . number_format($d->estimasi_nilai_total,0,',','.'),
-                    'penerima' => $d->kelompok->jumlah_anggota ?? 0,
+                    'penerima' => $d->kelompok->penerima_count ?? 0,
                     'kelompok' => $d->kelompok->nama ?? '-',
-                    'ketua' => $d->kelompok->ketua->nama ?? '-',
+                    'ketua' => $d->kelompok->ketuaUser->name ?? '-',
                     'daerah' => $d->kelompok->daerah ?? '',
                     'status' => $d->status,
                     'tgl' => is_object($d->tanggal) ? $d->tanggal->format('d M Y') : date('d M Y', strtotime($d->tanggal)),
@@ -92,7 +106,7 @@ Route::middleware('auth')->group(function () {
     // ============================================================
     // KHUSUS RELAWAN: Verifikasi & Validasi
     // ============================================================
-    Route::prefix('relawan')->name('relawan.')->middleware('auth')->group(function () {
+    Route::prefix('relawan')->name('relawan.')->middleware(\App\Http\Middleware\OperationalOnly::class)->group(function () {
         Route::get('/', [RelawanController::class, 'verifikasi'])->name('verifikasi');
     });
 
@@ -100,6 +114,20 @@ Route::middleware('auth')->group(function () {
     // KHUSUS ADMIN: User Management, Keuangan & Laporan
     // ============================================================
     Route::middleware(\App\Http\Middleware\AdminOnly::class)->group(function () {
+        // Mutasi Kelompok hanya Admin
+        Route::post('kelompok', [KelompokController::class, 'store'])->name('kelompok.store');
+        Route::put('kelompok/{kelompok}', [KelompokController::class, 'update'])->name('kelompok.update');
+        Route::patch('kelompok/{kelompok}', [KelompokController::class, 'update']);
+        Route::delete('kelompok/{kelompok}', [KelompokController::class, 'destroy'])->name('kelompok.destroy');
+
+        // Pengelolaan Distribusi hanya Admin
+        Route::get('distribusi/create', [DistribusiController::class, 'create'])->name('distribusi.create');
+        Route::post('distribusi', [DistribusiController::class, 'store'])->name('distribusi.store');
+        Route::get('distribusi/{distribusi}/edit', [DistribusiController::class, 'edit'])->name('distribusi.edit');
+        Route::put('distribusi/{distribusi}', [DistribusiController::class, 'update'])->name('distribusi.update');
+        Route::patch('distribusi/{distribusi}', [DistribusiController::class, 'update']);
+        Route::delete('distribusi/{distribusi}', [DistribusiController::class, 'destroy'])->name('distribusi.destroy');
+
         // User Management (Ketua Kelompok & Relawan)
         Route::resource('users', UserController::class);
 

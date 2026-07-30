@@ -14,6 +14,16 @@ class PenerimaController extends Controller
     {
         $u = auth()->user();
         if ($u && !$u->isAdmin()) {
+            // Ketua Kelompok hanya boleh melihat anggota kelompok yang ditetapkan.
+            if ($u->isKetuaKelompok()) {
+                if ($u->kelompok_id) {
+                    $query->where('kelompok_id', $u->kelompok_id);
+                } else {
+                    $query->whereRaw('1 = 0');
+                }
+                return $query;
+            }
+
             if ($u->wilayah_kabupaten) $query->where('kabupaten', $u->wilayah_kabupaten);
             if ($u->wilayah_kecamatan) $query->where('kecamatan', $u->wilayah_kecamatan);
             if ($u->wilayah_desa) $query->where('desa', $u->wilayah_desa);
@@ -26,6 +36,9 @@ class PenerimaController extends Controller
     {
         $u = auth()->user();
         if (!$u || $u->isAdmin()) return true;
+        if ($u->isKetuaKelompok()) {
+            return $u->kelompok_id && (int) $penerima->kelompok_id === (int) $u->kelompok_id;
+        }
         if ($u->wilayah_kabupaten && $penerima->kabupaten !== $u->wilayah_kabupaten) return false;
         if ($u->wilayah_kecamatan && $penerima->kecamatan !== $u->wilayah_kecamatan) return false;
         if ($u->wilayah_desa && $penerima->desa !== $u->wilayah_desa) return false;
@@ -70,7 +83,10 @@ class PenerimaController extends Controller
 
     public function create()
     {
-        $kelompoks = Kelompok::all();
+        $user = auth()->user();
+        $kelompoks = $user->isKetuaKelompok()
+            ? Kelompok::whereKey($user->kelompok_id)->get()
+            : Kelompok::all();
         return view('penerima.form', compact('kelompoks'));
     }
 
@@ -108,6 +124,10 @@ class PenerimaController extends Controller
             }
             // Ketua kelompok: data yang diinput otomatis bersumber ketua_kelompok & status pending
             if ($u->isKetuaKelompok()) {
+                if (!$u->kelompok_id) {
+                    return back()->withInput()->withErrors(['kelompok_id' => 'Akun Ketua Kelompok belum terhubung ke kelompok.']);
+                }
+                $data['kelompok_id'] = $u->kelompok_id;
                 $data['sumber_data'] = 'ketua_kelompok';
             }
         }
@@ -133,7 +153,10 @@ class PenerimaController extends Controller
     public function edit(Penerima $penerima)
     {
         abort_unless($this->cekAksesWilayah($penerima), 403, 'Di luar wilayah kerja Anda.');
-        $kelompoks = Kelompok::all();
+        $user = auth()->user();
+        $kelompoks = $user->isKetuaKelompok()
+            ? Kelompok::whereKey($user->kelompok_id)->get()
+            : Kelompok::all();
         return view('penerima.form', compact('penerima', 'kelompoks'));
     }
 
@@ -157,6 +180,17 @@ class PenerimaController extends Controller
             'kelompok_id' => 'required|exists:kelompoks,id',
             'sumber_data' => 'nullable|in:mandiri,relawan,ketua_kelompok',
         ]);
+
+        if (!auth()->user()->isAdmin()) {
+            // Perubahan status hanya melalui alur verifikasi khusus Relawan/Admin.
+            unset($data['status']);
+            unset($data['sumber_data']);
+        }
+
+        if (auth()->user()->isKetuaKelompok()) {
+            $data['kelompok_id'] = auth()->user()->kelompok_id;
+            $data['sumber_data'] = 'ketua_kelompok';
+        }
 
         $penerima->update($data);
         return redirect()->route('penerima.index')->with('success', 'Data penerima diupdate.');

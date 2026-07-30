@@ -29,8 +29,8 @@
                     <select name="kelompok_id" class="form-input" required id="selKelompok">
                         <option value="">Pilih Kelompok</option>
                         @foreach($kelompoks as $k)
-                        <option value="{{ $k->id }}" data-anggota="{{ $k->jumlah_anggota }}" data-ketua="{{ $k->ketua->nama ?? '-' }}" {{ old('kelompok_id', $distribusi->kelompok_id ?? '') == $k->id ? 'selected' : '' }}>
-                            {{ $k->nama }} — {{ $k->daerah }} ({{ $k->jumlah_anggota }} penerima)
+                        <option value="{{ $k->id }}" data-anggota="{{ $k->penerima_count }}" data-ketua="{{ optional($k->ketuaUser)->name ?? '-' }}" {{ old('kelompok_id', $distribusi->kelompok_id ?? '') == $k->id ? 'selected' : '' }}>
+                            {{ $k->nama }} — {{ $k->daerah }} ({{ $k->penerima_count }} penerima)
                         </option>
                         @endforeach
                     </select>
