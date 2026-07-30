@@ -7,8 +7,10 @@ use App\Models\Kelompok;
 use App\Models\Penerima;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class PhaseTwoFeaturesTest extends TestCase
@@ -76,8 +78,12 @@ class PhaseTwoFeaturesTest extends TestCase
         $admin = $this->admin();
         $kelompok = $this->kelompok();
         $penerima = $this->penerima($kelompok, '1101010101010001');
+        Storage::fake('public');
+        $payload = array_merge($this->payload($kelompok), [
+            'bukti_file' => UploadedFile::fake()->create('bukti-distribusi.pdf', 100, 'application/pdf'),
+        ]);
 
-        $response = $this->actingAs($admin)->post('/distribusi', $this->payload($kelompok));
+        $response = $this->actingAs($admin)->post('/distribusi', $payload);
 
         $response->assertRedirect(route('distribusi.index'));
         $this->assertDatabaseHas('distribusis', [
@@ -85,6 +91,9 @@ class PhaseTwoFeaturesTest extends TestCase
             'estimasi_nilai_total' => 0,
             'sumber_dana' => '',
         ]);
+        $distribusi = Distribusi::where('nama_kegiatan', 'Distribusi Uji Tahap Dua')->firstOrFail();
+        $this->assertNotNull($distribusi->bukti_file);
+        Storage::disk('public')->assertExists($distribusi->bukti_file);
         $this->assertDatabaseHas('penerima_distribusi', [
             'penerima_id' => $penerima->id,
             'status' => 'terjadwal',

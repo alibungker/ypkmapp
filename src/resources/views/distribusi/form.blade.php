@@ -10,7 +10,7 @@
         <h3 style="font-size:15px;font-weight:600;">{{ isset($distribusi) ? '✏️ Edit Distribusi' : '🚚 Buat Distribusi Baru' }}</h3>
     </div>
     <div style="padding:20px;">
-        <form method="POST" action="{{ isset($distribusi) ? route('distribusi.update', $distribusi) : route('distribusi.store') }}">
+        <form method="POST" enctype="multipart/form-data" action="{{ isset($distribusi) ? route('distribusi.update', $distribusi) : route('distribusi.store') }}">
             @csrf
             @if(isset($distribusi)) @method('PUT') @endif
 
@@ -87,6 +87,15 @@
             <div style="margin-top:16px;">
                 <label class="form-label">Catatan</label>
                 <textarea name="catatan" class="form-input" rows="3" maxlength="5000" placeholder="Catatan tambahan distribusi...">{{ old('catatan', $distribusi->catatan ?? '') }}</textarea>
+            </div>
+
+            <div style="margin-top:16px;">
+                <label class="form-label">Bukti Distribusi</label>
+                <input type="file" name="bukti_file" class="form-input" accept=".jpg,.jpeg,.png,.pdf">
+                <small style="color:#6b7280;">JPG, PNG, atau PDF; maksimum 5 MB.</small>
+                @if(isset($distribusi) && $distribusi->bukti_file)
+                    <div style="margin-top:6px;"><a href="{{ Storage::url($distribusi->bukti_file) }}" target="_blank" rel="noopener">Lihat bukti tersimpan</a></div>
+                @endif
             </div>
 
             <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid #e5e7eb;">

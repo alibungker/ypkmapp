@@ -7,6 +7,7 @@ use App\Models\BarangBantuan;
 use App\Models\BiayaOperasional;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class DistribusiController extends Controller
@@ -55,12 +56,23 @@ class DistribusiController extends Controller
     public function store(Request $request)
     {
         $data = $this->validated($request);
+        $upload = $data['bukti_file'] ?? null;
+        unset($data['bukti_file']);
+        $newPath = $upload?->store('distribusi/bukti', 'public');
+        if ($newPath) $data['bukti_file'] = $newPath;
         $data['kode_distribusi'] = 'DST-' . now()->format('Ymd') . '-' . strtoupper(Str::random(4));
         $data['created_by'] = auth()->id();
-        DB::transaction(function () use ($data) {
-            $distribusi = Distribusi::create($data);
-            $this->syncPenerima($distribusi);
-        });
+
+        try {
+            DB::transaction(function () use ($data) {
+                $distribusi = Distribusi::create($data);
+                $this->syncPenerima($distribusi);
+            });
+        } catch (\Throwable $e) {
+            if ($newPath) Storage::disk('public')->delete($newPath);
+            throw $e;
+        }
+
         return redirect()->route('distribusi.index')->with('success', 'Distribusi tersimpan dan penerima terverifikasi telah dialokasikan.');
     }
 
@@ -73,28 +85,42 @@ class DistribusiController extends Controller
     public function update(Request $request, Distribusi $distribusi)
     {
         $data = $this->validated($request);
+        $upload = $data['bukti_file'] ?? null;
+        unset($data['bukti_file']);
+        $newPath = $upload?->store('distribusi/bukti', 'public');
+        if ($newPath) $data['bukti_file'] = $newPath;
+        $oldPath = $distribusi->bukti_file;
         $kelompokBerubah = (int) $distribusi->kelompok_id !== (int) $data['kelompok_id'];
 
         if ($kelompokBerubah && $distribusi->penerimaDistribusi()->where('status', 'diterima')->exists()) {
+            if ($newPath) Storage::disk('public')->delete($newPath);
             return back()->withInput()->withErrors([
                 'kelompok_id' => 'Kelompok tidak dapat diubah karena sudah ada tanda terima bantuan.',
             ]);
         }
 
-        DB::transaction(function () use ($distribusi, $data, $kelompokBerubah) {
-            $distribusi->update($data);
-            if ($kelompokBerubah) {
-                $distribusi->penerimaDistribusi()->delete();
-                $this->syncPenerima($distribusi);
-            }
-        });
+        try {
+            DB::transaction(function () use ($distribusi, $data, $kelompokBerubah) {
+                $distribusi->update($data);
+                if ($kelompokBerubah) {
+                    $distribusi->penerimaDistribusi()->delete();
+                    $this->syncPenerima($distribusi);
+                }
+            });
+        } catch (\Throwable $e) {
+            if ($newPath) Storage::disk('public')->delete($newPath);
+            throw $e;
+        }
 
+        if ($newPath && $oldPath) Storage::disk('public')->delete($oldPath);
         return redirect()->route('distribusi.index')->with('success', 'Distribusi diupdate.');
     }
 
     public function destroy(Distribusi $distribusi)
     {
+        $path = $distribusi->bukti_file;
         $distribusi->delete();
+        if ($path) Storage::disk('public')->delete($path);
         return redirect()->route('distribusi.index')->with('success', 'Distribusi dihapus.');
     }
 
@@ -129,6 +155,7 @@ class DistribusiController extends Controller
             'estimasi_nilai_total' => 'nullable|numeric|min:0',
             'sumber_dana' => 'nullable|string|max:255',
             'catatan' => 'nullable|string|max:5000',
+            'bukti_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
             'status' => 'required|in:direncanakan,berlangsung,selesai,dibatalkan',
         ], [
             'titik_koordinat.regex' => 'Format koordinat harus latitude,longitude, contoh: 4.2991424,97.8653578.',

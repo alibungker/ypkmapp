@@ -37,7 +37,7 @@ class Distribusi extends Model
     protected $fillable = [
         'kode_distribusi', 'nama_kegiatan', 'tanggal', 'lokasi', 'titik_koordinat',
         'kelompok_id', 'jenis_bantuan', 'jumlah_paket', 'estimasi_nilai_total',
-        'sumber_dana', 'catatan', 'status', 'created_by'
+        'sumber_dana', 'catatan', 'bukti_file', 'status', 'created_by'
     ];
 
     public function kelompok() { return $this->belongsTo(Kelompok::class); }

@@ -27,6 +27,7 @@
                 @endif
                 <tr><td style="padding:6px 0;color:#6b7280;">💰 Estimasi Nilai</td><td style="font-weight:600;color:#017723;">Rp {{ number_format($distribusi->estimasi_nilai_total,0,',','.') }}</td></tr>
                 <tr><td style="padding:6px 0;color:#6b7280;">💵 Sumber Dana</td><td>{{ $distribusi->sumber_dana ?? '-' }}</td></tr>
+                <tr><td style="padding:6px 0;color:#6b7280;">📎 Bukti</td><td>@if($distribusi->bukti_file)<a href="{{ Storage::url($distribusi->bukti_file) }}" target="_blank" rel="noopener">Lihat file bukti</a>@else - @endif</td></tr>
                 <tr><td style="padding:6px 0;color:#6b7280;">📊 Status</td><td>
                     @if($distribusi->status == 'selesai') <span class="badge badge-green">✅ Selesai</span>
                     @elseif($distribusi->status == 'berlangsung') <span class="badge badge-gold">⏳ Berlangsung</span>
