@@ -26,7 +26,7 @@ class LaporanController extends Controller
                 'kelompok' => fn ($q) => $q->withCount([
                     'penerima',
                     'penerima as penerima_terverifikasi_count' => fn ($p) => $p->where('status', 'terverifikasi'),
-                    'penerima as penerima_menerima_count' => fn ($p) => $p->where('status_terima', true),
+                    'penerima as penerima_menerima_count' => fn ($p) => $p->where('terima_bantuan', true),
                 ])->with('ketuaUser'),
             ])
             ->withCount([

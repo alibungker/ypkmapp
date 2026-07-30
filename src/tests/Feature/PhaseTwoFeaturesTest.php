@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Distribusi;
 use App\Models\Kelompok;
+use App\Models\Penerima;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -36,6 +37,23 @@ class PhaseTwoFeaturesTest extends TestCase
         ]);
     }
 
+    private function penerima(Kelompok $kelompok, string $nik, bool $menerima = false): Penerima
+    {
+        return Penerima::create([
+            'nik' => $nik,
+            'nama' => 'Penerima Uji Tahap Dua',
+            'alamat' => 'Desa Juar',
+            'kabupaten' => 'Aceh Tamiang',
+            'kecamatan' => 'Sekerak',
+            'desa' => 'Juar',
+            'phone' => '081200000000',
+            'sumber_data' => 'relawan',
+            'status' => 'terverifikasi',
+            'kelompok_id' => $kelompok->id,
+            'terima_bantuan' => $menerima,
+        ]);
+    }
+
     private function payload(Kelompok $kelompok): array
     {
         return [
@@ -57,6 +75,7 @@ class PhaseTwoFeaturesTest extends TestCase
     {
         $admin = $this->admin();
         $kelompok = $this->kelompok();
+        $penerima = $this->penerima($kelompok, '1101010101010001');
 
         $response = $this->actingAs($admin)->post('/distribusi', $this->payload($kelompok));
 
@@ -66,12 +85,17 @@ class PhaseTwoFeaturesTest extends TestCase
             'estimasi_nilai_total' => 0,
             'sumber_dana' => '',
         ]);
+        $this->assertDatabaseHas('penerima_distribusi', [
+            'penerima_id' => $penerima->id,
+            'status' => 'pending',
+        ]);
     }
 
     public function test_peta_and_laporan_render_database_data(): void
     {
         $admin = $this->admin();
         $kelompok = $this->kelompok();
+        $this->penerima($kelompok, '1101010101010002', true);
         Distribusi::create(array_merge($this->payload($kelompok), [
             'kode_distribusi' => 'DST-PHASE2',
             'created_by' => $admin->id,

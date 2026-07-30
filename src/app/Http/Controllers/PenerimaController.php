@@ -73,7 +73,7 @@ class PenerimaController extends Controller
             $query->where('kelompok_id', $request->integer('kelompok_id'));
         }
         if (in_array((string) $request->status_terima, ['0', '1'], true)) {
-            $query->where('status_terima', (bool) $request->integer('status_terima'));
+            $query->where('terima_bantuan', (bool) $request->integer('status_terima'));
         }
 
         $penerima = $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
