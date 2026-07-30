@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 
 class RelawanController extends Controller
 {
-    // Filter by wilayah lock
     private function scopeWilayah($query)
     {
         $u = auth()->user();
@@ -16,21 +15,18 @@ class RelawanController extends Controller
         return $query;
     }
 
-    // 🔍 Verifikasi: daftar penerima PENDING yang diajukan ketua kelompok
     public function verifikasi()
     {
-        $query = Penerima::with('kelompok')->where('status', 'pending');
-        $this->scopeWilayah($query);
-        $penerima = $query->orderBy('created_at', 'desc')->get();
-        return view('relawan.verifikasi', compact('penerima'));
-    }
+        // Data PENDING (butuh verifikasi)
+        $pending = clone $query = Penerima::with('kelompok')->where('status', 'pending');
+        $this->scopeWilayah($pending);
+        $pending = $pending->orderBy('created_at', 'desc')->get();
 
-    // ✅ Validasi: daftar penerima TERVERIFIKASI yang butuh checklist terima bantuan
-    public function validasi()
-    {
-        $query = Penerima::with('kelompok', 'verifikator')->where('status', 'terverifikasi');
-        $this->scopeWilayah($query);
-        $penerima = $query->orderBy('verified_at', 'desc')->get();
-        return view('relawan.validasi', compact('penerima'));
+        // Data TERVERIFIKASI (butuh checklist terima bantuan)
+        $terverifikasi = clone $query = Penerima::with('kelompok', 'verifikator')->where('status', 'terverifikasi');
+        $this->scopeWilayah($terverifikasi);
+        $terverifikasi = $terverifikasi->orderBy('verified_at', 'desc')->get();
+
+        return view('relawan.verifikasi', compact('pending', 'terverifikasi'));
     }
 }

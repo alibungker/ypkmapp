@@ -93,8 +93,7 @@ Route::middleware('auth')->group(function () {
     // KHUSUS RELAWAN: Verifikasi & Validasi
     // ============================================================
     Route::prefix('relawan')->name('relawan.')->middleware('auth')->group(function () {
-        Route::get('verifikasi', [RelawanController::class, 'verifikasi'])->name('verifikasi');
-        Route::get('validasi', [RelawanController::class, 'validasi'])->name('validasi');
+        Route::get('/', [RelawanController::class, 'verifikasi'])->name('verifikasi');
     });
 
     // ============================================================

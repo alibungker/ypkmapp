@@ -60,9 +60,8 @@
         </div>
         <nav class="p-3" style="padding-bottom:80px;">
             @if(auth()->check() && auth()->user()->isRelawan())
-            {{-- RELAWAN: hanya Verifikasi & Validasi --}}
-            <a href="{{ route('relawan.verifikasi') }}" class="nav-item {{ request()->routeIs('relawan.verifikasi*') ? 'active' : '' }}">🔍 <span>Verifikasi Penerima</span></a>
-            <a href="{{ route('relawan.validasi') }}" class="nav-item {{ request()->routeIs('relawan.validasi*') ? 'active' : '' }}">✅ <span>Validasi Terima Bantuan</span></a>
+            {{-- RELAWAN: Verifikasi & Validasi digabung --}}
+            <a href="{{ route('relawan.verifikasi') }}" class="nav-item {{ request()->routeIs('relawan*') ? 'active' : '' }}">📋 <span>Data & Validasi Penerima</span></a>
             <a href="{{ route('peta.index') }}" class="nav-item {{ request()->routeIs('peta*') ? 'active' : '' }}">🗺️ <span>Peta Distribusi</span></a>
             @else
             {{-- ADMIN & KETUA KELOMPOK: full navigasi --}}
