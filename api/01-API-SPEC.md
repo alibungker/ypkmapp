@@ -76,6 +76,22 @@ Production:  https://peduli.ypkm.info/api
 | GET | `/distribusi/{id}/penerima` | ✅ | Daftar penerima distribusi |
 | PUT | `/distribusi/{id}/terima/{penerimaId}` | ✅ | Tanda terima |
 | POST | `/distribusi/{id}/selesai` | ✅ | Selesaikan distribusi |
+| GET | `/distribusi/{id}/items` | ✅ | Daftar barang di distribusi |
+| POST | `/distribusi/{id}/items` | ✅ | Tambah barang ke distribusi |
+| GET | `/distribusi/{id}/biaya` | ✅ | Biaya operasional distribusi |
+| POST | `/distribusi/{id}/biaya` | ✅ | Catat biaya operasional |
+| GET | `/distribusi/{id}/laporan` | ✅ | Laporan lengkap (nilai barang + biaya) |
+
+### 2.5 Barang Bantuan (Inventory)
+
+| Method | Endpoint | Auth | Deskripsi |
+|:---|:---|---:|:---|
+| GET | `/barang` | ✅ | Katalog barang bantuan |
+| POST | `/barang` | ✅ | Tambah jenis barang baru |
+| PUT | `/barang/{id}` | ✅ | Edit barang |
+| GET | `/stok` | ✅ | Stok barang masuk/keluar |
+| POST | `/stok/masuk` | ✅ | Catat barang masuk dari donatur |
+| GET | `/stok/{id}/mutasi` | ✅ | Riwayat mutasi stok |
 
 ### 2.5 Relawan
 

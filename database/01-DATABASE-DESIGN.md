@@ -70,10 +70,51 @@ distribusi
 ├── kelompok_id (FK -> kelompok)
 ├── jenis_bantuan
 ├── jumlah_paket
+├── estimasi_nilai_total (decimal 15,2)
 ├── sumber_dana
 ├── status: enum(direncanakan,berlangsung,selesai,dibatalkan)
 ├── created_by (FK -> users)
 ├── catatan
+└── timestamps
+
+barang_bantuan
+├── id (PK)
+├── nama
+├── kategori: enum(sembako,pakaian,alat_sekolah,obat,uang_tunai,lainnya)
+├── satuan: enum(kg,liter,pcs,paket,karton)
+├── harga_perkiraan (decimal 12,2)
+├── deskripsi
+└── timestamps
+
+stok_barang
+├── id (PK)
+├── barang_id (FK -> barang_bantuan)
+├── jumlah (decimal 12,2)
+├── sumber (donatur / donasi dari ...)
+├── nilai_total (decimal 15,2)
+├── tanggal_masuk
+├── tanggal_kadaluarsa [nullable]
+├── catatan
+└── timestamps
+
+distribusi_items
+├── id (PK)
+├── distribusi_id (FK -> distribusi)
+├── barang_id (FK -> barang_bantuan)
+├── jumlah_per_paket (decimal 12,2)
+├── jumlah_paket_distribusi (integer)
+├── subtotal_nilai (decimal 15,2)
+└── timestamps
+
+biaya_operasional
+├── id (PK)
+├── distribusi_id (FK -> distribusi) [nullable]
+├── kategori: enum(transportasi,konsumsi,sewa,atk,komunikasi,lainnya)
+├── deskripsi
+├── jumlah (decimal 12,2)
+├── tanggal
+├── bukti_foto [nullable]
+├── dicatat_oleh (FK -> users)
 └── timestamps
 
 penerima_distribusi (pivot)
