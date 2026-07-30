@@ -1,75 +1,50 @@
-#!/bin/bash
-# ============================================================
-# PEDULI YPKM — Deploy Script
-# Jalankan dari folder root Laravel: bash deploy.sh
-# ============================================================
-set -e
+#!/usr/bin/env bash
+# PEDULI YPKM — deployment source custom src/ ke runtime Laravel
+set -Eeuo pipefail
+umask 0027
 
-echo "🚀 PEDULI YPKM Deploy v1.1"
-echo "================================"
-echo ""
+APP_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$APP_ROOT"
 
-# 1. Copy migrations
-echo "📦 Copying migrations..."
-cp -r src/database/migrations/* database/migrations/
+required=(artisan composer.json src/routes/runtime-web.php src/routes/web.php)
+for file in "${required[@]}"; do
+    [[ -f "$file" ]] || { echo "ERROR: file wajib tidak ditemukan: $file" >&2; exit 2; }
+done
+[[ -f .env ]] || { echo "ERROR: .env tidak ditemukan. Salin .env.example dan isi konfigurasi aman." >&2; exit 2; }
+[[ -f vendor/autoload.php ]] || { echo "ERROR: vendor belum tersedia. Jalankan composer install." >&2; exit 2; }
 
-# 2. Copy models
-echo "📦 Copying models..."
-cp src/app/Models/*.php app/Models/
+printf '🚀 PEDULI YPKM Deploy v1.2\n================================\n'
 
-# 3. Copy controllers
-echo "📦 Copying controllers..."
-mkdir -p app/Http/Controllers
-cp src/app/Http/Controllers/*.php app/Http/Controllers/
+install -d app/Models app/Http/Controllers app/Http/Middleware \
+    database/migrations database/seeders resources/views routes tests/Feature \
+    public/img storage/app/public storage/framework/cache/data \
+    storage/framework/sessions storage/framework/views storage/logs bootstrap/cache
 
-# 3b. Copy middleware
-echo "📦 Copying middleware..."
-mkdir -p app/Http/Middleware
-cp src/app/Http/Middleware/*.php app/Http/Middleware/ 2>/dev/null || true
-
-# 4. Copy views
-echo "📦 Copying views..."
-cp -r src/resources/views/* resources/views/
-
-# 4b. Copy automated tests
-if [ -d src/tests ]; then
-    echo "🧪 Copying tests..."
-    mkdir -p tests/Feature
-    cp -r src/tests/Feature/* tests/Feature/
-fi
-
-# 4c. Copy public assets (logo, img, dll)
-echo "📦 Copying public assets..."
-if [ -d src/public/img ]; then
-    mkdir -p public/img
-    cp -r src/public/img/* public/img/
-fi
-
-# 5. Replace runtime route entrypoint (hindari route lama/duplikat)
-echo "📦 Updating routes..."
+printf '📦 Sinkronisasi source aplikasi...\n'
+cp -a src/database/migrations/. database/migrations/
+cp -a src/app/Models/. app/Models/
+cp -a src/app/Http/Controllers/. app/Http/Controllers/
+cp -a src/app/Http/Middleware/. app/Http/Middleware/
+cp -a src/resources/views/. resources/views/
+cp -a src/tests/Feature/. tests/Feature/
+cp -a src/public/img/. public/img/
 cp src/routes/runtime-web.php routes/web.php
 
-# 6. Run migrations
-echo "🗄️ Running migrations..."
+printf '🧩 Memperbarui autoload...\n'
+composer dump-autoload --optimize --no-interaction >/dev/null
+
+printf '🗄️ Menjalankan migration...\n'
 php artisan migrate --force
 
-# 7. Cache clear
-echo "🧹 Clearing cache..."
-php artisan config:clear
-php artisan route:clear
-php artisan view:clear
+printf '🧹 Membersihkan cache...\n'
+php artisan optimize:clear
 
-# 8. Storage link
-echo "🔗 Storage link..."
+printf '🔗 Memastikan storage link...\n'
 php artisan storage:link 2>/dev/null || true
 
-# 9. Permission minimum (hindari chmod 777)
-echo "🔐 Setting minimum permissions..."
-find storage bootstrap/cache -type d -exec chmod 775 {} \; 2>/dev/null || true
-find storage bootstrap/cache -type f -exec chmod 664 {} \; 2>/dev/null || true
-chmod 640 .env 2>/dev/null || true
+printf '🔐 Permission minimum...\n'
+find storage bootstrap/cache -type d -exec chmod 775 {} \;
+find storage bootstrap/cache -type f -exec chmod 664 {} \;
+chmod 640 .env
 
-echo ""
-echo "✅ Deploy selesai!"
-echo "📌 Akses: https://peduli.ypkm.info"
-echo "📌 Login: gunakan akun admin yang sudah dibuat"
+printf '✅ Deploy selesai pada commit %s\n' "$(git rev-parse --short HEAD 2>/dev/null || echo non-git)"

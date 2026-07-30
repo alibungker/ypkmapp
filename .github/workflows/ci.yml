@@ -1,0 +1,40 @@
+name: PEDULI YPKM CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: fileinfo, pdo_sqlite
+          coverage: none
+          tools: composer:v2
+      - name: Validate Composer
+        run: composer validate --strict
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Prepare isolated SQLite runtime
+        run: |
+          cp .env.example .env
+          mkdir -p database storage/app/public storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache
+          touch database/database.sqlite
+          php artisan key:generate --force
+      - name: Deploy source into runtime
+        run: bash deploy.sh
+      - name: Validate versioned Aceh master data
+        run: php artisan db:seed --class='Database\Seeders\WilayahAcehSeeder' --force
+      - name: Run test suite
+        run: php artisan test --do-not-cache-result

@@ -11,6 +11,17 @@ storage/framework/views/*
 storage/logs/*
 !public/storage/
 bootstrap/cache/*
+/database/database.sqlite
+
+# Runtime Laravel generated from source custom src/
+/app/Models/*.php
+/app/Http/Controllers/*.php
+!/app/Http/Controllers/Controller.php
+/app/Http/Middleware/*.php
+/resources/views/*
+/database/migrations/*.php
+/tests/Feature/*.php
+/public/img/*
 
 # IDE
 .idea/
