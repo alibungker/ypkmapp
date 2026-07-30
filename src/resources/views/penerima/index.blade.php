@@ -27,14 +27,15 @@
         </form>
         <div style="overflow-x:auto;">
             <table class="table-data">
-                <thead><tr><th>NIK</th><th>Nama</th><th>Kelompok</th><th>Sumber</th><th>Status</th><th></th></tr></thead>
+                <thead><tr><th>Nama Lengkap</th><th>NIK</th><th>Pekerjaan</th><th>Kecamatan</th><th>Desa</th><th>Status</th><th></th></tr></thead>
                 <tbody>
                     @forelse($penerima as $p)
                     <tr>
-                        <td style="color:#6b7280;">{{ $p->nik }}</td>
                         <td style="font-weight:500;">{{ $p->nama }}</td>
-                        <td>{{ $p->kelompok->nama ?? '-' }}</td>
-                        <td><span style="padding:2px 8px;background:#f0f0f0;border-radius:6px;font-size:12px;">{{ $p->sumber_data }}</span></td>
+                        <td style="color:#6b7280;font-family:monospace;">{{ $p->nik }}</td>
+                        <td>{{ $p->pekerjaan ?? '-' }}</td>
+                        <td style="color:#6b7280;">{{ $p->kecamatan }}</td>
+                        <td style="color:#6b7280;">{{ $p->desa }}</td>
                         <td>
                             @if($p->status == 'terverifikasi') <span class="badge badge-green">✅ Terverifikasi</span>
                             @elseif($p->status == 'pending') <span class="badge badge-gold">⏳ Pending</span>
