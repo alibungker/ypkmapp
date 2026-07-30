@@ -32,17 +32,28 @@
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
                 <div>
                     <label class="form-label">Role <span style="color:#dc2626;">*</span></label>
-                    <select name="role" class="form-input" required>
+                    <select name="role" id="f_role" class="form-input" required>
                         <option value="ketua_kelompok">👤 Ketua Kelompok</option>
                         <option value="relawan">🤝 Relawan</option>
                         <option value="admin">👑 Admin</option>
                     </select>
                 </div>
+                <div id="kelompok_box">
+                    <label class="form-label">Kelompok <span id="kelompok_label" style="color:#dc2626;">*</span></label>
+                    <select name="kelompok_id" id="f_kelompok" class="form-input">
+                        <option value="">— Pilih Kelompok —</option>
+                        @foreach($kelompoks as $k)
+                        <option value="{{ $k->id }}">{{ $k->nama }} — {{ $k->daerah }} ({{ $k->jumlah_anggota }} anggota)</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
                 <div>
                     <label class="form-label">No. HP</label>
                     <input type="text" name="phone" class="form-input" value="{{ old('phone') }}" placeholder="08xxxxxxxxxx">
                 </div>
-            </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
                 <div>
                     <label class="form-label">Jenis Kelamin</label>
@@ -101,7 +112,24 @@
 
 @section('scripts')
 <script>
-function setupCascade(kabSel, kecSel, desaSel, preKab, preKec, preDesa) {
+// Toggle kelompok dropdown based on role
+const roleSel = document.getElementById('f_role');
+const kelompokBox = document.getElementById('kelompok_box');
+const kelompokLabel = document.getElementById('kelompok_label');
+
+function toggleKelompok() {
+    if (roleSel.value === 'ketua_kelompok') {
+        kelompokBox.style.display = 'block';
+        kelompokLabel.textContent = '*';
+    } else {
+        kelompokBox.style.display = 'none';
+        document.getElementById('f_kelompok').value = '';
+    }
+}
+roleSel.addEventListener('change', toggleKelompok);
+toggleKelompok();
+
+function setupCascade(kabSel, kecSel, desaSel, preKab, preKec, preDesa) { /*...same as before...*/
     fetch('/api/wilayah/kabupaten').then(r => r.json()).then(list => {
         kabSel.innerHTML = '<option value="">— Tidak dikunci —</option>';
         list.forEach(w => { const opt = document.createElement('option'); opt.value = w.nama.replace(/^(Kabupaten|Kota)\s/, ''); opt.dataset.kode = w.kode; opt.textContent = w.nama; if (preKab && opt.value === preKab) opt.selected = true; kabSel.appendChild(opt); });

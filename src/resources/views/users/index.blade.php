@@ -13,7 +13,7 @@
     </div>
     <div style="padding:16px 20px;overflow-x:auto;">
         <table class="table-data">
-            <thead><tr><th>NIK</th><th>Nama</th><th>Email</th><th>Role</th><th>Wilayah Kerja</th><th></th></tr></thead>
+            <thead><tr><th>NIK</th><th>Nama</th><th>Email</th><th>Role</th><th>Kelompok</th><th>Wilayah Kerja</th><th></th></tr></thead>
                 <tbody>
                     @forelse($users as $u)
                     <tr>
@@ -25,9 +25,10 @@
                         <td>
                             @if($u->role == 'admin') <span class="badge badge-navy">👑 Admin</span>
                             @elseif($u->role == 'relawan') <span class="badge badge-green">🤝 Relawan</span>
-                            @else <span class="badge badge-gold">👤 Ketua Kelompok</span>
+                            @else <span class="badge badge-gold">👤 {{ $u->kelompok->nama ?? 'Ketua' }}</span>
                             @endif
                         </td>
+                        <td style="font-size:13px;">{{ $u->kelompok->nama ?? ($u->role == 'ketua_kelompok' ? '<span style="color:#dc2626;">Belum ditentukan</span>' : '-') }}</td>
                         <td style="font-size:13px;color:#6b7280;">🔒 {{ $u->wilayahLabel() }}</td>
                         <td style="white-space:nowrap;">
                             <button onclick='editUser(@json($u))' style="color:#00034a;border:none;background:none;cursor:pointer;font-size:13px;padding:4px 8px;">✏️ Edit</button>
@@ -83,6 +84,15 @@
                     <input id="e_phone" name="phone" class="form-input">
                 </div>
             </div>
+            <div style="margin-bottom:12px;" id="e_kelompok_box">
+                <label class="form-label">Kelompok <span style="color:#dc2626;">*</span></label>
+                <select name="kelompok_id" id="e_kelompok" class="form-input">
+                    <option value="">— Pilih Kelompok —</option>
+                    @foreach(\App\Models\Kelompok::all() as $k)
+                    <option value="{{ $k->id }}">{{ $k->nama }} — {{ $k->daerah }} ({{ $k->jumlah_anggota }} anggota)</option>
+                    @endforeach
+                </select>
+            </div>
             <div style="background:#f8f9fa;border:1px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:14px;">
                 <div style="font-size:13px;font-weight:600;margin-bottom:10px;">🔒 Kunci Wilayah Kerja</div>
                 <div style="margin-bottom:10px;">
@@ -122,6 +132,10 @@ function editUser(u) {
     document.getElementById('e_email').value = u.email;
     document.getElementById('e_role').value = u.role;
     document.getElementById('e_phone').value = u.phone || '';
+    document.getElementById('e_kelompok').value = u.kelompok_id || '';
+    // Toggle kelompok field
+    const eBox = document.getElementById('e_kelompok_box');
+    eBox.style.display = u.role === 'ketua_kelompok' ? 'block' : 'none';
     document.getElementById('editModal').style.display = 'flex';
     setupCascade(
         document.getElementById('e_kab'),

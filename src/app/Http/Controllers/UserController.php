@@ -21,7 +21,8 @@ class UserController extends Controller
 
     public function create()
     {
-        return view('users.create');
+        $kelompoks = \App\Models\Kelompok::all();
+        return view('users.create', compact('kelompoks'));
     }
 
     public function store(Request $request)
@@ -32,6 +33,7 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6',
             'role' => 'required|in:admin,relawan,ketua_kelompok',
+            'kelompok_id' => 'nullable|exists:kelompoks,id',
             'phone' => 'nullable',
             'tempat_lahir' => 'nullable',
             'tanggal_lahir' => 'nullable|date',
@@ -59,6 +61,7 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email,' . $user->id,
             'password' => 'nullable|min:6',
             'role' => 'required|in:admin,relawan,ketua_kelompok',
+            'kelompok_id' => 'nullable|exists:kelompoks,id',
             'phone' => 'nullable',
             'tempat_lahir' => 'nullable',
             'tanggal_lahir' => 'nullable|date',

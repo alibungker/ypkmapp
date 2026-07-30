@@ -8,7 +8,7 @@ class User extends Authenticatable
 {
     use Notifiable;
 
-    protected $fillable = ['name', 'email', 'password', 'role', 'phone', 'foto', 'is_active',
+    protected $fillable = ['name', 'email', 'password', 'role', 'kelompok_id', 'phone', 'foto', 'is_active',
         'wilayah_kabupaten', 'wilayah_kecamatan', 'wilayah_desa',
         'nik', 'tempat_lahir', 'tanggal_lahir', 'jenis_kelamin', 'alamat_lengkap'];
     protected $hidden = ['password', 'remember_token'];
@@ -16,6 +16,7 @@ class User extends Authenticatable
     public function isAdmin(): bool { return $this->role === 'admin'; }
     public function isRelawan(): bool { return $this->role === 'relawan'; }
     public function isKetuaKelompok(): bool { return $this->role === 'ketua_kelompok'; }
+    public function kelompok() { return $this->belongsTo(Kelompok::class); }
 
     // Label wilayah kerja user (utk tampilan)
     public function wilayahLabel(): string
