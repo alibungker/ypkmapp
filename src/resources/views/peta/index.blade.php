@@ -119,8 +119,17 @@ const data = [
     @endforeach
 ];
 const colors = {done:'#017723',progress:'#e5a820',plan:'#00034a'};
+const giftIcon = function(size) {
+    return L.divIcon({
+        html: '<div style="font-size:' + size + 'px;text-align:center;line-height:1;">🎁</div>',
+        className: '',
+        iconSize: [size+10, size+10],
+        iconAnchor: [(size+10)/2, (size+10)/2]
+    });
+};
 data.forEach(d => {
-    L.circleMarker([d.lat,d.lng],{radius:Math.max(6,d.paket/30),fillColor:colors[d.status],color:'white',weight:2,fillOpacity:.7})
+    const sz = Math.max(20, d.paket / 20);
+    L.marker([d.lat,d.lng], {icon: giftIcon(sz)})
     .addTo(map).bindPopup(`
         <div style="min-width:220px;">
             <div style="font-size:15px;font-weight:700;color:#00034a;margin-bottom:8px;">📍 ${d.name}</div>
@@ -138,7 +147,7 @@ data.forEach(d => {
 });
 
 // Fit bounds
-const group = L.featureGroup(data.map(d=>L.circleMarker([d.lat,d.lng])));
+const group = L.featureGroup(data.map(d=>L.marker([d.lat,d.lng])));
 map.fitBounds(group.getBounds().pad(.15));
 </script>
 @endsection
