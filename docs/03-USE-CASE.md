@@ -104,3 +104,4 @@
 7. Sistem update status distribusi
 8. Admin pantau progress real-time
 ```
+\n**Domain:** peduli.ypkm.info\n**Warna Brand:** Navy #00034a, Green #017723, Gold #e5a820

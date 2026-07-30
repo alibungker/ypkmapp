@@ -92,3 +92,4 @@
 - ✅ Waktu render halaman < 3 detik (Lighthouse)
 - ✅ Tidak ada error 500
 - ✅ Mobile responsif
+\n**Warna Brand:** #00034a (Navy), #017723 (Green), #e5a820 (Gold)

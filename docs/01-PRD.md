@@ -67,3 +67,4 @@ Registrasi (Mandiri/Relawan/Ketua)
 - Input data offline-friendly
 - Laporan siap < 5 detik
 - Support 5.000+ penerima
+\n**Domain:** peduli.ypkm.info\n**Warna Brand:** Navy #00034a, Green #017723, Gold #e5a820

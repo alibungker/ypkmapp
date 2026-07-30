@@ -65,3 +65,4 @@ Hari 8: deploy ke server
 | Input offline | Sedang | PWA + cache |
 | Server down | Tinggi | Backup harian, monitoring |
 | Kehilangan data | Kritis | Backup database otomatis |
+\n**Domain:** peduli.ypkm.info\n**Warna Brand:** Navy #00034a, Green #017723, Gold #e5a820

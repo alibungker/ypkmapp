@@ -99,3 +99,4 @@ Sistem mencakup: manajemen penerima, kelompok, distribusi, relawan, dan laporan.
 | NF-05 | Enkripsi data sensitif (NIK, kontak) | Security |
 | NF-06 | Backup database harian otomatis | Reliability |
 | NF-07 | Log aktivitas pengguna | Auditability |
+\n**Domain:** peduli.ypkm.info\n**Warna Brand:** Navy #00034a, Green #017723, Gold #e5a820
