@@ -9,7 +9,7 @@ class KelompokController extends Controller
 {
     public function index()
     {
-        $kelompoks = Kelompok::withCount('penerima')->orderBy('daerah')->get();
+        $kelompoks = Kelompok::withCount('penerima')->with('ketua')->orderBy('daerah')->get();
         return view('kelompok.index', compact('kelompoks'));
     }
 
@@ -20,14 +20,39 @@ class KelompokController extends Controller
             'kode' => 'required|unique:kelompoks,kode',
             'daerah' => 'required',
             'kecamatan' => 'nullable',
+            'description' => 'nullable',
         ]);
+        $data['jumlah_anggota'] = 0;
         Kelompok::create($data);
-        return redirect()->route('kelompok.index')->with('success', 'Kelompok dibuat.');
+        return redirect()->route('kelompok.index')->with('success', 'Kelompok berhasil dibuat.');
+    }
+
+    public function update(Request $request, Kelompok $kelompok)
+    {
+        $data = $request->validate([
+            'nama' => 'required',
+            'kode' => 'required|unique:kelompoks,kode,' . $kelompok->id,
+            'daerah' => 'required',
+            'kecamatan' => 'nullable',
+            'ketua_id' => 'nullable|exists:penerimas,id',
+            'description' => 'nullable',
+        ]);
+        $kelompok->update($data);
+        return redirect()->route('kelompok.index')->with('success', 'Kelompok diupdate.');
+    }
+
+    public function destroy(Kelompok $kelompok)
+    {
+        if ($kelompok->penerima()->count() > 0) {
+            return back()->with('error', 'Tidak bisa hapus — kelompok masih punya anggota.');
+        }
+        $kelompok->delete();
+        return redirect()->route('kelompok.index')->with('success', 'Kelompok dihapus.');
     }
 
     public function show(Kelompok $kelompok)
     {
-        $kelompok->load('penerima', 'distribusi');
+        $kelompok->load('penerima', 'distribusi', 'ketua');
         return view('kelompok.show', compact('kelompok'));
     }
 
