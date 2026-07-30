@@ -24,6 +24,10 @@ jobs:
           tools: composer:v2
       - name: Validate Composer
         run: composer validate --strict
+      - name: Prepare Composer classmap source
+        run: |
+          mkdir -p app/Models
+          cp src/app/Models/Models.php app/Models/Models.php
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
       - name: Prepare isolated SQLite runtime

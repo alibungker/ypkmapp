@@ -9,6 +9,9 @@ command -v composer >/dev/null || { echo 'ERROR: Composer tidak tersedia.' >&2; 
 php -r 'exit(version_compare(PHP_VERSION,"8.3.0","<") ? 1 : 0);' || { echo 'ERROR: PHP minimal 8.3.' >&2; exit 2; }
 php -r 'exit(extension_loaded("fileinfo") ? 0 : 1);' || { echo 'ERROR: ekstensi PHP fileinfo wajib aktif.' >&2; exit 2; }
 
+# Composer classmap produksi menunjuk runtime app/Models/Models.php.
+install -d app/Models
+cp src/app/Models/Models.php app/Models/Models.php
 composer install --no-interaction --prefer-dist
 [[ -f .env ]] || cp .env.example .env
 install -d database storage/app/public storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache

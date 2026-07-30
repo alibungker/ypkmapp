@@ -27,7 +27,7 @@
             "Database\\Seeders\\": "database/seeders/"
         },
         "classmap": [
-            "src/app/Models/Models.php"
+            "app/Models/Models.php"
         ]
     },
     "autoload-dev": {
