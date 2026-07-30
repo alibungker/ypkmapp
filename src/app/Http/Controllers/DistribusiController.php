@@ -6,6 +6,7 @@ use App\Models\Kelompok;
 use App\Models\BarangBantuan;
 use App\Models\BiayaOperasional;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class DistribusiController extends Controller
@@ -56,8 +57,11 @@ class DistribusiController extends Controller
         $data = $this->validated($request);
         $data['kode_distribusi'] = 'DST-' . now()->format('Ymd') . '-' . strtoupper(Str::random(4));
         $data['created_by'] = auth()->id();
-        Distribusi::create($data);
-        return redirect()->route('distribusi.index')->with('success', 'Distribusi tersimpan & tampil di peta.');
+        DB::transaction(function () use ($data) {
+            $distribusi = Distribusi::create($data);
+            $this->syncPenerima($distribusi);
+        });
+        return redirect()->route('distribusi.index')->with('success', 'Distribusi tersimpan dan penerima terverifikasi telah dialokasikan.');
     }
 
     public function edit(Distribusi $distribusi)
@@ -68,7 +72,23 @@ class DistribusiController extends Controller
 
     public function update(Request $request, Distribusi $distribusi)
     {
-        $distribusi->update($this->validated($request));
+        $data = $this->validated($request);
+        $kelompokBerubah = (int) $distribusi->kelompok_id !== (int) $data['kelompok_id'];
+
+        if ($kelompokBerubah && $distribusi->penerimaDistribusi()->where('status', 'diterima')->exists()) {
+            return back()->withInput()->withErrors([
+                'kelompok_id' => 'Kelompok tidak dapat diubah karena sudah ada tanda terima bantuan.',
+            ]);
+        }
+
+        DB::transaction(function () use ($distribusi, $data, $kelompokBerubah) {
+            $distribusi->update($data);
+            if ($kelompokBerubah) {
+                $distribusi->penerimaDistribusi()->delete();
+                $this->syncPenerima($distribusi);
+            }
+        });
+
         return redirect()->route('distribusi.index')->with('success', 'Distribusi diupdate.');
     }
 
@@ -76,6 +96,24 @@ class DistribusiController extends Controller
     {
         $distribusi->delete();
         return redirect()->route('distribusi.index')->with('success', 'Distribusi dihapus.');
+    }
+
+    private function syncPenerima(Distribusi $distribusi): void
+    {
+        $ids = Kelompok::findOrFail($distribusi->kelompok_id)
+            ->penerima()
+            ->where('status', 'terverifikasi')
+            ->pluck('penerimas.id');
+
+        foreach ($ids->chunk(500) as $chunk) {
+            $distribusi->penerimaDistribusi()->createMany(
+                $chunk->map(fn ($id) => [
+                    'penerima_id' => $id,
+                    'status' => 'pending',
+                    'tanda_terima' => false,
+                ])->all()
+            );
+        }
     }
 
     private function validated(Request $request): array
@@ -96,8 +134,9 @@ class DistribusiController extends Controller
             'titik_koordinat.regex' => 'Format koordinat harus latitude,longitude, contoh: 4.2991424,97.8653578.',
         ]);
 
-        // Hindari NULL eksplisit pada kolom database yang mempunyai default numerik.
+        // Hindari NULL eksplisit pada kolom database yang mempunyai default.
         $data['estimasi_nilai_total'] = $data['estimasi_nilai_total'] ?? 0;
+        $data['sumber_dana'] = $data['sumber_dana'] ?? '';
 
         return $data;
     }
