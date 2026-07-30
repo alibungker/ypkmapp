@@ -109,7 +109,7 @@ class DistribusiController extends Controller
             $distribusi->penerimaDistribusi()->createMany(
                 $chunk->map(fn ($id) => [
                     'penerima_id' => $id,
-                    'status' => 'pending',
+                    'status' => 'terjadwal',
                     'tanda_terima' => false,
                 ])->all()
             );

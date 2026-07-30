@@ -87,7 +87,7 @@ class PhaseTwoFeaturesTest extends TestCase
         ]);
         $this->assertDatabaseHas('penerima_distribusi', [
             'penerima_id' => $penerima->id,
-            'status' => 'pending',
+            'status' => 'terjadwal',
         ]);
     }
 
