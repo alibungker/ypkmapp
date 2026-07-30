@@ -5,6 +5,7 @@ use App\Models\Penerima;
 use App\Models\Kelompok;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class PenerimaController extends Controller
 {
@@ -22,10 +23,17 @@ class PenerimaController extends Controller
         if ($request->sumber_data) {
             $query->where('sumber_data', $request->sumber_data);
         }
+        if ($request->kabupaten) {
+            $query->where('kabupaten', $request->kabupaten);
+        }
 
         $penerima = $query->orderBy('created_at', 'desc')->paginate(20);
         $kelompoks = Kelompok::all();
-        return view('penerima.index', compact('penerima', 'kelompoks'));
+        $kabupatens = DB::table('wilayah_boundaries')
+            ->where('kode', 'LIKE', '11.%')
+            ->orderBy('nama')
+            ->pluck('nama', 'kode');
+        return view('penerima.index', compact('penerima', 'kelompoks', 'kabupatens'));
     }
 
     public function create()

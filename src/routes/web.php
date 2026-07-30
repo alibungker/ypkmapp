@@ -63,3 +63,14 @@ Route::get('peta', function () {
 
 // Laporan
 Route::get('laporan', function () { return view('laporan.index'); })->name('laporan.index');
+
+// API Wilayah untuk peta
+Route::get('api/wilayah', function () {
+    return response()->json(
+        DB::table('wilayah_boundaries')
+            ->where('kode', 'LIKE', '11.%')
+            ->orWhere('kode', '11')
+            ->orderBy('kode')
+            ->get()
+    );
+});

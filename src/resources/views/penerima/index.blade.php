@@ -17,6 +17,12 @@
                 <option value="terverifikasi" {{ request('status')=='terverifikasi' ? 'selected' : '' }}>Terverifikasi</option>
                 <option value="ditolak" {{ request('status')=='ditolak' ? 'selected' : '' }}>Ditolak</option>
             </select>
+            <select name="kabupaten" class="form-input" style="width:200px;padding:8px 12px;font-size:13px;">
+                <option value="">Semua Kabupaten</option>
+                @foreach($kabupatens ?? [] as $kode => $nama)
+                <option value="{{ $nama }}" {{ request('kabupaten') == $nama ? 'selected' : '' }}>{{ $nama }}</option>
+                @endforeach
+            </select>
             <button class="btn btn-outline btn-sm">🔍 Cari</button>
         </form>
         <div style="overflow-x:auto;">
