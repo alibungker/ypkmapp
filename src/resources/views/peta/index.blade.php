@@ -121,15 +121,14 @@ const data = [
 const colors = {done:'#017723',progress:'#e5a820',plan:'#00034a'};
 const giftIcon = function(size) {
     return L.divIcon({
-        html: '<div style="font-size:' + size + 'px;text-align:center;line-height:1;">🎁</div>',
+        html: '<div style="font-size:15px;text-align:center;line-height:1;">🎁</div>',
         className: '',
-        iconSize: [size+10, size+10],
-        iconAnchor: [(size+10)/2, (size+10)/2]
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
     });
 };
 data.forEach(d => {
-    const sz = Math.max(20, d.paket / 20);
-    L.marker([d.lat,d.lng], {icon: giftIcon(sz)})
+    L.marker([d.lat,d.lng], {icon: giftIcon()})
     .addTo(map).bindPopup(`
         <div style="min-width:220px;">
             <div style="font-size:15px;font-weight:700;color:#00034a;margin-bottom:8px;">📍 ${d.name}</div>
