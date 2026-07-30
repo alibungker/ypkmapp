@@ -7,6 +7,7 @@ use App\Http\Controllers\KelompokController;
 use App\Http\Controllers\DistribusiController;
 use App\Http\Controllers\KeuanganController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\RelawanController;
 use App\Models\Distribusi;
 
 // ============================================================
@@ -87,6 +88,14 @@ Route::middleware('auth')->group(function () {
             });
         return view('peta.index', compact('distribusi'));
     })->name('peta.index');
+
+    // ============================================================
+    // KHUSUS RELAWAN: Verifikasi & Validasi
+    // ============================================================
+    Route::prefix('relawan')->name('relawan.')->middleware('auth')->group(function () {
+        Route::get('verifikasi', [RelawanController::class, 'verifikasi'])->name('verifikasi');
+        Route::get('validasi', [RelawanController::class, 'validasi'])->name('validasi');
+    });
 
     // ============================================================
     // KHUSUS ADMIN: User Management, Keuangan & Laporan

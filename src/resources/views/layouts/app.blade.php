@@ -59,6 +59,13 @@
             </div>
         </div>
         <nav class="p-3" style="padding-bottom:80px;">
+            @if(auth()->check() && auth()->user()->isRelawan())
+            {{-- RELAWAN: hanya Verifikasi & Validasi --}}
+            <a href="{{ route('relawan.verifikasi') }}" class="nav-item {{ request()->routeIs('relawan.verifikasi*') ? 'active' : '' }}">🔍 <span>Verifikasi Penerima</span></a>
+            <a href="{{ route('relawan.validasi') }}" class="nav-item {{ request()->routeIs('relawan.validasi*') ? 'active' : '' }}">✅ <span>Validasi Terima Bantuan</span></a>
+            <a href="{{ route('peta.index') }}" class="nav-item {{ request()->routeIs('peta*') ? 'active' : '' }}">🗺️ <span>Peta Distribusi</span></a>
+            @else
+            {{-- ADMIN & KETUA KELOMPOK: full navigasi --}}
             <a href="{{ route('dashboard') }}" class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">📊 <span>Dashboard</span></a>
             <a href="{{ route('penerima.index') }}" class="nav-item {{ request()->routeIs('penerima*') ? 'active' : '' }}">👥 <span>Penerima</span></a>
             <a href="{{ route('kelompok.index') }}" class="nav-item {{ request()->routeIs('kelompok*') ? 'active' : '' }}">📋 <span>Kelompok</span></a>
@@ -69,6 +76,7 @@
             <a href="{{ route('users.index') }}" class="nav-item {{ request()->routeIs('users*') ? 'active' : '' }}">👥 <span>Users</span></a>
             <a href="{{ route('keuangan.index') }}" class="nav-item {{ request()->routeIs('keuangan*') ? 'active' : '' }}">💰 <span>Keuangan</span></a>
             <a href="{{ route('laporan.index') }}" class="nav-item {{ request()->routeIs('laporan*') ? 'active' : '' }}">📄 <span>Laporan</span></a>
+            @endif
             @endif
         </nav>
         <div style="position:absolute;bottom:0;left:0;right:0;padding:16px;border-top:1px solid rgba(255,255,255,0.08);">
