@@ -15,17 +15,27 @@ class RelawanController extends Controller
         return $query;
     }
 
-    public function verifikasi()
+    public function verifikasi(Request $request)
     {
+        $query = Penerima::with('kelompok');
+
+        // Search by NIK or Nama
+        if ($request->search) {
+            $query->where(function ($q) use ($request) {
+                $q->where('nama', 'like', "%{$request->search}%")
+                  ->orWhere('nik', 'like', "%{$request->search}%");
+            });
+        }
+
         // Data PENDING (butuh verifikasi)
-        $pending = clone $query = Penerima::with('kelompok')->where('status', 'pending');
+        $pending = clone $query;
         $this->scopeWilayah($pending);
-        $pending = $pending->orderBy('created_at', 'desc')->get();
+        $pending = $pending->where('status', 'pending')->orderBy('created_at', 'desc')->get();
 
         // Data TERVERIFIKASI (butuh checklist terima bantuan)
-        $terverifikasi = clone $query = Penerima::with('kelompok', 'verifikator')->where('status', 'terverifikasi');
+        $terverifikasi = clone $query;
         $this->scopeWilayah($terverifikasi);
-        $terverifikasi = $terverifikasi->orderBy('verified_at', 'desc')->get();
+        $terverifikasi = $terverifikasi->where('status', 'terverifikasi')->orderBy('verified_at', 'desc')->get();
 
         return view('relawan.verifikasi', compact('pending', 'terverifikasi'));
     }

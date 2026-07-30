@@ -6,6 +6,16 @@
 @if(session('error'))<div class="alert" style="background:#fce8e6;border:1px solid #f5c6c0;color:#dc2626;">❌ {{ session('error') }}</div>@endif
 @if($errors->any())<div class="alert" style="background:#fce8e6;border:1px solid #f5c6c0;color:#dc2626;">❌ {{ $errors->first() }}</div>@endif
 
+{{-- Search --}}
+<form method="GET" style="margin-bottom:16px;">
+    <div style="display:flex;gap:8px;align-items:center;">
+        <input type="text" name="search" class="form-input" style="max-width:360px;" value="{{ request('search') }}" placeholder="🔍 Cari NIK atau Nama lengkap...">
+        <button type="submit" class="btn btn-primary btn-sm">Cari</button>
+        @if(request('search'))<a href="{{ route('relawan.verifikasi') }}" class="btn btn-outline btn-sm" style="text-decoration:none;">↩️ Reset</a>@endif
+    </div>
+</form>
+
+{{-- Stats --}}
 <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
     <div style="flex:1;background:#fef7e6;border:1px solid #f0dcae;border-radius:10px;padding:16px;text-align:center;">
         <div style="font-size:24px;font-weight:800;color:#b07d14;">{{ $pending->count() }}</div>
