@@ -7,6 +7,7 @@ use App\Models\BarangBantuan;
 use App\Models\StokBarang;
 use App\Models\Distribusi;
 use App\Models\Anggaran;
+use App\Models\PembelianBarang;
 use Illuminate\Http\Request;
 
 class KeuanganController extends Controller
@@ -21,10 +22,13 @@ class KeuanganController extends Controller
         $dana_masuk = DanaDonatur::with('pencatat')->orderBy('tanggal_masuk', 'desc')->get();
         $biaya = BiayaOperasional::with('distribusi', 'pencatat')->orderBy('tanggal', 'desc')->take(20)->get();
         $anggarans = Anggaran::with('distribusi')->get();
+        $pembelian = PembelianBarang::orderBy('id')->get();
+        $total_anggaran_all = $anggarans->sum('anggaran') + $pembelian->sum('anggaran');
+        $total_realisasi_all = $anggarans->sum('realisasi') + $pembelian->sum('realisasi');
 
         $distribusi_list = Distribusi::whereIn('status', ['direncanakan', 'berlangsung'])->orderBy('tanggal', 'desc')->get();
 
-        return view('keuangan.index', compact('total_masuk', 'total_biaya', 'total_bantuan', 'sisa', 'dana_masuk', 'biaya', 'anggarans', 'distribusi_list'));
+        return view('keuangan.index', compact('total_masuk', 'total_biaya', 'total_bantuan', 'sisa', 'dana_masuk', 'biaya', 'anggarans', 'distribusi_list', 'pembelian', 'total_anggaran_all', 'total_realisasi_all'));
     }
 
     public function storeDana(Request $request)
