@@ -5,7 +5,6 @@ use App\Http\Controllers\PenerimaController;
 use App\Http\Controllers\KelompokController;
 use App\Http\Controllers\DistribusiController;
 use App\Http\Controllers\KeuanganController;
-use App\Http\Controllers;
 
 // Dashboard
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
@@ -41,4 +40,4 @@ Route::prefix('keuangan')->name('keuangan.')->group(function () {
 Route::view('peta', 'peta.index')->name('peta.index');
 
 // Laporan
-Route::view('laporan', 'laporan.index')->name('laporan.index');
+Route::get('laporan', function () { return view('laporan.index'); })->name('laporan.index');

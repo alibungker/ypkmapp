@@ -37,7 +37,7 @@
                 <a href="{{ route('distribusi.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg {{ request()->routeIs('distribusi*') ? 'bg-white/10 text-gold font-semibold' : 'text-white/70 hover:bg-white/5' }}">
                     🚚 <span>Distribusi</span>
                 </a>
-                <a href="{{ route('barang.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg {{ request()->routeIs('barang*') ? 'bg-white/10 text-gold font-semibold' : 'text-white/70 hover:bg-white/5' }}">
+                <a href="" class="flex items-center gap-3 px-4 py-3 rounded-lg text-white/70 hover:bg-white/5">
                     📦 <span>Barang</span>
                 </a>
                 <a href="{{ route('keuangan.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg {{ request()->routeIs('keuangan*') ? 'bg-white/10 text-gold font-semibold' : 'text-white/70 hover:bg-white/5' }}">
