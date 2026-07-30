@@ -24,9 +24,9 @@ jobs:
           tools: composer:v2
       - name: Validate Composer
         run: composer validate --strict
-      - name: Prepare Composer classmap source
+      - name: Prepare Composer runtime directories and classmap
         run: |
-          mkdir -p app/Models
+          mkdir -p app/Models database bootstrap/cache storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs
           cp src/app/Models/Models.php app/Models/Models.php
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
