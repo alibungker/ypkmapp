@@ -13,8 +13,12 @@
             <h3 style="font-size:15px;font-weight:600;">➕ Tambah User</h3>
         </div>
         <div style="padding:20px;">
-            <form method="POST" action="{{ route('users.store') }}">
+            <form method="POST" action="{{ route('users.store') }}" enctype="multipart/form-data">
                 @csrf
+                <div style="margin-bottom:12px;">
+                    <label class="form-label">NIK <span style="font-weight:400;color:#9ca3af;">(KTP)</span></label>
+                    <input type="text" name="nik" class="form-input" value="{{ old('nik') }}" maxlength="20" placeholder="16 digit NIK (opsional)">
+                </div>
                 <div style="margin-bottom:12px;">
                     <label class="form-label">Nama Lengkap <span style="color:#dc2626;">*</span></label>
                     <input type="text" name="name" class="form-input" required value="{{ old('name') }}">
@@ -42,6 +46,32 @@
                         <label class="form-label">No. HP</label>
                         <input type="text" name="phone" class="form-input" value="{{ old('phone') }}">
                     </div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                    <div>
+                        <label class="form-label">Jenis Kelamin</label>
+                        <select name="jenis_kelamin" class="form-input">
+                            <option value="">— Pilih —</option>
+                            <option value="L" {{ old('jenis_kelamin') == 'L' ? 'selected' : '' }}>Laki-laki</option>
+                            <option value="P" {{ old('jenis_kelamin') == 'P' ? 'selected' : '' }}>Perempuan</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Tempat Lahir</label>
+                        <input type="text" name="tempat_lahir" class="form-input" value="{{ old('tempat_lahir') }}">
+                    </div>
+                    <div>
+                        <label class="form-label">Tanggal Lahir</label>
+                        <input type="date" name="tanggal_lahir" class="form-input" value="{{ old('tanggal_lahir') }}">
+                    </div>
+                </div>
+                <div style="margin-bottom:12px;">
+                    <label class="form-label">Alamat Lengkap</label>
+                    <input type="text" name="alamat_lengkap" class="form-input" value="{{ old('alamat_lengkap') }}" placeholder="Dusun/Jalan, Desa, Kecamatan, Kabupaten">
+                </div>
+                <div style="margin-bottom:12px;">
+                    <label class="form-label">Foto</label>
+                    <input type="file" name="foto" class="form-input" accept="image/*">
                 </div>
 
                 <div id="wilayahBox" style="background:#f8f9fa;border:1px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:14px;">
@@ -78,11 +108,14 @@
         </div>
         <div style="padding:16px 20px;overflow-x:auto;">
             <table class="table-data">
-                <thead><tr><th>Nama</th><th>Email</th><th>Role</th><th>Wilayah Kerja</th><th></th></tr></thead>
+                <thead><tr><th>NIK</th><th>Nama</th><th>Email</th><th>Role</th><th>Wilayah Kerja</th><th></th></tr></thead>
                 <tbody>
                     @forelse($users as $u)
                     <tr>
-                        <td style="font-weight:500;">{{ $u->name }}</td>
+                        <td style="font-family:monospace;color:#6b7280;font-size:13px;">{{ $u->nik ?? '-' }}</td>
+                        <td style="font-weight:500;">
+                            <a href="{{ route('users.show', $u) }}" style="color:#00034a;text-decoration:none;">{{ $u->name }}</a>
+                        </td>
                         <td style="color:#6b7280;">{{ $u->email }}</td>
                         <td>
                             @if($u->role == 'admin') <span class="badge badge-navy">👑 Admin</span>

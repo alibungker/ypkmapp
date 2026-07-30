@@ -9,7 +9,8 @@ class User extends Authenticatable
     use Notifiable;
 
     protected $fillable = ['name', 'email', 'password', 'role', 'phone', 'foto', 'is_active',
-        'wilayah_kabupaten', 'wilayah_kecamatan', 'wilayah_desa'];
+        'wilayah_kabupaten', 'wilayah_kecamatan', 'wilayah_desa',
+        'nik', 'tempat_lahir', 'tanggal_lahir', 'jenis_kelamin', 'alamat_lengkap'];
     protected $hidden = ['password', 'remember_token'];
 
     public function isAdmin(): bool { return $this->role === 'admin'; }
