@@ -61,7 +61,16 @@ Sistem mencakup: manajemen penerima, kelompok, distribusi, relawan, dan laporan.
 | F-20 | Laporan real-time status bantuan | Sedang |
 | F-21 | Export laporan ke PDF/Excel | Sedang |
 
-### 2.6 Autentikasi & Role
+### 2.6 Peta Distribusi
+
+| ID | Requirement | Prioritas |
+|:---|:---|---:|
+| F-22 | Sistem harus menampilkan peta distribusi interaktif | Tinggi |
+| F-23 | Marker di peta membedakan status: ✅ selesai, ⏳ berlangsung, 📋 rencana | Tinggi |
+| F-24 | Click marker menampilkan popup: jumlah paket, nilai, tanggal | Tinggi |
+| F-25 | Peta menampilkan statistik: total daerah, paket, penerima | Sedang |
+
+### 2.7 Autentikasi & Role
 
 | ID | Requirement | Prioritas |
 |:---|:---|---:|

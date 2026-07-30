@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Peta Distribusi — PEDULI YPKM</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+:root { --navy:#00034a; --green:#017723; --gold:#e5a820; --bg:#f5f6fa; --text:#1a1a2e; --text2:#6b7280; --border:#e5e7eb; --radius:12px; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); }
+.wrapper { max-width:1200px; margin:0 auto; padding:24px; }
+
+/* Header */
+.header { display:flex; align-items:center; gap:12px; margin-bottom:24px; }
+.header .icon { width:40px; height:40px; background:var(--navy); border-radius:10px; display:flex; align-items:center; justify-content:center; color:var(--gold); font-weight:800; }
+.header h1 { font-size:22px; font-weight:700; color:var(--navy); }
+.header span { font-size:13px; color:var(--text2); margin-left:auto; }
+
+/* Stats row */
+.stats { display:flex; gap:16px; margin-bottom:24px; }
+.stat { background:white; padding:16px 20px; border-radius:var(--radius); border:1px solid var(--border); flex:1; }
+.stat-value { font-size:24px; font-weight:800; color:var(--navy); }
+.stat-label { font-size:12px; color:var(--text2); margin-top:2px; }
+.stat-row { display:flex; align-items:center; gap:4px; font-size:11px; margin-top:4px; }
+
+/* Map */
+#map { height:500px; border-radius:var(--radius); border:1px solid var(--border); z-index:1; }
+
+/* Legend */
+.legend { display:flex; gap:20px; margin-top:16px; padding:16px; background:white; border-radius:var(--radius); border:1px solid var(--border); font-size:13px; }
+.legend-item { display:flex; align-items:center; gap:8px; }
+.legend-dot { width:14px; height:14px; border-radius:50%; border:2px solid white; box-shadow:0 1px 3px rgba(0,0,0,0.3); }
+.legend-dot.done { background:#017723; }
+.legend-dot.progress { background:#e5a820; }
+.legend-dot.plan { background:#00034a; }
+.legend-dot.home { background:#ef4444; }
+
+/* Sidebar popup */
+.sidebar-dist { margin-top:24px; background:white; border-radius:var(--radius); border:1px solid var(--border); overflow:hidden; }
+.sidebar-dist h3 { padding:16px 20px; font-size:15px; font-weight:600; border-bottom:1px solid var(--border); }
+.sidebar-dist table { width:100%; border-collapse:collapse; }
+.sidebar-dist th,.sidebar-dist td { text-align:left; padding:10px 16px; font-size:13px; border-bottom:1px solid var(--border); }
+.sidebar-dist th { color:var(--text2); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; }
+.sidebar-dist td { vertical-align:middle; }
+.badge { display:inline-flex; align-items:center; gap:4px; padding:2px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+.badge-green { background:#e8f5ec; color:var(--green); }
+.badge-gold { background:#fef7e6; color:#b07d14; }
+.badge-navy { background:#e8e8f0; color:var(--navy); }
+
+/* Bottom chart */
+.chart-section { margin-top:24px; display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.chart-card { background:white; border-radius:var(--radius); border:1px solid var(--border); padding:20px; }
+.chart-card h3 { font-size:15px; font-weight:600; margin-bottom:12px; }
+.bar-item { margin-bottom:10px; }
+.bar-label { display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px; }
+.bar-track { height:10px; background:var(--bg); border-radius:5px; overflow:hidden; }
+.bar-fill { height:100%; border-radius:5px; }
+.bar-fill.navy { background:var(--navy); }
+.bar-fill.green { background:var(--green); }
+.bar-fill.gold { background:var(--gold); }
+
+@media (max-width:768px) { .stats { flex-wrap:wrap; } .stat { min-width:45%; } .chart-section { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="wrapper">
+<div class="header">
+  <div class="icon">📍</div>
+  <h1>Peta Distribusi PEDULI YPKM</h1>
+  <span>Bantuan dari Langit, Sampai ke Pelosok</span>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-value">7</div>
+    <div class="stat-label">Daerah Distribusi</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">13</div>
+    <div class="stat-label">Total Distribusi</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">1.247</div>
+    <div class="stat-label">Penerima Manfaat</div>
+    <div class="stat-row">📍 48 kelompok</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">Rp 235 Jt</div>
+    <div class="stat-label">Nilai Bantuan</div>
+    <div class="stat-row">🟢 Tersalurkan Rp 180 Jt</div>
+  </div>
+</div>
+
+<div id="map"></div>
+
+<div class="legend">
+  <div class="legend-item"><span class="legend-dot done"></span> Selesai (5)</div>
+  <div class="legend-item"><span class="legend-dot progress"></span> Berlangsung (2)</div>
+  <div class="legend-item"><span class="legend-dot plan"></span> Rencana (3)</div>
+  <div class="legend-item"><span class="legend-dot home"></span> Kantor YPKM</div>
+</div>
+
+<div class="sidebar-dist">
+  <h3>📍 Daftar Distribusi Berdasarkan Daerah</h3>
+  <div style="overflow-x:auto;">
+  <table>
+    <tr><th>Daerah</th><th>Kecamatan</th><th>Paket</th><th>Nilai</th><th>Tanggal</th><th>Status</th></tr>
+    <tr><td><strong>Aceh Tamiang</strong></td><td>Sekerak</td><td>500</td><td>Rp 75.000.000</td><td>25 Jul 2026</td><td><span class="badge badge-green">✅ Selesai</span></td></tr>
+    <tr><td><strong>Aceh Tamiang</strong></td><td>Karang Baru</td><td>250</td><td>Rp 37.500.000</td><td>25 Jul 2026</td><td><span class="badge badge-green">✅ Selesai</span></td></tr>
+    <tr><td><strong>Pidie</strong></td><td>Mutiara</td><td>300</td><td>Rp 45.000.000</td><td>28 Jul 2026</td><td><span class="badge badge-gold">⏳ Berlangsung</span></td></tr>
+    <tr><td><strong>Aceh Utara</strong></td><td>Lhoksukon</td><td>200</td><td>Rp 30.000.000</td><td>30 Jul 2026</td><td><span class="badge badge-gold">⏳ Berlangsung</span></td></tr>
+    <tr><td><strong>Bireuen</strong></td><td>Jeunieb</td><td>150</td><td>Rp 22.500.000</td><td>02 Agu 2026</td><td><span class="badge badge-navy">📋 Rencana</span></td></tr>
+    <tr><td><strong>Subulussalam</strong></td><td>Penanggalan</td><td>120</td><td>Rp 18.000.000</td><td>05 Agu 2026</td><td><span class="badge badge-navy">📋 Rencana</span></td></tr>
+    <tr><td><strong>Aceh Besar</strong></td><td>Indrapuri</td><td>200</td><td>Rp 30.000.000</td><td>10 Agu 2026</td><td><span class="badge badge-navy">📋 Rencana</span></td></tr>
+    <tr style="background:var(--bg); font-weight:600;"><td colspan="2">Total</td><td>1.720 paket</td><td>Rp 258.000.000</td><td></td><td></td></tr>
+  </table>
+  </div>
+</div>
+
+<div class="chart-section">
+  <div class="chart-card">
+    <h3>📊 Distribusi per Daerah</h3>
+    <div class="bar-item">
+      <div class="bar-label"><span>Aceh Tamiang</span><span>750 paket</span></div>
+      <div class="bar-track"><div class="bar-fill green" style="width:100%"></div></div>
+    </div>
+    <div class="bar-item">
+      <div class="bar-label"><span>Pidie</span><span>300 paket</span></div>
+      <div class="bar-track"><div class="bar-fill gold" style="width:40%"></div></div>
+    </div>
+    <div class="bar-item">
+      <div class="bar-label"><span>Aceh Utara</span><span>200 paket</span></div>
+      <div class="bar-track"><div class="bar-fill gold" style="width:27%"></div></div>
+    </div>
+    <div class="bar-item">
+      <div class="bar-label"><span>Bireuen</span><span>150 paket</span></div>
+      <div class="bar-track"><div class="bar-fill navy" style="width:20%"></div></div>
+    </div>
+    <div class="bar-item">
+      <div class="bar-label"><span>Subulussalam</span><span>120 paket</span></div>
+      <div class="bar-track"><div class="bar-fill navy" style="width:16%"></div></div>
+    </div>
+    <div class="bar-item">
+      <div class="bar-label"><span>Aceh Besar</span><span>200 paket</span></div>
+      <div class="bar-track"><div class="bar-fill navy" style="width:27%"></div></div>
+    </div>
+  </div>
+  <div class="chart-card">
+    <h3>💰 Nilai Bantuan (Rp)</h3>
+    <div style="display:flex; flex-direction:column; height:calc(100% - 40px); justify-content:center;">
+      <div style="text-align:center; margin-bottom:16px;">
+        <div style="font-size:32px; font-weight:800; color:var(--navy);">Rp 258 Juta</div>
+        <div style="font-size:13px; color:var(--text2);">Total nilai bantuan tersalurkan & direncanakan</div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div style="background:#e8f5ec; padding:16px; border-radius:8px; text-align:center;">
+          <div style="font-size:20px; font-weight:800; color:var(--green);">Rp 157,5 Jt</div>
+          <div style="font-size:11px; color:var(--text2);">✅ Tersalurkan</div>
+        </div>
+        <div style="background:var(--gold-light, #fef7e6); padding:16px; border-radius:8px; text-align:center;">
+          <div style="font-size:20px; font-weight:800; color:#b07d14;">Rp 100,5 Jt</div>
+          <div style="font-size:11px; color:var(--text2);">📋 Dalam Proses</div>
+        </div>
+      </div>
+      <div style="margin-top:16px; background:#f8f9fa; border-radius:8px; padding:16px;">
+        <div style="font-size:13px; font-weight:600; margin-bottom:8px;">📍 Jangkauan Wilayah</div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <span style="padding:4px 10px; background:white; border-radius:6px; font-size:12px; border:1px solid var(--border);">🏛️ 6 Kabupaten/Kota</span>
+          <span style="padding:4px 10px; background:white; border-radius:6px; font-size:12px; border:1px solid var(--border);">📌 13 Kecamatan</span>
+          <span style="padding:4px 10px; background:white; border-radius:6px; font-size:12px; border:1px solid var(--border);">👥 48 Gampong</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="text-align:center; margin-top:32px; padding:16px; color:var(--text2); font-size:13px;">
+  PEDULI YPKM — Yayasan Pelangi Kesejahteraan Masyarakat &bull; peduli.ypkm.info
+</div>
+</div>
+
+<script>
+const map = L.map('map', {
+  center: [4.9, 96.5],
+  zoom: 8,
+  zoomControl: true
+});
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap',
+  maxZoom: 18
+}).addTo(map);
+
+// Kantor YPKM
+L.marker([4.92, 96.50], {
+  icon: L.divIcon({ html:'🏢', className:'', iconSize:[24,24] })
+}).addTo(map).bindPopup('<b>📍 Kantor YPKM</b><br>Banda Aceh');
+
+// Distribusi data
+const data = [
+  { name:'Aceh Tamiang (Sekerak)', lat:4.25, lng:97.95, paket:500, nilai:'Rp 75 Jt', status:'done', tgl:'25 Jul' },
+  { name:'Aceh Tamiang (Karang Baru)', lat:4.30, lng:97.85, paket:250, nilai:'Rp 37,5 Jt', status:'done', tgl:'25 Jul' },
+  { name:'Pidie (Mutiara)', lat:5.25, lng:95.95, paket:300, nilai:'Rp 45 Jt', status:'progress', tgl:'28 Jul' },
+  { name:'Aceh Utara (Lhoksukon)', lat:5.05, lng:97.30, paket:200, nilai:'Rp 30 Jt', status:'progress', tgl:'30 Jul' },
+  { name:'Bireuen (Jeunieb)', lat:5.20, lng:96.70, paket:150, nilai:'Rp 22,5 Jt', status:'plan', tgl:'2 Agu' },
+  { name:'Subulussalam (Penanggalan)', lat:2.65, lng:98.00, paket:120, nilai:'Rp 18 Jt', status:'plan', tgl:'5 Agu' },
+  { name:'Aceh Besar (Indrapuri)', lat:5.40, lng:95.55, paket:200, nilai:'Rp 30 Jt', status:'plan', tgl:'10 Agu' }
+];
+
+const colors = { done:'#017723', progress:'#e5a820', plan:'#00034a' };
+
+data.forEach(d => {
+  const marker = L.circleMarker([d.lat, d.lng], {
+    radius: d.paket / 30,
+    fillColor: colors[d.status],
+    color: 'white',
+    weight: 2,
+    opacity: 0.9,
+    fillOpacity: 0.7
+  }).addTo(map);
+  
+  marker.bindPopup(`
+    <b>${d.name}</b><br>
+    📦 ${d.paket} paket &middot; 💰 ${d.nilai}<br>
+    📅 ${d.tgl} &middot; ${d.status === 'done' ? '✅ Selesai' : d.status === 'progress' ? '⏳ Berlangsung' : '📋 Rencana'}
+  `);
+});
+
+// Fit map bounds
+const group = L.featureGroup(data.map(d => L.circleMarker([d.lat, d.lng]))).addTo(map);
+map.fitBounds(group.getBounds().pad(0.15));
+</script>
+</body>
+</html>
