@@ -1,185 +1,128 @@
-# Deployment Guide — OpenCode CLI
-## PEDULI YPKM — Sistem Informasi Penyaluran Bantuan Yayasan Pelangi Kesejahteraan Masyarakat
-**Kode:** DEP-01 | **Versi:** 1.0
+# Deployment Guide — PEDULI YPKM
 
----
+**Kode:** DEP-01 | **Versi:** 2.0 | **Diverifikasi:** 30 Juli 2026
 
-## 1. Prasyarat Server
+## 1. Prasyarat
 
-| Kebutuhan | Spesifikasi |
-|:---|---|
-| 1 | OS | Ubuntu 22.04 / Debian 12 |
-| 2 | CPU | 2 core |
-| 3 | RAM | 4 GB |
-| 4 | Disk | 20 GB |
-| 5 | Domain | peduli.ypkm.info |
-| 6 | Web Server | Nginx |
-| 7 | Database | MySQL 8+ |
-| 8 | PHP | 8.2+ |
-| 9 | Composer | Latest |
-| 10 | Node.js | 20+ (untuk build asset) |
+| Komponen | Minimum/ketentuan |
+|---|---|
+| PHP | 8.3+ |
+| Ekstensi | `fileinfo`, `pdo_mysql`; `pdo_sqlite` untuk test |
+| Composer | 2.x |
+| Database | MySQL 8+ produksi; SQLite untuk development/test |
+| Web server | Nginx/Apache, document root ke `public/` |
+| Git | Working tree dan `.git` dapat ditulis user deployment |
 
-## 2. Lingkungan Pengembangan (via OpenCode)
+## 2. Fresh clone development
 
 ```bash
-# 1. Clone/Akses project di OpenCode terminal
-cd /home/ali/hermes-workspace/ypkm-aplikasi
-
-# 2. Buat project Laravel
-composer create-project laravel/laravel .
-
-# 3. Install packages
-composer require laravel/breeze
-php artisan breeze:install blade
-npm install && npm run build
-
-# 4. Konfigurasi database (cek .env)
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=ypkm
-DB_USERNAME=ypkm_user
-DB_PASSWORD=********
+git clone https://github.com/alibungker/ypkmapp.git
+cd ypkmapp
+bash setup-local.sh
 ```
 
-## 3. Struktur Database
+Hasil yang wajib terlihat:
 
-```sql
-CREATE DATABASE ypkm CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'ypkm_user'@'localhost' IDENTIFIED BY 'password';
-GRANT ALL ON ypkm.* TO 'ypkm_user'@'localhost';
-FLUSH PRIVILEGES;
-```
+- migration `000000`–`000014` berhasil;
+- master Aceh: 6.810 wilayah dan 28 boundary;
+- seluruh feature test lulus.
+
+Konfigurasi lokal menggunakan `.env.example` dan `database/database.sqlite`. Jangan menyalin `.env` produksi ke development.
+
+## 3. Instalasi produksi baru
 
 ```bash
-# Jalankan migration
-php artisan migrate
-```
-
-## 4. Deployment ke Production
-
-> **Mekanisme aktif 30 Juli 2026:** repository masih menggunakan source custom pada `src/`. Jalankan `git pull --ff-only origin main` lalu `bash deploy.sh`. Script menyalin migration/model/controller/middleware/view/test, mengganti `routes/web.php` dengan entrypoint terversi untuk mencegah route duplikat, menjalankan migration, membersihkan cache, dan menerapkan permission minimum. Migrasi ke repository Laravel penuh direncanakan pada Tahap 3.
-
-### 4.1 Export dari Development
-```bash
-# Buat archive project
-cd /home/ali/hermes-workspace
-tar -czf peduli-ypkm.tar.gz ypkm-aplikasi/
-```
-
-### 4.2 Deploy via rsync/scp ke VPS
-```bash
-# Upload ke server
-scp peduli-ypkm.tar.gz user@vps-server:/var/www/
-
-# Di server VPS
-cd /var/www
-tar -xzf peduli-ypkm.tar.gz
-cd peduli-ypkm
-
-# Copy .env production
+git clone https://github.com/alibungker/ypkmapp.git /www/wwwroot/peduli.ypkm.info
+cd /www/wwwroot/peduli.ypkm.info
+composer install --no-interaction --prefer-dist --optimize-autoloader
 cp .env.example .env
-# Edit: DB, APP_URL, APP_ENV=production, APP_DEBUG=false
+php artisan key:generate
+# Isi APP_ENV=production, APP_DEBUG=false, APP_URL, database, mail, dan session pada .env
+bash deploy.sh
+php artisan db:seed --class='Database\Seeders\WilayahAcehSeeder' --force
+php artisan test --do-not-cache-result
+```
 
-# Install dependencies
-composer install --optimize-autoloader --no-dev
-npm install && npm run build
+## 4. Deployment pembaruan
 
-# Cache
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+### 4.1 Backup
 
-# Storage link
-php artisan storage:link
+Sebelum migration atau perubahan schema:
 
-# Permission minimum
-chown -R www:www storage bootstrap/cache
+```bash
+STAMP=$(date +%Y%m%d-%H%M%S)
+mkdir -p /home/ali/backups/peduli-ypkm/$STAMP
+# Dump database dengan akun yang memperoleh kredensial melalui .env/vault, bukan ditulis di command history.
+tar -czf /home/ali/backups/peduli-ypkm/$STAMP/source-storage.tgz src storage/app/public
+```
+
+### 4.2 Deploy
+
+```bash
+cd /www/wwwroot/peduli.ypkm.info
+git pull --ff-only origin main
+bash deploy.sh
+php artisan test --do-not-cache-result
+```
+
+`deploy.sh`:
+
+1. memvalidasi `.env`, `vendor`, dan file wajib;
+2. menyalin migration, model, controller, middleware, view, test, dan aset dari `src/`;
+3. memasang entrypoint route versioned;
+4. memperbarui Composer autoload;
+5. menjalankan migration;
+6. membersihkan cache;
+7. memastikan storage link;
+8. menerapkan permission minimum.
+
+## 5. Ownership dan permission
+
+Gunakan satu user deployment secara konsisten. Produksi aktif menggunakan `www:www` untuk root aplikasi, `.git`, `vendor`, `storage`, dan `bootstrap/cache`.
+
+```bash
+chown -R www:www /www/wwwroot/peduli.ypkm.info/.git \
+    /www/wwwroot/peduli.ypkm.info/vendor \
+    /www/wwwroot/peduli.ypkm.info/storage \
+    /www/wwwroot/peduli.ypkm.info/bootstrap/cache
 find storage bootstrap/cache -type d -exec chmod 775 {} \;
 find storage bootstrap/cache -type f -exec chmod 664 {} \;
 chmod 640 .env
-
-# Queue worker (background)
-php artisan queue:work --daemon &
 ```
 
-### 4.3 Konfigurasi Nginx
+> Jangan melakukan `chown -R` tanpa pengecualian terhadap file panel seperti `.user.ini`, dan jangan menggunakan `chmod -R 777`.
 
-```nginx
-server {
-    listen 80;
-    server_name peduli.ypkm.info;
-    root /var/www/peduli-ypkm/public;
-
-    add_header X-Frame-Options "SAMEORIGIN";
-    add_header X-Content-Type-Options "nosniff";
-
-    index index.php;
-
-    charset utf-8;
-
-    location / {
-        try_files $uri $uri/ /index.php?$query_string;
-    }
-
-    location = /favicon.ico { access_log off; log_not_found off; }
-    location = /robots.txt  { access_log off; log_not_found off; }
-
-    error_page 404 /index.php;
-
-    location ~ \.php$ {
-        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
-        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
-        include fastcgi_params;
-    }
-
-    location ~ /\.(?!well-known).* {
-        deny all;
-    }
-}
-```
+## 6. Verifikasi pascadeploy
 
 ```bash
-# Aktifkan site
-ln -s /etc/nginx/sites-available/ypkm /etc/nginx/sites-enabled/
-nginx -t && systemctl reload nginx
-
-# SSL (LetsEncrypt)
-certbot --nginx -d peduli.ypkm.info
+php artisan migrate:status
+php artisan route:list --except-vendor
+php artisan test --do-not-cache-result
+git rev-parse HEAD
+git rev-parse origin/main
+git status --porcelain --untracked-files=no
 ```
 
-## 5. Backup
+Smoke test wajib:
 
-```bash
-# Backup database
-mysqldump -u ypkm_user -p ypkm > /backup/ypkm-$(date +%Y%m%d).sql
-
-# Backup file
-rsync -av /var/www/peduli-ypkm/storage /backup/storage-$(date +%Y%m%d)
-
-# Cron job harian
-0 3 * * * /usr/bin/mysqldump -u ypkm_user -p'password' ypkm > /backup/db/ypkm-$(date +\%Y\%m\%d).sql
-```
-
-## 6. Monitoring
-
-```bash
-# Cek log aplikasi
-tail -f /var/www/peduli-ypkm/storage/logs/laravel.log
-
-# Cek queue worker
-ps aux | grep queue:work
-
-# Cek resource
-htop
-```
+- Admin: `/peta`, `/laporan`, `/penerima`, detail Distribusi = HTTP 200;
+- Ketua: data hanya kelompok sendiri; `/laporan` = HTTP 403;
+- Relawan: `/peta` dan `/relawan` = HTTP 200 sesuai wilayah;
+- `/register` = HTTP 404;
+- upload dan penghapusan bukti Distribusi berhasil;
+- tidak ada `production.ERROR` baru.
 
 ## 7. Rollback
 
 ```bash
-# Simpan versi sebelumnya
-mv /var/www/peduli-ypkm /var/www/peduli-ypkm-rollback-$(date +%Y%m%d)
-
-# Restore dari backup
-tar -xzf /backup/peduli-ypkm-20260729.tar.gz -C /var/www/
+cd /www/wwwroot/peduli.ypkm.info
+git log --oneline -10
+git checkout <commit-terakhir-yang-stabil>
+bash deploy.sh
 ```
+
+Jika migration mengubah data/schema, pulihkan database dari backup yang dibuat sebelum deployment. Jangan menjalankan `migrate:rollback` di produksi tanpa membaca method `down()` dan menilai dampak kehilangan data.
+
+## 8. CI
+
+Workflow `.github/workflows/ci.yml` berjalan pada push/PR ke `main` dan membangun aplikasi dari fresh checkout menggunakan SQLite terisolasi. Deployment tidak boleh dianggap selesai bila CI atau test produksi gagal.

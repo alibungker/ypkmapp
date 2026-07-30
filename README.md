@@ -1,109 +1,94 @@
-# PEDULI YPKM v1.1
+# PEDULI YPKM
 
-**Pendataan & Distribusi Untuk Layanan Insani**
-Yayasan Pelangi Kesejahteraan Masyarakat
+**Pendataan & Distribusi untuk Layanan Insani**
+Yayasan Pelangi Kesejahteraan Masyarakat — [peduli.ypkm.info](https://peduli.ypkm.info)
 
-## 🚀 Deploy via OpenCode
+## Status
 
-### 1. Clone ke Server
+Aplikasi Laravel dengan RBAC **Admin**, **Relawan**, dan **Ketua Kelompok**. Source aplikasi berada di `src/`, sedangkan scaffold Laravel, dependency lock, master wilayah Aceh, setup fresh clone, dan CI telah terversi di repository ini.
+
+## Fitur aktif
+
+- penerima dan kelompok dengan scope kelompok/wilayah;
+- verifikasi oleh Admin/Relawan;
+- distribusi, alokasi penerima terverifikasi, tanda terima, dan upload bukti JPG/PNG/PDF maksimal 5 MB;
+- filter cascading Kabupaten → Kecamatan → Desa;
+- peta distribusi dan boundary wilayah berbasis database;
+- laporan dinamis, filter periode/wilayah, cetak browser, dan export CSV;
+- keuangan, barang bantuan, dan biaya operasional;
+- automated feature tests pada SQLite terisolasi.
+
+## Fresh clone untuk development
+
+Prasyarat: PHP **8.3+**, Composer 2, ekstensi `fileinfo` dan `pdo_sqlite`.
+
+```bash
+git clone https://github.com/alibungker/ypkmapp.git
+cd ypkmapp
+bash setup-local.sh
+```
+
+`setup-local.sh` akan:
+
+1. memasang dependency dari `composer.lock`;
+2. membuat `.env` lokal dan SQLite;
+3. menyalin source `src/` ke runtime Laravel;
+4. menjalankan seluruh migration;
+5. mengimpor **6.810 wilayah Aceh** dan **28 boundary**;
+6. menjalankan seluruh automated test.
+
+## Deployment produksi
 
 ```bash
 cd /www/wwwroot/peduli.ypkm.info
-
-# Clone repo
-git clone https://github.com/alibungker/ypkmapp.git .
-# atau: git pull origin main
-```
-
-### 2. Buat Project Laravel
-
-```bash
-# Buat project Laravel baru
-composer create-project laravel/laravel tmp
-cp -r tmp/* ./
-rm -rf tmp
-
-# Install Breeze (autentikasi)
-composer require laravel/breeze
-php artisan breeze:install blade
-npm install && npm run build
-```
-
-### 3. Deploy Source Code Aplikasi
-
-```bash
-# Dari root runtime Laravel
+git pull --ff-only origin main
 bash deploy.sh
+php artisan test --do-not-cache-result
 ```
 
-`deploy.sh` menyalin source custom dari `src/`, memasang entrypoint route terversi, menjalankan migration, membersihkan cache, menyalin automated tests, dan mengatur permission minimum. Jangan menyalin `src/routes/web.php` langsung ke `routes/web.php` karena entrypoint runtime juga harus memuat route autentikasi.
+`deploy.sh` memerlukan `.env` dan `vendor/` yang sudah tersedia. Script menjalankan migration, membersihkan cache, memastikan storage link, serta menerapkan permission minimum pada `storage`, `bootstrap/cache`, dan `.env`.
 
-### 4. Konfigurasi Database
+> Jangan gunakan `chmod -R 777`. Jalankan Git dan deployment dengan satu akun deployment yang konsisten; produksi saat ini memakai user/group `www:www` untuk working tree, `.git`, `vendor`, dan storage.
 
-Edit `.env`:
-```env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=peduli_ypkm
-DB_USERNAME=root
-DB_PASSWORD=yourpassword
-```
+## Master wilayah
+
+Data versioned:
+
+- `database/data/wilayah-aceh.csv.gz` — 6.810 record;
+- `database/data/wilayah-boundaries-aceh.jsonl.gz` — 28 record.
+
+Import idempotent:
 
 ```bash
-# Buat database di phpMyAdmin/aaPanel
-# Lalu jalankan:
-php artisan migrate
+php artisan db:seed --class='Database\Seeders\WilayahAcehSeeder' --force
 ```
 
-### 5. Storage & Cache
+Seeder memverifikasi jumlah record dan melakukan `upsert`, sehingga dapat dipakai pada MySQL maupun SQLite.
+
+## Testing dan CI
 
 ```bash
-php artisan storage:link
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-find storage bootstrap/cache -type d -exec chmod 775 {} \;
-find storage bootstrap/cache -type f -exec chmod 664 {} \;
-chmod 640 .env
+php artisan test --do-not-cache-result
 ```
 
-### 6. Selesai!
+GitHub Actions: `.github/workflows/ci.yml`. Pipeline memvalidasi Composer, membangun runtime SQLite dari fresh checkout, mengimpor master wilayah, dan menjalankan test suite.
 
-Akses: https://peduli.ypkm.info
+## Struktur utama
 
-## 📁 Struktur Source Code
-
+```text
+src/                    # source aplikasi custom
+app/, bootstrap/, config/ # scaffold Laravel terversi
+database/data/          # master wilayah terkompresi
+database/seeders/       # importer idempotent
+.github/workflows/      # CI
+setup-local.sh          # bootstrap fresh clone
+deploy.sh               # deployment runtime
 ```
-src/
-├── app/Models/          # Model Eloquent
-├── database/migrations/ # Migrasi tabel
-├── routes/              # Route files
-├── resources/views/     # Blade templates
-└── public/              # Static files
-```
 
-## 🗄️ Database Tables
+## Brand
 
-| Table | Keterangan |
+| Elemen | Warna |
 |---|---|
-| users | Admin, relawan, ketua kelompok |
-| penerimas | Data penerima bantuan |
-| kelompoks | Kelompok penerima |
-| distribusis | Jadwal distribusi |
-| penerima_distribusi | Pivot penerima-distribusi |
-| barang_bantuans | Katalog barang |
-| stok_barangs | Stok inventory |
-| distribusi_items | Barang per distribusi |
-| dana_donaturs | Pemasukan donatur |
-| biaya_operasionals | Biaya lapangan |
-| anggarans | Rencana vs realisasi |
-| relawans | Data relawan |
-| logs | Audit trail |
-
-## 🎨 Brand
-
-- **Navy:** #00034a
-- **Green:** #017723
-- **Gold:** #e5a820
-- **Domain:** peduli.ypkm.info
+| Navy | `#00034a` |
+| Green | `#017723` |
+| Gold | `#e5a820` |

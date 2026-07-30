@@ -1,111 +1,85 @@
-# Test Plan (TP)
-## PEDULI YPKM — Sistem Informasi Penyaluran Bantuan Yayasan Pelangi Kesejahteraan Masyarakat
-**Kode:** TP-01 | **Versi:** 1.0
+# Test Plan — PEDULI YPKM
 
----
+**Kode:** TP-01 | **Versi:** 2.0 | **Diverifikasi:** 30 Juli 2026
 
-## 1. Skenario Testing
+## 1. Strategi
 
-### 1.1 Autentikasi & Role
-| ID | Skenario | Input | Expected |
-|:---|:---|---:|:---|
-| T-01 | Login Admin sukses | Email + password valid | Redirect ke dashboard admin |
-| T-02 | Login gagal | Password salah | Pesan error |
-| T-03 | Relawan akses admin panel | Relawan login | 403 Forbidden |
-| T-04 | Logout | Klik logout | Redirect ke login |
+| Lapisan | Metode |
+|---|---|
+| Otomatis | PHPUnit feature tests, SQLite `:memory:`, `RefreshDatabase` |
+| Reproducibility | Fresh clone → Composer → migration → master wilayah → test |
+| Produksi | Test terisolasi + authenticated smoke test tanpa merusak data aktif |
+| CI | GitHub Actions pada push/PR ke `main` |
 
-### 1.2 Manajemen Penerima
-| ID | Skenario | Expected |
-|:---:|:---|---:|
-| T-05 | Tambah penerima via form admin | Data tersimpan |
-| T-06 | Tambah penerima dengan NIK duplikat | Tolak, pesan duplikat |
-| T-07 | Verifikasi penerima | Status berubah jadi terverifikasi |
-| T-08 | Tolak penerima | Status ditolak, catatan terisi |
-| T-09 | Edit data penerima | Data berubah |
-| T-10 | Hapus penerima | Data soft-deleted |
-| T-11 | Cari penerima (nama/NIK) | Hasil sesuai filter |
-| T-12 | Import Excel | 100 data masuk dalam < 5 detik |
+Automated test tidak boleh memakai database produksi. Konfigurasi `phpunit.xml` memaksa `DB_CONNECTION=sqlite` dan `DB_DATABASE=:memory:`.
 
-### 1.7 Manajemen Keuangan
-| ID | Skenario | Expected |
-|:---:|:---|---|
-| T-13 | Catat dana donatur baru (tunai) | Tersimpan, total dana bertambah |
-| T-14 | Catat dana donatur 6x bertahap | Semua masuk, total akurat |
-| T-15 | Buat anggaran per distribusi | Anggaran muncul |
-| T-16 | Catat biaya operasional | Biaya tercatat |
-| T-17 | Lihat rekap keuangan (dana masuk - pakai - sisa) | Angka balance |
+## 2. Automated tests aktif
 
-### 1.8 Peta Distribusi
-| ID | Skenario | Expected |
-|:---:|:---|---|
-| T-18 | Buka peta distribusi | Peta tampil dengan semua marker |
-| T-19 | Klik marker distribusi | Popup muncul (paket, nilai, status) |
-| T-20 | Filter peta berdasarkan status | Hanya marker sesuai status |
-| T-21 | Peta di perangkat mobile | Responsif, marker tetap terlihat |
+### `PhaseOneAccessTest`
 
-### 1.9 Distribusi
-| ID | Skenario | Expected |
-|:---:|:---|---|
-
-### 1.3 Manajemen Kelompok
-| ID | Skenario | Expected |
-|:---:|:---|---:|
-| T-13 | Buat kelompok baru | Kelompok muncul |
-| T-14 | Pindahkan penerima ke kelompok lain | Relasi berubah |
-| T-15 | Hapus kelompok (kosong) | Berhasil |
-| T-16 | Hapus kelompok (ada anggota) | Ditolak |
-
-### 1.4 Registrasi Mandiri (Publik)
-| ID | Skenario | Expected |
-|:---:|:---|---:|
-| T-17 | Daftar via form publik | Sukses, status pending |
-| T-18 | Submit tanpa NIK | Validasi error |
-| T-19 | Submit dengan NIK duplikat | Pesan "sudah terdaftar" |
-
-### 1.5 Distribusi
-| ID | Skenario | Expected |
-|:---:|:---|---:|
-| T-20 | Buat jadwal distribusi baru | Jadwal muncul |
-| T-21 | Relawan tandai penerima sudah terima | Status berubah |
-| T-22 | Upload foto bukti | File tersimpan |
-| T-23 | Selesaikan distribusi | Status selesai |
-
-### 1.6 Laporan
-| ID | Skenario | Expected |
-|:---:|:---|---:|
-| T-24 | Lihat rekap per daerah | Data muncul per kelompok |
-| T-25 | Export Excel | File .xlsx terdownload |
-| T-26 | Filter data per periode | Hanya data dalam rentang |
-
-## 2. Alat Testing
-
-| Tool | Untuk |
-|:---|---|
-| PHPUnit | Unit test & feature test |
-| Laravel Dusk | Browser testing |
-| Postman | API testing |
-| Lighthouse | Performance audit |
-
-## 3. Automated Test Aktif
-
-File: `src/tests/Feature/PhaseOneAccessTest.php`
-
-| ID | Skenario | Status produksi 30-07-2026 |
+| ID | Skenario | Status |
 |---|---|---|
 | AT-01 | Ketua ditolak dari modul Relawan dan mutasi Admin | ✅ Lulus |
-| AT-02 | Relawan dapat mengakses operasional tetapi bukan User/Keuangan | ✅ Lulus |
+| AT-02 | Relawan dapat mengakses operasional tetapi bukan modul Admin | ✅ Lulus |
 | AT-03 | Ketua hanya melihat kelompok sendiri | ✅ Lulus |
 | AT-04 | Admin dapat mengakses modul pengelolaan | ✅ Lulus |
 
-Hasil terakhir: **4 test, 12 assertion, seluruhnya lulus** menggunakan database SQLite terisolasi melalui `RefreshDatabase`.
+### `PhaseTwoFeaturesTest`
 
-## 4. Kriteria Lolos
+| ID | Skenario | Status |
+|---|---|---|
+| AT-05 | Distribusi menormalisasi nilai opsional | ✅ Lulus |
+| AT-06 | Penerima terverifikasi dialokasikan ke Distribusi | ✅ Lulus |
+| AT-07 | Bukti JPG/PNG/PDF tervalidasi dan tersimpan | ✅ Lulus |
+| AT-08 | Peta dan laporan memakai data database | ✅ Lulus |
+| AT-09 | Export laporan CSV dapat diunduh | ✅ Lulus |
+| AT-10 | API cascading wilayah mengembalikan master yang benar | ✅ Lulus |
 
-- Automated test yang sudah diterapkan wajib lulus.
-- Tidak ada route method+URI duplikat.
-- Tidak ada error HTTP 500 pada smoke test halaman utama.
-- Scope kelompok/wilayah dan middleware role wajib menghasilkan 403 untuk akses tidak sah.
-- Skenario fitur yang belum diterapkan (import/export, filter peta, upload bukti) tetap berstatus **rencana**, bukan dianggap lulus.
-- Target render halaman < 3 detik dan tampilan mobile responsif.
+Hasil produksi terakhir: **8 test, 33 assertion, seluruhnya lulus**.
 
-**Warna Brand:** #00034a (Navy), #017723 (Green), #e5a820 (Gold)
+## 3. Fresh-clone test
+
+```bash
+bash setup-local.sh
+```
+
+Kriteria lulus:
+
+- dependency dipasang dari `composer.lock`;
+- migration `000000`–`000014` berhasil pada SQLite;
+- seeder memverifikasi 6.810 wilayah dan 28 boundary;
+- seluruh test lulus;
+- working tree tracked tetap bersih.
+
+## 4. Smoke test produksi
+
+| Role/fitur | Expected |
+|---|---|
+| Admin `/peta`, `/laporan`, `/penerima`, `/distribusi/{id}` | HTTP 200 |
+| Ketua `/peta` | HTTP 200, scoped kelompok |
+| Ketua `/laporan` | HTTP 403 |
+| Relawan `/peta`, `/relawan` | HTTP 200, scoped wilayah |
+| Registrasi publik `/register` | HTTP 404 |
+| Upload bukti Distribusi | File tersimpan, dapat direferensikan, dan terhapus bersama record |
+| Laravel log | Tidak ada `production.ERROR` baru |
+
+## 5. Skenario manual/regresi
+
+- login sukses/gagal dan logout;
+- CRUD Penerima, NIK unik, verifikasi, dan filter cascading;
+- CRUD Kelompok dan penolakan penghapusan/ubah relasi yang tidak aman;
+- tanda terima Distribusi serta larangan pindah kelompok setelah penerimaan;
+- laporan periode/wilayah dan validasi angka dana, biaya, serta saldo;
+- peta mobile, popup marker, boundary GeoJSON, dan link detail;
+- upload file tidak valid/lebih dari 5 MB harus ditolak;
+- akses ID langsung di luar kelompok/wilayah harus menghasilkan HTTP 403/404.
+
+## 6. Kriteria rilis
+
+- semua automated test dan CI hijau;
+- migration dan route list berhasil;
+- `HEAD`, `origin/main`, dan produksi sama;
+- tidak ada tracked changes di produksi;
+- backup sebelum migration tersedia;
+- smoke test role dan log lulus;
+- kredensial tidak berada dalam source, log, atau dokumentasi.

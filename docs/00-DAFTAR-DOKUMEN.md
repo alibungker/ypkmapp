@@ -15,11 +15,12 @@
 | 8 | DEP-01 | Deployment Guide (OpenCode) | 1.0 | ✅ Siap |
 | 9 | API-01 | API Specification | 1.1 | ✅ Siap |
 | 10 | UI-01 | UI/UX Wireframe | 1.0 | ✅ Siap |
-| 11 | MAP-01 | Peta Distribusi Interaktif | 1.0 | ⚠️ Sebagian dinamis |
+| 11 | MAP-01 | Peta Distribusi Interaktif | 2.0 | ✅ Dinamis + boundary |
 | 12 | AUDIT-01 | Audit Aplikasi Produksi vs GitHub — 30 Juli 2026 | 1.0 | ✅ Selesai |
 | 13 | FIX-01 | Laporan Perbaikan Tahap 1 — Stabilitas dan RBAC | 1.0 | ✅ Terverifikasi |
+| 14 | FIX-02 | Perbaikan Tahap 2–3 dan Audit Akhir — 30 Juli 2026 | 1.0 | ✅ Terverifikasi produksi |
 
-> **Catatan audit:** Status “Siap” pada dokumen lama adalah status ketersediaan dokumen, bukan bukti seluruh requirement sudah diterapkan. Lihat `08-AUDIT-APLIKASI-2026-07-30.md` untuk gap implementasi terbaru.
+> **Catatan audit:** Status “Siap” pada dokumen lama adalah status ketersediaan dokumen. Audit awal terdapat pada `08-AUDIT-APLIKASI-2026-07-30.md`; status implementasi dan verifikasi terbaru terdapat pada `10-PERBAIKAN-TAHAP-2-3-DAN-AUDIT-AKHIR-2026-07-30.md`.
 
 > **Standar acuan:** ISO/IEC/IEEE 29148 (Requirements Engineering),
 > ISO 25010 (Quality Model), ISO/IEC 12207 (Lifecycle Processes)

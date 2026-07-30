@@ -1,6 +1,6 @@
 # Software Architecture Document (SAD)
 ## PEDULI YPKM — Sistem Informasi Penyaluran Bantuan Yayasan Pelangi Kesejahteraan Masyarakat
-**Kode:** SAD-01 | **Versi:** 1.0
+**Kode:** SAD-01 | **Versi:** 2.0
 
 ---
 
@@ -50,16 +50,14 @@
 
 | Layer | Teknologi | Alasan |
 |:---|---|:---|
-| **Backend** | Laravel 11.x | Familiar, tool lengkap, ORM Eloquent |
-| **Database** | MySQL 8+ | Reliabel, support geospasial |
-| **Frontend Admin** | Laravel Blade + Tailwind CSS | Cepat, tanpa SPA |
-| **Frontend Publik** | Blade + Tailwind | SEO friendly |
-| **Mobile** | PWA (Service Worker) | Bisa offline, tanpa Play Store |
-| **Storage** | Local server / S3 | Foto bukti distribusi |
-| **Auth** | Laravel Breeze / Jetstream | Role bawaan |
-| **Queue** | Laravel Queue + Database | Notifikasi async |
-| **Map** | Leaflet.js + OpenStreetMap | Peta distribusi gratis |
-| **Server** | VPS Proxmox (existing) | Sudah ada infra |
+| **Backend** | Laravel 13.x / PHP 8.3+ | Framework, ORM Eloquent, validation, dan middleware |
+| **Database** | MySQL 8+; SQLite untuk test | Produksi relasional dan test terisolasi |
+| **Frontend** | Laravel Blade + CSS custom | Server-rendered, ringan, dan sesuai brand |
+| **Storage** | Laravel disk `public` | Bukti Distribusi JPG/PNG/PDF tervalidasi |
+| **Auth** | Session Laravel + route login/logout terbatas | Registrasi publik dinonaktifkan |
+| **Map** | Leaflet.js + OpenStreetMap + GeoJSON | Marker dan boundary wilayah |
+| **CI** | GitHub Actions | Fresh checkout, migration, seeder, test |
+| **Server** | VPS Proxmox / Nginx / PHP-FPM | Infrastruktur produksi aktif |
 
 ## 3. Struktur Database (Entity Overview)
 
@@ -92,6 +90,9 @@
 - CSRF protection Laravel.
 - Satu akun Ketua per kelompok melalui unique index.
 - Route runtime terversi dan pemeriksaan route duplikat.
+- Registrasi publik dinonaktifkan; hanya login/logout yang tersedia.
+- Upload bukti dibatasi MIME JPG/JPEG/PNG/PDF dan ukuran 5 MB.
+- Master wilayah versioned, importer idempotent, automated tests, dan CI fresh-checkout.
 
 ### Kontrol yang masih direncanakan
 
