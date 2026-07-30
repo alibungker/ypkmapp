@@ -20,7 +20,7 @@ class Penerima extends Model
 
 class Kelompok extends Model
 {
-    protected $fillable = ['nama', 'kode', 'daerah', 'kecamatan', 'ketua_id', 'jumlah_anggota', 'description'];
+    protected $fillable = ['nama', 'kode', 'daerah', 'kecamatan', 'desa', 'ketua_id', 'jumlah_anggota', 'description'];
 
     public function ketua() { return $this->belongsTo(Penerima::class, 'ketua_id'); }
     public function penerima() { return $this->hasMany(Penerima::class); }

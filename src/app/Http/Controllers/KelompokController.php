@@ -4,13 +4,18 @@ namespace App\Http\Controllers;
 use App\Models\Kelompok;
 use App\Models\Penerima;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class KelompokController extends Controller
 {
     public function index()
     {
         $kelompoks = Kelompok::withCount('penerima')->with('ketua')->orderBy('daerah')->get();
-        return view('kelompok.index', compact('kelompoks'));
+        $kabupatens = DB::table('wilayah_boundaries')
+            ->where('kode', 'LIKE', '11.%')
+            ->orderBy('nama')
+            ->pluck('nama', 'kode');
+        return view('kelompok.index', compact('kelompoks', 'kabupatens'));
     }
 
     public function store(Request $request)
@@ -20,6 +25,7 @@ class KelompokController extends Controller
             'kode' => 'required|unique:kelompoks,kode',
             'daerah' => 'required',
             'kecamatan' => 'nullable',
+            'desa' => 'nullable',
             'description' => 'nullable',
         ]);
         $data['jumlah_anggota'] = 0;
@@ -34,6 +40,7 @@ class KelompokController extends Controller
             'kode' => 'required|unique:kelompoks,kode,' . $kelompok->id,
             'daerah' => 'required',
             'kecamatan' => 'nullable',
+            'desa' => 'nullable',
             'ketua_id' => 'nullable|exists:penerimas,id',
             'description' => 'nullable',
         ]);

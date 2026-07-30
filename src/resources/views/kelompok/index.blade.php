@@ -24,11 +24,20 @@
                 </div>
                 <div style="margin-bottom:12px;">
                     <label class="form-label">Kabupaten/Daerah <span style="color:#dc2626;">*</span></label>
-                    <input type="text" name="daerah" class="form-input" required value="{{ old('daerah') }}" placeholder="Aceh Tamiang">
+                    <select name="daerah" class="form-input" required>
+                        <option value="">— Pilih Kabupaten/Kota —</option>
+                        @foreach($kabupatens ?? [] as $kode => $nama)
+                        <option value="{{ preg_replace('/^(Kabupaten|Kota)\s/', '', $nama) }}" {{ old('daerah') == preg_replace('/^(Kabupaten|Kota)\s/', '', $nama) ? 'selected' : '' }}>{{ $nama }}</option>
+                        @endforeach
+                    </select>
                 </div>
                 <div style="margin-bottom:12px;">
                     <label class="form-label">Kecamatan</label>
                     <input type="text" name="kecamatan" class="form-input" value="{{ old('kecamatan') }}" placeholder="Sekerak">
+                </div>
+                <div style="margin-bottom:12px;">
+                    <label class="form-label">Desa</label>
+                    <input type="text" name="desa" class="form-input" value="{{ old('desa') }}" placeholder="Juar">
                 </div>
                 <div style="margin-bottom:12px;">
                     <label class="form-label">Keterangan</label>
@@ -57,7 +66,7 @@
                         <td>👥 {{ number_format($k->penerima_count ?? 0) }}</td>
                         <td>{{ $k->ketua->nama ?? '-' }}</td>
                         <td style="white-space:nowrap;">
-                            <button onclick="editKelompok({{ $k->id }}, '{{ addslashes($k->nama) }}', '{{ addslashes($k->kode) }}', '{{ addslashes($k->daerah) }}', '{{ addslashes($k->kecamatan ?? '') }}', {{ $k->ketua_id ?? 'null' }}, '{{ addslashes($k->description ?? '') }}')" style="color:#00034a;border:none;background:none;cursor:pointer;font-size:13px;padding:4px 8px;">✏️ Edit</button>
+                            <button onclick="editKelompok({{ $k->id }}, '{{ addslashes($k->nama) }}', '{{ addslashes($k->kode) }}', '{{ addslashes($k->daerah) }}', '{{ addslashes($k->kecamatan ?? '') }}', '{{ addslashes($k->desa ?? '') }}', {{ $k->ketua_id ?? 'null' }}, '{{ addslashes($k->description ?? '') }}')" style="color:#00034a;border:none;background:none;cursor:pointer;font-size:13px;padding:4px 8px;">✏️ Edit</button>
                             <form method="POST" action="{{ route('kelompok.destroy', $k) }}" style="display:inline;" onsubmit="return confirm('Hapus kelompok ini?')">
                                 @csrf @method('DELETE')
                                 <button style="color:#dc2626;border:none;background:none;cursor:pointer;font-size:13px;padding:4px 8px;">🗑️</button>
@@ -90,7 +99,12 @@
                 </div>
                 <div>
                     <label class="form-label">Daerah</label>
-                    <input id="e_daerah" name="daerah" class="form-input" required>
+                    <select id="e_daerah" name="daerah" class="form-input" required>
+                        <option value="">— Pilih —</option>
+                        @foreach($kabupatens ?? [] as $kode => $nama)
+                        <option value="{{ preg_replace('/^(Kabupaten|Kota)\s/', '', $nama) }}">{{ $nama }}</option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
@@ -99,11 +113,15 @@
                     <input id="e_kecamatan" name="kecamatan" class="form-input">
                 </div>
                 <div>
-                    <label class="form-label">Ketua Kelompok</label>
-                    <select id="e_ketua" name="ketua_id" class="form-input">
-                        <option value="">— Pilih dari anggota —</option>
-                    </select>
+                    <label class="form-label">Desa</label>
+                    <input id="e_desa" name="desa" class="form-input">
                 </div>
+            </div>
+            <div style="margin-top:12px;">
+                <label class="form-label">Ketua Kelompok</label>
+                <select id="e_ketua" name="ketua_id" class="form-input">
+                    <option value="">— Pilih dari anggota —</option>
+                </select>
             </div>
             <div style="margin-top:12px;">
                 <label class="form-label">Keterangan</label>
@@ -120,12 +138,13 @@
 
 @section('scripts')
 <script>
-function editKelompok(id, nama, kode, daerah, kecamatan, ketuaId, desc) {
+function editKelompok(id, nama, kode, daerah, kecamatan, desa, ketuaId, desc) {
     document.getElementById('editForm').action = '/kelompok/' + id;
     document.getElementById('e_nama').value = nama;
     document.getElementById('e_kode').value = kode;
     document.getElementById('e_daerah').value = daerah;
     document.getElementById('e_kecamatan').value = kecamatan;
+    document.getElementById('e_desa').value = desa;
     document.getElementById('e_desc').value = desc;
     document.getElementById('editModal').style.display = 'flex';
 
