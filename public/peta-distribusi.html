@@ -241,7 +241,7 @@ data.forEach(d => {
 });
 
 // Fit map bounds
-const group = L.featureGroup(data.map(d => L.circleMarker([d.lat, d.lng]))).addTo(map);
+const group = L.featureGroup(data.map(d => L.circleMarker([d.lat, d.lng])));
 map.fitBounds(group.getBounds().pad(0.15));
 </script>
 </body>
