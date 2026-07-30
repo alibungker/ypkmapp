@@ -66,6 +66,7 @@
             <a href="{{ route('peta.index') }}" class="nav-item {{ request()->routeIs('peta*') ? 'active' : '' }}">🗺️ <span>Peta</span></a>
             @if(auth()->check() && auth()->user()->isAdmin())
             <div style="margin:12px 8px 4px;font-size:11px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:1px;">Admin</div>
+            <a href="{{ route('users.index') }}" class="nav-item {{ request()->routeIs('users*') ? 'active' : '' }}">👥 <span>Users</span></a>
             <a href="{{ route('keuangan.index') }}" class="nav-item {{ request()->routeIs('keuangan*') ? 'active' : '' }}">💰 <span>Keuangan</span></a>
             <a href="{{ route('laporan.index') }}" class="nav-item {{ request()->routeIs('laporan*') ? 'active' : '' }}">📄 <span>Laporan</span></a>
             @endif

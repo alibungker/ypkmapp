@@ -85,15 +85,16 @@
                 @endif
             </div>
 
-            {{-- Panel Verifikasi (Admin / Relawan / Ketua Kelompok) --}}
-            @if($penerima->status == 'pending')
+            {{-- Panel Verifikasi (Relawan / Admin) — Ketua Kelompok TIDAK bisa verifikasi --}}
+            @if($penerima->status == 'pending' && !auth()->user()->isKetuaKelompok())
             <div style="margin-top:20px;padding:16px;background:#fef7e6;border:1px solid #f0dcae;border-radius:10px;">
-                <div style="font-size:14px;font-weight:600;margin-bottom:10px;">🔍 Verifikasi Penerima</div>
+                <div style="font-size:14px;font-weight:600;margin-bottom:10px;">🔍 Verifikasi Relawan</div>
+                <p style="font-size:12px;color:#6b7280;margin-bottom:10px;">Data diajukan oleh <strong>{{ $penerima->sumber_data == 'ketua_kelompok' ? 'Ketua Kelompok' : $penerima->sumber_data }}</strong>. Pastikan data sesuai KTP.</p>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;">
                     <form method="POST" action="{{ route('penerima.verify', $penerima) }}">
                         @csrf
                         <input type="hidden" name="status" value="terverifikasi">
-                        <button class="btn btn-sm" style="background:#017723;color:white;">✅ Setujui</button>
+                        <button class="btn btn-sm" style="background:#017723;color:white;">✅ Setujui (Verifikasi)</button>
                     </form>
                     <form method="POST" action="{{ route('penerima.verify', $penerima) }}" onsubmit="return confirm('Tolak penerima ini?')">
                         @csrf
@@ -102,15 +103,36 @@
                     </form>
                 </div>
             </div>
-            @elseif($penerima->status == 'ditolak')
-            <div style="margin-top:20px;">
-                <form method="POST" action="{{ route('penerima.verify', $penerima) }}">
+
+            {{-- Checklist TERIMA BANTUAN oleh relawan (setelah terverifikasi) --}}
+            @elseif($penerima->status == 'terverifikasi' && !auth()->user()->isKetuaKelompok())
+            <div style="margin-top:20px;padding:16px;background:#e8f5ec;border:1px solid #c6e6d0;border-radius:10px;">
+                <div style="font-size:14px;font-weight:600;margin-bottom:10px;">
+                    @if($penerima->terima_bantuan)
+                    ✅ PENERIMA SUDAH MENERIMA BANTUAN
+                    @else
+                    📋 Checklist Terima Bantuan
+                    @endif
+                </div>
+                <p style="font-size:12px;color:#6b7280;margin-bottom:10px;">
+                    @if($penerima->terima_bantuan)
+                    Telah dichecklist oleh relawan pada {{ is_object($penerima->terima_at) ? $penerima->terima_at->format('d M Y H:i') : date('d M Y H:i', strtotime($penerima->terima_at)) }}.
+                    @else
+                    Pastikan penerima sudah menerima bantuan secara langsung.
+                    @endif
+                </p>
+                <form method="POST" action="{{ route('penerima.terima-bantuan', $penerima) }}">
                     @csrf
-                    <input type="hidden" name="status" value="terverifikasi">
-                    <button class="btn btn-sm" style="background:#017723;color:white;">✅ Setujui Ulang</button>
+                    <button class="btn btn-sm" style="{{ $penerima->terima_bantuan ? 'background:#dc2626;color:white;' : 'background:#017723;color:white;' }}">
+                        {{ $penerima->terima_bantuan ? '↩️ Batalkan Checklist' : '✅ Terima Bantuan' }}
+                    </button>
                 </form>
             </div>
-            @endif
+            @elseif($penerima->status == 'terverifikasi' && auth()->user()->isKetuaKelompok())
+            <div style="margin-top:20px;padding:16px;background:#f0f0f0;border:1px solid #e5e7eb;border-radius:10px;">
+                <div style="font-size:14px;font-weight:600;">⏳ Menunggu Checklist Relawan</div>
+                <p style="font-size:12px;color:#6b7280;margin-top:4px;">Data sudah diverifikasi. Menunggu relawan melakukan checklist terima bantuan.</p>
+            </div>
         </div>
     </div>
 </div>

@@ -6,6 +6,7 @@ use App\Http\Controllers\PenerimaController;
 use App\Http\Controllers\KelompokController;
 use App\Http\Controllers\DistribusiController;
 use App\Http\Controllers\KeuanganController;
+use App\Http\Controllers\UserController;
 use App\Models\Distribusi;
 
 // ============================================================
@@ -48,9 +49,10 @@ Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Penerima — semua role bisa lihat & input; verifikasi utk admin/relawan/ketua diatur di UI
+    // Penerima — semua role bisa lihat & input; verifikasi utk admin/relawan
     Route::resource('penerima', PenerimaController::class);
     Route::post('penerima/{penerima}/verify', [PenerimaController::class, 'verify'])->name('penerima.verify');
+    Route::post('penerima/{penerima}/terima-bantuan', [PenerimaController::class, 'terimaBantuan'])->name('penerima.terima-bantuan');
 
     // Kelompok
     Route::resource('kelompok', KelompokController::class);
@@ -87,9 +89,12 @@ Route::middleware('auth')->group(function () {
     })->name('peta.index');
 
     // ============================================================
-    // KHUSUS ADMIN: Keuangan & Laporan
+    // KHUSUS ADMIN: User Management, Keuangan & Laporan
     // ============================================================
     Route::middleware(\App\Http\Middleware\AdminOnly::class)->group(function () {
+        // User Management (Ketua Kelompok & Relawan)
+        Route::resource('users', UserController::class);
+
         Route::prefix('keuangan')->name('keuangan.')->group(function () {
             Route::get('/', [KeuanganController::class, 'index'])->name('index');
             Route::post('dana', [KeuanganController::class, 'storeDana'])->name('dana.store');

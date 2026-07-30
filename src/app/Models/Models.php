@@ -10,11 +10,13 @@ class Penerima extends Model
         'alamat', 'provinsi', 'kabupaten', 'kecamatan', 'desa', 'rt_rw',
         'phone', 'jumlah_keluarga', 'pekerjaan', 'penghasilan', 'titik_koordinat',
         'foto_ktp', 'foto_kk', 'foto_rumah', 'sumber_data', 'status',
-        'catatan_verifikasi', 'verified_by', 'verified_at', 'kelompok_id'
+        'catatan_verifikasi', 'verified_by', 'verified_at', 'kelompok_id',
+        'terima_bantuan', 'terima_by', 'terima_at'
     ];
 
     public function kelompok() { return $this->belongsTo(Kelompok::class); }
     public function verifikator() { return $this->belongsTo(User::class, 'verified_by'); }
+    public function penerimaTerima() { return $this->belongsTo(User::class, 'terima_by'); }
     public function penerimaDistribusi() { return $this->hasMany(PenerimaDistribusi::class); }
 }
 

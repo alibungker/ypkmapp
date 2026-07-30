@@ -9,13 +9,39 @@ use Illuminate\Support\Facades\DB;
 
 class PenerimaController extends Controller
 {
+    // Terapkan kunci wilayah kerja user pada query penerima
+    private function applyWilayahLock($query)
+    {
+        $u = auth()->user();
+        if ($u && !$u->isAdmin()) {
+            if ($u->wilayah_kabupaten) $query->where('kabupaten', $u->wilayah_kabupaten);
+            if ($u->wilayah_kecamatan) $query->where('kecamatan', $u->wilayah_kecamatan);
+            if ($u->wilayah_desa) $query->where('desa', $u->wilayah_desa);
+        }
+        return $query;
+    }
+
+    // Cek apakah user boleh akses data penerima ini (sesuai kunci wilayah)
+    private function cekAksesWilayah(Penerima $penerima)
+    {
+        $u = auth()->user();
+        if (!$u || $u->isAdmin()) return true;
+        if ($u->wilayah_kabupaten && $penerima->kabupaten !== $u->wilayah_kabupaten) return false;
+        if ($u->wilayah_kecamatan && $penerima->kecamatan !== $u->wilayah_kecamatan) return false;
+        if ($u->wilayah_desa && $penerima->desa !== $u->wilayah_desa) return false;
+        return true;
+    }
+
     public function index(Request $request)
     {
         $query = Penerima::with('kelompok');
+        $this->applyWilayahLock($query);
 
         if ($request->search) {
-            $query->where('nama', 'like', "%{$request->search}%")
-                ->orWhere('nik', 'like', "%{$request->search}%");
+            $query->where(function ($q) use ($request) {
+                $q->where('nama', 'like', "%{$request->search}%")
+                  ->orWhere('nik', 'like', "%{$request->search}%");
+            });
         }
         if ($request->status) {
             $query->where('status', $request->status);
@@ -27,7 +53,7 @@ class PenerimaController extends Controller
             $query->where('kabupaten', $request->kabupaten);
         }
 
-        $penerima = $query->orderBy('created_at', 'desc')->paginate(20);
+        $penerima = $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
         $kelompoks = Kelompok::all();
         $kabupatens = DB::table('wilayah_boundaries')
             ->where('kode', 'LIKE', '11.%')
@@ -56,10 +82,29 @@ class PenerimaController extends Controller
             'kecamatan' => 'required',
             'desa' => 'required',
             'phone' => 'required',
+            'pekerjaan' => 'nullable',
             'jumlah_keluarga' => 'nullable|integer',
             'kelompok_id' => 'required|exists:kelompoks,id',
             'sumber_data' => 'required|in:mandiri,relawan,ketua_kelompok',
         ]);
+
+        // Validasi kunci wilayah: user terkunci tidak boleh input di luar wilayahnya
+        $u = auth()->user();
+        if ($u && !$u->isAdmin()) {
+            if ($u->wilayah_kabupaten && $data['kabupaten'] !== $u->wilayah_kabupaten) {
+                return back()->withInput()->withErrors(['kabupaten' => 'Anda hanya bisa input penerima di wilayah ' . $u->wilayahLabel()]);
+            }
+            if ($u->wilayah_kecamatan && $data['kecamatan'] !== $u->wilayah_kecamatan) {
+                return back()->withInput()->withErrors(['kecamatan' => 'Anda hanya bisa input penerima di wilayah ' . $u->wilayahLabel()]);
+            }
+            if ($u->wilayah_desa && $data['desa'] !== $u->wilayah_desa) {
+                return back()->withInput()->withErrors(['desa' => 'Anda hanya bisa input penerima di wilayah ' . $u->wilayahLabel()]);
+            }
+            // Ketua kelompok: data yang diinput otomatis bersumber ketua_kelompok & status pending
+            if ($u->isKetuaKelompok()) {
+                $data['sumber_data'] = 'ketua_kelompok';
+            }
+        }
 
         $data['status'] = 'pending';
         $data['provinsi'] = 'Aceh';
@@ -69,37 +114,62 @@ class PenerimaController extends Controller
         }
 
         Penerima::create($data);
-        return redirect()->route('penerima.index')->with('success', 'Data penerima berhasil ditambahkan.');
+        return redirect()->route('penerima.index')->with('success', 'Data penerima diajukan — menunggu verifikasi relawan.');
     }
 
     public function show(Penerima $penerima)
     {
-        $penerima->load('kelompok', 'verifikator', 'penerimaDistribusi.distribusi');
+        abort_unless($this->cekAksesWilayah($penerima), 403, 'Di luar wilayah kerja Anda.');
+        $penerima->load('kelompok', 'verifikator', 'penerimaTerima', 'penerimaDistribusi.distribusi');
         return view('penerima.show', compact('penerima'));
     }
 
     public function edit(Penerima $penerima)
     {
+        abort_unless($this->cekAksesWilayah($penerima), 403, 'Di luar wilayah kerja Anda.');
         $kelompoks = Kelompok::all();
         return view('penerima.form', compact('penerima', 'kelompoks'));
     }
 
     public function update(Request $request, Penerima $penerima)
     {
+        abort_unless($this->cekAksesWilayah($penerima), 403, 'Di luar wilayah kerja Anda.');
         $data = $request->validate([
             'nik' => 'required|unique:penerimas,nik,' . $penerima->id,
             'nama' => 'required',
+            'no_kk' => 'nullable',
+            'tempat_lahir' => 'nullable',
+            'tanggal_lahir' => 'nullable|date',
+            'jenis_kelamin' => 'nullable|in:L,P',
             'alamat' => 'required',
+            'kabupaten' => 'nullable',
+            'kecamatan' => 'nullable',
+            'desa' => 'nullable',
             'phone' => 'required',
+            'pekerjaan' => 'nullable',
+            'jumlah_keluarga' => 'nullable|integer',
             'kelompok_id' => 'required|exists:kelompoks,id',
+            'sumber_data' => 'nullable|in:mandiri,relawan,ketua_kelompok',
         ]);
 
         $penerima->update($data);
         return redirect()->route('penerima.index')->with('success', 'Data penerima diupdate.');
     }
 
+    public function destroy(Penerima $penerima)
+    {
+        abort_unless(auth()->user()->isAdmin(), 403, 'Hanya admin yang bisa menghapus.');
+        $penerima->delete();
+        return redirect()->route('penerima.index')->with('success', 'Data penerima dihapus.');
+    }
+
+    // Verifikasi oleh RELAWAN / ADMIN (ketua kelompok TIDAK boleh verifikasi)
     public function verify(Penerima $penerima)
     {
+        $u = auth()->user();
+        abort_if($u->isKetuaKelompok(), 403, 'Ketua kelompok tidak dapat memverifikasi. Verifikasi dilakukan relawan.');
+        abort_unless($this->cekAksesWilayah($penerima), 403, 'Di luar wilayah kerja Anda.');
+
         $penerima->update([
             'status' => request('status', 'terverifikasi'),
             'catatan_verifikasi' => request('catatan'),
@@ -107,6 +177,25 @@ class PenerimaController extends Controller
             'verified_at' => now(),
         ]);
         return back()->with('success', 'Status penerima diperbarui.');
+    }
+
+    // Checklist TERIMA BANTUAN oleh relawan (setelah terverifikasi)
+    public function terimaBantuan(Penerima $penerima)
+    {
+        $u = auth()->user();
+        abort_if($u->isKetuaKelompok(), 403, 'Checklist terima bantuan dilakukan oleh relawan.');
+        abort_unless($this->cekAksesWilayah($penerima), 403, 'Di luar wilayah kerja Anda.');
+
+        if ($penerima->status !== 'terverifikasi') {
+            return back()->with('error', 'Penerima harus terverifikasi dulu sebelum checklist terima bantuan.');
+        }
+
+        $penerima->update([
+            'terima_bantuan' => !$penerima->terima_bantuan,
+            'terima_by' => $penerima->terima_bantuan ? null : auth()->id(),
+            'terima_at' => $penerima->terima_bantuan ? null : now(),
+        ]);
+        return back()->with('success', $penerima->terima_bantuan ? '✅ Penerima dicheklist MENERIMA BANTUAN.' : 'Checklist dibatalkan.');
     }
 
     public function formDaftar()
@@ -124,12 +213,16 @@ class PenerimaController extends Controller
             'phone' => 'required',
             'jumlah_keluarga' => 'nullable|integer',
         ]);
+
         $data['status'] = 'pending';
         $data['sumber_data'] = 'mandiri';
         $data['provinsi'] = 'Aceh';
-        $data['kelompok_id'] = 1; // default group
+        $data['kabupaten'] = $request->kabupaten ?? '-';
+        $data['kecamatan'] = $request->kecamatan ?? '-';
+        $data['desa'] = $request->desa ?? '-';
+        $data['kelompok_id'] = $request->kelompok_id ?? Kelompok::first()?->id;
 
         Penerima::create($data);
-        return back()->with('success', 'Pendaftaran berhasil! Data akan diverifikasi.');
+        return back()->with('success', 'Pendaftaran berhasil! Data Anda akan diverifikasi petugas YPKM.');
     }
 }
