@@ -103,6 +103,23 @@ Route::middleware('auth')->group(function () {
         // User Management (Ketua Kelompok & Relawan)
         Route::resource('users', UserController::class);
 
+        // Manajemen Barang & Kegiatan (Batch 1-3 dst)
+        Route::get('barang', [\App\Http\Controllers\BarangController::class, 'index'])->name('barang.index');
+        Route::post('barang/kegiatan', [\App\Http\Controllers\BarangController::class, 'storeKegiatan'])->name('barang.kegiatan.store');
+        Route::get('barang/kegiatan/{anggaran}/edit', function (\App\Models\Anggaran $anggaran) {
+            $a = $anggaran;
+            return view('barang.edit-kegiatan', compact('a'));
+        })->name('barang.kegiatan.edit');
+        Route::put('barang/kegiatan/{anggaran}', [\App\Http\Controllers\BarangController::class, 'updateKegiatan'])->name('barang.kegiatan.update');
+        Route::delete('barang/kegiatan/{anggaran}', [\App\Http\Controllers\BarangController::class, 'destroyKegiatan'])->name('barang.kegiatan.destroy');
+        Route::post('barang/pembelian', [\App\Http\Controllers\BarangController::class, 'storePembelian'])->name('barang.pembelian.store');
+        Route::get('barang/pembelian/{pembelian}/edit', function (\App\Models\PembelianBarang $pembelian) {
+            $p = $pembelian;
+            return view('barang.edit-pembelian', compact('p'));
+        })->name('barang.pembelian.edit');
+        Route::put('barang/pembelian/{pembelian}', [\App\Http\Controllers\BarangController::class, 'updatePembelian'])->name('barang.pembelian.update');
+        Route::delete('barang/pembelian/{pembelian}', [\App\Http\Controllers\BarangController::class, 'destroyPembelian'])->name('barang.pembelian.destroy');
+
         Route::prefix('keuangan')->name('keuangan.')->group(function () {
             Route::get('/', [KeuanganController::class, 'index'])->name('index');
             Route::post('dana', [KeuanganController::class, 'storeDana'])->name('dana.store');
