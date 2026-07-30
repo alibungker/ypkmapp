@@ -4,13 +4,13 @@ namespace Tests\Feature;
 
 use App\Models\Kelompok;
 use App\Models\User;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class PhaseOneAccessTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     private function user(string $role, ?Kelompok $kelompok = null, array $wilayah = []): User
     {

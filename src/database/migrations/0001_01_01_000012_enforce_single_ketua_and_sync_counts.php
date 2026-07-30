@@ -14,8 +14,12 @@ return new class extends Migration
             $table->unique('kelompok_id', 'users_kelompok_id_unique');
         });
 
-        // Sinkronisasi satu kali untuk kompatibilitas data lama.
-        DB::statement('UPDATE kelompoks k SET jumlah_anggota = (SELECT COUNT(*) FROM penerimas p WHERE p.kelompok_id = k.id)');
+        // Sinkronisasi satu kali untuk kompatibilitas data lama (portabel MySQL/SQLite).
+        DB::table('kelompoks')->orderBy('id')->eachById(function ($kelompok) {
+            DB::table('kelompoks')->where('id', $kelompok->id)->update([
+                'jumlah_anggota' => DB::table('penerimas')->where('kelompok_id', $kelompok->id)->count(),
+            ]);
+        });
     }
 
     public function down(): void
