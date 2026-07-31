@@ -3,6 +3,8 @@
 @section('styles')
 <style>
 .finance-actions{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px 22px;margin-bottom:20px;background:white;border:1px solid #e5e7eb;border-radius:14px}.finance-actions h2{font-size:20px;color:#00034a;margin:3px 0}.finance-actions p{font-size:13px;color:#667085;margin:0}.finance-kicker{font-size:10px;letter-spacing:.14em;font-weight:800;color:#017723}.finance-actions__buttons{display:flex;gap:10px}.finance-modal{display:none;position:fixed;inset:0;z-index:1200;align-items:center;justify-content:center;padding:20px}.finance-modal.is-open{display:flex}.finance-modal__backdrop{position:absolute;inset:0;background:rgba(0,3,74,.68);backdrop-filter:blur(4px)}.finance-modal__panel{position:relative;width:min(650px,100%);max-height:calc(100dvh - 40px);overflow:auto;background:#fff;border-radius:18px;box-shadow:0 24px 80px rgba(0,3,74,.3)}.finance-modal__header{position:sticky;top:0;z-index:1;display:flex;justify-content:space-between;padding:20px 24px;border-bottom:1px solid #e5e7eb;background:white}.finance-modal__header h2{font-size:21px;color:#00034a;margin:3px 0}.finance-modal__close{width:44px;height:44px;border:0;border-radius:50%;font-size:24px;cursor:pointer}.finance-modal__form{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:24px}.form-field--full,.finance-modal__actions{grid-column:1/-1}.finance-modal__actions{display:flex;justify-content:flex-end;gap:10px}body.finance-modal-open{overflow:hidden}@media(max-width:700px){.finance-actions{align-items:stretch;flex-direction:column}.finance-actions__buttons{display:grid}.finance-modal{padding:0;align-items:flex-end}.finance-modal__panel{border-radius:18px 18px 0 0;max-height:94dvh}.finance-modal__form{grid-template-columns:1fr;padding:18px}.form-field--full,.finance-modal__actions{grid-column:1}.finance-modal__actions .btn{flex:1;min-height:48px}}
+.transaction-history{margin-top:20px;overflow:hidden}.transaction-history__header{padding:18px 20px;border-bottom:1px solid #e5e7eb}.transaction-history__header h3{font-size:17px;color:#00034a;margin:3px 0}.transaction-history__header p{font-size:12px;color:#667085;margin:0}.transaction-table-wrap{width:100%;overflow-x:auto}.transaction-table{width:100%;min-width:860px;border-collapse:collapse}.transaction-table th,.transaction-table td{padding:13px 14px;border-bottom:1px solid #e5e7eb;text-align:left;vertical-align:top;font-size:13px}.transaction-table thead th{background:#00034a;color:white;font-size:11px;letter-spacing:.06em;text-transform:uppercase}.transaction-table tbody tr:nth-child(even){background:#f5f8f6}.transaction-table tbody tr:hover{background:#eef5f0}.donor-cell{font-weight:700;color:#00034a}.date-cell{white-space:nowrap;color:#4b5563}.amount-cell{white-space:nowrap;color:#017723;font-weight:800;font-variant-numeric:tabular-nums}.amount-col{text-align:right}.description-cell{color:#4b5563;max-width:260px}.transaction-type{display:inline-flex;padding:5px 9px;border-radius:999px;background:#e8f5ec;color:#017723;font-size:11px;font-weight:700}.transaction-actions{display:flex;gap:7px;align-items:center}.transaction-actions form{margin:0}.transaction-action{min-height:38px;padding:7px 11px;border-radius:7px;background:white;font-size:12px;font-weight:700;cursor:pointer}.transaction-action--edit{border:1px solid #c7c9dc;color:#00034a}.transaction-action--delete{border:1px solid #fecaca;color:#b42318}.mobile-transactions{display:none}.transaction-empty{text-align:center;padding:32px;color:#667085}
+@media(max-width:767px){.desktop-transactions{display:none}.mobile-transactions{display:grid;gap:10px;padding:12px}.transaction-card{padding:15px;background:white;border:1px solid #e5e7eb;border-radius:11px}.transaction-card:nth-child(even){background:#f5f8f6}.transaction-card__top{display:grid;gap:10px}.transaction-card h4{font-size:14px;color:#00034a;margin:0}.transaction-card time{display:block;margin-top:3px;color:#667085;font-size:12px}.transaction-card__top strong{color:#017723;font-size:16px;font-variant-numeric:tabular-nums;white-space:nowrap}.transaction-card__meta{margin-top:11px}.transaction-card__meta p{margin:9px 0 0;color:#4b5563;font-size:13px}.transaction-card .transaction-actions{margin-top:13px;padding-top:12px;border-top:1px solid #e5e7eb}.transaction-card .transaction-action{min-height:44px;padding:9px 16px}}
 </style>
 @endsection
 @section('content')
@@ -124,34 +126,17 @@
 </div>
 
 {{-- Riwayat Dana Masuk --}}
-<div class="card">
-    <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;">
-        <h3 style="font-size:15px;font-weight:600;">📋 Riwayat Transaksi</h3>
-    </div>
-    <div style="padding:16px 20px;">
-        <table class="table-data">
-            <thead><tr><th>Donatur</th><th>Tanggal</th><th>Jumlah</th><th>Jenis</th><th>Keterangan</th><th></th></tr></thead>
-            <tbody>
-                @forelse($dana_masuk ?? [] as $d)
-                <tr>
-                    <td style="font-weight:500;">{{ $d->donatur }}</td>
-                    <td style="color:#6b7280;">{{ is_object($d->tanggal_masuk) ? $d->tanggal_masuk->format('d M Y') : date('d M Y', strtotime($d->tanggal_masuk)) }}</td>
-                    <td style="font-weight:600;color:#017723;">Rp {{ number_format($d->jumlah,0,',','.') }}</td>
-                    <td><span style="padding:2px 10px;background:#e8e8f0;border-radius:6px;font-size:12px;">{{ $d->jenis }}</span></td>
-                    <td style="color:#6b7280;">{{ $d->keterangan ?? '-' }}</td>
-                    <td style="white-space:nowrap;">
-                        <button onclick="editDana({{ $d->id }}, '{{ $d->donatur }}', '{{ is_object($d->tanggal_masuk) ? $d->tanggal_masuk->format('Y-m-d') : $d->tanggal_masuk }}', {{ $d->jumlah }}, '{{ $d->jenis }}', '{{ $d->keterangan ?? '' }}')" style="color:#00034a;border:none;background:none;cursor:pointer;font-size:13px;padding:4px 8px;">✏️ Edit</button>
-                        <form method="POST" action="{{ route('keuangan.dana.delete', $d->id) }}" style="display:inline;" onsubmit="return confirm('Hapus data dana ini?')">
-                            @csrf
-                            <button style="color:#dc2626;border:none;background:none;cursor:pointer;font-size:13px;padding:4px 8px;">🗑️ Hapus</button>
-                        </form>
-                    </td>
-                </tr>
-                @empty
-                <tr><td colspan="6" style="padding:32px;text-align:center;color:#9ca3af;">Belum ada dana masuk. Silakan tambah melalui form di atas.</td></tr>
-                @endforelse
-            </tbody>
-        </table>
+<div class="card transaction-history">
+    <div class="transaction-history__header"><div><span class="finance-kicker">AUDIT DANA MASUK</span><h3>Riwayat Transaksi</h3><p>{{ count($dana_masuk ?? []) }} transaksi tercatat</p></div></div>
+    <div class="transaction-table-wrap desktop-transactions"><table class="transaction-table"><thead><tr><th>Donatur</th><th>Tanggal</th><th class="amount-col">Jumlah</th><th>Jenis</th><th>Keterangan</th><th>Aksi</th></tr></thead><tbody>
+    @forelse($dana_masuk ?? [] as $d)
+    <tr><td class="donor-cell">{{ $d->donatur }}</td><td class="date-cell">{{ is_object($d->tanggal_masuk) ? $d->tanggal_masuk->format('d M Y') : date('d M Y', strtotime($d->tanggal_masuk)) }}</td><td class="amount-cell">Rp {{ number_format($d->jumlah,0,',','.') }}</td><td><span class="transaction-type">{{ ucfirst(str_replace('_',' ',$d->jenis)) }}</span></td><td class="description-cell">{{ $d->keterangan ?? '-' }}</td><td><div class="transaction-actions"><button type="button" onclick="editDana({{ $d->id }}, @js($d->donatur), @js(is_object($d->tanggal_masuk) ? $d->tanggal_masuk->format('Y-m-d') : $d->tanggal_masuk), {{ $d->jumlah }}, @js($d->jenis), @js($d->keterangan ?? ''))" class="transaction-action transaction-action--edit">Edit</button><form method="POST" action="{{ route('keuangan.dana.delete', $d->id) }}" onsubmit="return confirm('Hapus transaksi ini?')">@csrf<button class="transaction-action transaction-action--delete">Hapus</button></form></div></td></tr>
+    @empty<tr><td colspan="6" class="transaction-empty">Belum ada transaksi dana masuk.</td></tr>@endforelse
+    </tbody></table></div>
+    <div class="mobile-transactions">
+    @forelse($dana_masuk ?? [] as $d)
+    <article class="transaction-card"><div class="transaction-card__top"><div><h4>{{ $d->donatur }}</h4><time>{{ is_object($d->tanggal_masuk) ? $d->tanggal_masuk->format('d M Y') : date('d M Y', strtotime($d->tanggal_masuk)) }}</time></div><strong>Rp {{ number_format($d->jumlah,0,',','.') }}</strong></div><div class="transaction-card__meta"><span class="transaction-type">{{ ucfirst(str_replace('_',' ',$d->jenis)) }}</span><p>{{ $d->keterangan ?? 'Tanpa keterangan' }}</p></div><div class="transaction-actions"><button type="button" onclick="editDana({{ $d->id }}, @js($d->donatur), @js(is_object($d->tanggal_masuk) ? $d->tanggal_masuk->format('Y-m-d') : $d->tanggal_masuk), {{ $d->jumlah }}, @js($d->jenis), @js($d->keterangan ?? ''))" class="transaction-action transaction-action--edit">Edit</button><form method="POST" action="{{ route('keuangan.dana.delete', $d->id) }}" onsubmit="return confirm('Hapus transaksi ini?')">@csrf<button class="transaction-action transaction-action--delete">Hapus</button></form></div></article>
+    @empty<div class="transaction-empty">Belum ada transaksi dana masuk.</div>@endforelse
     </div>
 </div>
 
