@@ -74,6 +74,37 @@ class PhaseTwoFeaturesTest extends TestCase
         ];
     }
 
+    public function test_barang_index_uses_create_modals_for_kegiatan_and_pembelian(): void
+    {
+        $response = $this->actingAs($this->admin())->get(route('barang.index'));
+
+        $response->assertOk();
+        $response->assertSee('id="createKegiatanModal"', false);
+        $response->assertSee('id="createPembelianModal"', false);
+        $response->assertSee('data-open-modal="createKegiatanModal"', false);
+        $response->assertSee('data-open-modal="createPembelianModal"', false);
+        $response->assertSee('Tambah Kegiatan');
+        $response->assertSee('Pembelian Barang');
+    }
+
+    public function test_barang_create_modal_preserves_invalid_kegiatan_input_and_reopens(): void
+    {
+        $response = $this->actingAs($this->admin())->from(route('barang.index'))->post(route('barang.kegiatan.store'), [
+            'nama_anggaran' => '',
+            'kategori' => 'barang_bantuan',
+            'target_paket' => 100,
+            'satuan' => 'paket',
+            'anggaran' => 1000000,
+            'realisasi' => 0,
+            'catatan' => 'Rencana',
+            'form_type' => 'kegiatan',
+        ]);
+
+        $response->assertRedirect(route('barang.index'));
+        $response->assertSessionHasErrors('nama_anggaran');
+        $response->assertSessionHasInput('form_type', 'kegiatan');
+    }
+
     public function test_distribusi_normalizes_optional_numeric_values(): void
     {
         $admin = $this->admin();

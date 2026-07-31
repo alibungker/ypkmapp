@@ -13,61 +13,11 @@
 
 {{-- Tab KEGIATAN --}}
 <div id="panel_kegiatan">
-    <div style="display:grid;grid-template-columns:400px 1fr;gap:20px;align-items:start;">
-        {{-- Form Tambah Kegiatan --}}
-        <div class="card">
-            <div style="padding:14px 18px;border-bottom:1px solid #e5e7eb;"><h3 style="font-size:14px;font-weight:600;">➕ Tambah Kegiatan</h3></div>
-            <div style="padding:18px;">
-                <form method="POST" action="{{ route('barang.kegiatan.store') }}">
-                    @csrf
-                    <div style="margin-bottom:10px;">
-                        <label class="form-label">Nama Kegiatan <span style="color:#dc2626;">*</span></label>
-                        <input type="text" name="nama_anggaran" class="form-input" required placeholder="Batch 4 — 5.000 Paket">
-                    </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                        <div>
-                            <label class="form-label">Kategori <span style="color:#dc2626;">*</span></label>
-                            <select name="kategori" class="form-input" required>
-                                <option value="barang_bantuan">📦 Barang Bantuan</option>
-                                <option value="transportasi">🚛 Transportasi</option>
-                                <option value="konsumsi">🍱 Konsumsi</option>
-                                <option value="sewa">🏠 Sewa</option>
-                                <option value="atk">📎 ATK</option>
-                                <option value="cadangan">💰 Cadangan</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="form-label">Target Paket</label>
-                            <input type="number" name="target_paket" class="form-input" placeholder="5000">
-                        </div>
-                    </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px;">
-                        <div>
-                            <label class="form-label">Satuan</label>
-                            <input type="text" name="satuan" class="form-input" placeholder="paket">
-                        </div>
-                        <div>
-                            <label class="form-label">Anggaran (Rp) <span style="color:#dc2626;">*</span></label>
-                            <input type="number" name="anggaran" class="form-input" required step="0.01" placeholder="1000000000">
-                        </div>
-                        <div>
-                            <label class="form-label">Realisasi (Rp) <span style="color:#dc2626;">*</span></label>
-                            <input type="number" name="realisasi" class="form-input" required step="0.01" placeholder="1000000000">
-                        </div>
-                    </div>
-                    <div style="margin-top:10px;">
-                        <label class="form-label">Catatan/Status</label>
-                        <input type="text" name="catatan" class="form-input" value="✅ Lunas" placeholder="✅ Lunas">
-                    </div>
-                    <button type="submit" class="btn btn-primary" style="width:100%;margin-top:12px;">💾 Simpan Kegiatan</button>
-                </form>
-            </div>
+    <div class="card">
+        <div class="barang-card-header">
+            <div><span class="section-kicker">RENCANA & REALISASI</span><h3>Daftar Kegiatan</h3></div>
+            <button type="button" class="btn btn-primary" data-open-modal="createKegiatanModal">+ Tambah Kegiatan</button>
         </div>
-        {{-- Tabel Kegiatan --}}
-        <div class="card">
-            <div style="padding:14px 18px;border-bottom:1px solid #e5e7eb;">
-                <h3 style="font-size:14px;font-weight:600;">📋 Daftar Kegiatan</h3>
-            </div>
             <div style="padding:14px 18px;overflow-x:auto;">
                 <table class="table-data">
                     <thead><tr><th>No</th><th>Nama Kegiatan</th><th>Target</th><th>Anggaran</th><th>Realisasi</th><th>%</th><th>Status</th><th></th></tr></thead>
@@ -96,95 +46,29 @@
                 </table>
             </div>
         </div>
-    </div>
 </div>
 
 {{-- Tab PEMBELIAN BARANG --}}
 <div id="panel_pembelian" style="display:none;">
-    <div style="display:grid;grid-template-columns:400px 1fr;gap:20px;align-items:start;">
-        {{-- Form Tambah Pembelian --}}
-        <div class="card">
-            <div style="padding:14px 18px;border-bottom:1px solid #e5e7eb;"><h3 style="font-size:14px;font-weight:600;">➕ Tambah Item Barang</h3></div>
-            <div style="padding:18px;">
-                <form method="POST" action="{{ route('barang.pembelian.store') }}">
-                    @csrf
-                    <div style="margin-bottom:10px;">
-                        <label class="form-label">Nama Barang <span style="color:#dc2626;">*</span></label>
-                        <input type="text" name="nama_barang" class="form-input" required placeholder="Beras Rojolele 10 Kg">
-                    </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                        <div>
-                            <label class="form-label">Batch</label>
-                            <input type="text" name="batch" class="form-input" placeholder="Batch 4">
-                        </div>
-                        <div>
-                            <label class="form-label">Harga Satuan (Rp) <span style="color:#dc2626;">*</span></label>
-                            <input type="number" name="harga_satuan" class="form-input" required step="0.01" placeholder="154000">
-                        </div>
-                    </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
-                        <div>
-                            <label class="form-label">Qty Rencana <span style="color:#dc2626;">*</span></label>
-                            <input type="number" name="qty_rencana" class="form-input" required placeholder="9500">
-                        </div>
-                        <div>
-                            <label class="form-label">Qty Terbeli</label>
-                            <input type="number" name="qty_terbeli" class="form-input" placeholder="4500">
-                        </div>
-                    </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
-                        <div>
-                            <label class="form-label">Anggaran (Rp) <span style="color:#dc2626;">*</span></label>
-                            <input type="number" name="anggaran" class="form-input" required step="0.01" placeholder="1463000000">
-                        </div>
-                        <div>
-                            <label class="form-label">Realisasi (Rp)</label>
-                            <input type="number" name="realisasi" class="form-input" step="0.01" placeholder="693000000">
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary" style="width:100%;margin-top:12px;">💾 Simpan Item Barang</button>
-                </form>
-            </div>
+    <div class="card">
+        <div class="barang-card-header">
+            <div><span class="section-kicker">PENGADAAN BARANG</span><h3>Daftar Pembelian Barang</h3></div>
+            <button type="button" class="btn btn-primary" data-open-modal="createPembelianModal">+ Pembelian Barang</button>
         </div>
-        {{-- Tabel Pembelian --}}
-        <div class="card">
-            <div style="padding:14px 18px;border-bottom:1px solid #e5e7eb;">
-                <h3 style="font-size:14px;font-weight:600;">📋 Daftar Pembelian Barang</h3>
-            </div>
-            <div style="padding:14px 18px;overflow-x:auto;">
-                <table class="table-data">
-                    <thead><tr><th>No</th><th>Nama Barang</th><th>Batch</th><th>Qty Renc</th><th>Qty Beli</th><th>Belum</th><th>Harga</th><th>Anggaran</th><th>Realisasi</th><th>Sisa</th><th>%</th><th></th></tr></thead>
-                    <tbody>
-                        @forelse($pembelian as $i => $p)
-                        <tr>
-                            <td>{{ $i+1 }}</td>
-                            <td style="font-weight:500;font-size:13px;">{{ $p->nama_barang }}</td>
-                            <td style="font-size:12px;">{{ $p->batch ?? '-' }}</td>
-                            <td>{{ number_format($p->qty_rencana) }}</td>
-                            <td>{{ number_format($p->qty_terbeli) }}</td>
-                            <td>{{ $p->qty_belum > 0 ? number_format($p->qty_belum) : '< 0.00 >' }}</td>
-                            <td>{{ number_format($p->harga_satuan) }}</td>
-                            <td>{{ number_format($p->anggaran) }}</td>
-                            <td>{{ number_format($p->realisasi) }}</td>
-                            <td>{{ number_format($p->sisa) }}</td>
-                            <td><span style="color:{{ $p->persen_real >= 100 ? '#017723' : '#e5a820' }};">{{ $p->persen_real }}%</span></td>
-                            <td style="white-space:nowrap;">
-                                <button onclick="editPembelian({{ $p->id }})" style="color:#00034a;border:none;background:none;cursor:pointer;font-size:12px;">✏️</button>
-                                <form method="POST" action="{{ route('barang.pembelian.destroy', $p) }}" style="display:inline;" onsubmit="return confirm('Hapus?')">
-                                    @csrf @method('DELETE')
-                                    <button style="color:#dc2626;border:none;background:none;cursor:pointer;font-size:12px;">🗑️</button>
-                                </form>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr><td colspan="12" style="padding:24px;text-align:center;color:#9ca3af;">Belum ada item barang</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+        <div style="padding:14px 18px;overflow-x:auto;">
+            <table class="table-data">
+                <thead><tr><th>No</th><th>Nama Barang</th><th>Batch</th><th>Qty Renc</th><th>Qty Beli</th><th>Belum</th><th>Harga</th><th>Anggaran</th><th>Realisasi</th><th>Sisa</th><th>%</th><th></th></tr></thead>
+                <tbody>
+                    @forelse($pembelian as $i => $p)
+                    <tr><td>{{ $i+1 }}</td><td style="font-weight:500;font-size:13px;">{{ $p->nama_barang }}</td><td>{{ $p->batch ?? '-' }}</td><td>{{ number_format($p->qty_rencana) }}</td><td>{{ number_format($p->qty_terbeli) }}</td><td>{{ $p->qty_belum > 0 ? number_format($p->qty_belum) : '0' }}</td><td>{{ number_format($p->harga_satuan) }}</td><td>{{ number_format($p->anggaran) }}</td><td>{{ number_format($p->realisasi) }}</td><td>{{ number_format($p->sisa) }}</td><td>{{ $p->persen_real }}%</td><td style="white-space:nowrap;"><button onclick="editPembelian({{ $p->id }})" class="icon-action">✏️</button><form method="POST" action="{{ route('barang.pembelian.destroy', $p) }}" style="display:inline;" onsubmit="return confirm('Hapus?')">@csrf @method('DELETE')<button class="icon-action icon-action--danger">🗑️</button></form></td></tr>
+                    @empty<tr><td colspan="12" class="empty-row">Belum ada item barang</td></tr>@endforelse
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
+
+@include('barang._create-modals')
 
 {{-- Edit Modal Kegiatan --}}
 <div id="editModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:999;align-items:center;justify-content:center;" onclick="if(event.target===this)closeEdit()">
@@ -193,6 +77,13 @@
         <div id="editFormContainer"></div>
     </div>
 </div>
+@endsection
+
+@section('styles')
+<style>
+.barang-card-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 18px;border-bottom:1px solid #e5e7eb}.barang-card-header h3{font-size:17px;margin:2px 0 0;color:#111827}.section-kicker,.create-modal__eyebrow{font-size:10px;letter-spacing:.12em;font-weight:800;color:#017723}.icon-action{border:0;background:none;cursor:pointer;padding:6px}.icon-action--danger{color:#dc2626}.empty-row{padding:28px;text-align:center;color:#9ca3af}.create-modal{display:none;position:fixed;inset:0;z-index:1200;align-items:center;justify-content:center;padding:20px}.create-modal.is-open{display:flex}.create-modal__backdrop{position:absolute;inset:0;background:rgba(0,3,74,.66);backdrop-filter:blur(4px)}.create-modal__panel{position:relative;width:min(680px,100%);max-height:calc(100dvh - 40px);overflow:auto;overscroll-behavior:contain;background:#fff;border-radius:18px;box-shadow:0 24px 80px rgba(0,3,74,.3)}.create-modal__header{position:sticky;top:0;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:20px 24px;border-bottom:1px solid #e5e7eb;background:#fff}.create-modal__header h2{margin:3px 0 0;color:#00034a;font-size:21px}.create-modal__close{border:0;background:#f3f4f6;border-radius:50%;min-width:44px;width:44px;height:44px;font-size:24px;cursor:pointer}.create-modal__form{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:24px}.form-field--full,.create-modal__actions{grid-column:1/-1}.form-label span{color:#dc2626}.create-modal__actions{display:flex;justify-content:flex-end;gap:10px;padding-top:6px}.btn-secondary{background:#eef0f4;color:#374151}body.modal-open{overflow:hidden}
+@media(max-width:640px){.barang-card-header{align-items:stretch;flex-direction:column}.barang-card-header .btn{width:100%}.create-modal{padding:0;align-items:flex-end}.create-modal__panel{border-radius:18px 18px 0 0;max-height:94dvh}.create-modal__form{grid-template-columns:1fr;padding:18px}.form-field--full,.create-modal__actions{grid-column:1}.create-modal__actions{background:#fff;border-top:1px solid #e5e7eb;margin:8px -18px -18px;padding:14px 18px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -6px 16px rgba(0,3,74,.06)}.create-modal__actions .btn{flex:1;min-height:48px}}
+</style>
 @endsection
 
 @section('scripts')
@@ -206,8 +97,44 @@ function showTab(tab) {
     document.getElementById('tab_pembelian').style.color = tab === 'pembelian' ? 'white' : '#374151';
 }
 
-// Set default tab
-showTab('kegiatan');
+// Modal create: focus management, Escape, backdrop, and validation reopen.
+let activeCreateModal = null;
+let createModalTrigger = null;
+function openCreateModal(id) {
+    const modal = document.getElementById(id);
+    if (!modal) return;
+    createModalTrigger = document.activeElement;
+    activeCreateModal = modal;
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('modal-open');
+    const first = modal.querySelector('input:not([type="hidden"]), select, button');
+    if (first) first.focus();
+}
+function closeCreateModal() {
+    if (!activeCreateModal) return;
+    activeCreateModal.classList.remove('is-open');
+    activeCreateModal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('modal-open');
+    activeCreateModal = null;
+    if (createModalTrigger) createModalTrigger.focus();
+}
+document.querySelectorAll('[data-open-modal]').forEach(button => button.addEventListener('click', () => openCreateModal(button.dataset.openModal)));
+document.querySelectorAll('[data-close-modal]').forEach(button => button.addEventListener('click', closeCreateModal));
+document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && activeCreateModal) closeCreateModal();
+    if (event.key !== 'Tab' || !activeCreateModal) return;
+    const focusable = [...activeCreateModal.querySelectorAll('button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled])')];
+    if (!focusable.length) return;
+    const first = focusable[0], last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+});
+
+const invalidForm = @json(old('form_type'));
+showTab(invalidForm === 'pembelian' ? 'pembelian' : 'kegiatan');
+if (invalidForm === 'kegiatan') openCreateModal('createKegiatanModal');
+if (invalidForm === 'pembelian') openCreateModal('createPembelianModal');
 
 function closeEdit() { document.getElementById('editModal').style.display = 'none'; }
 window.editKegiatan = function(id) {
