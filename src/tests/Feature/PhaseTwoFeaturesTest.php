@@ -135,6 +135,36 @@ class PhaseTwoFeaturesTest extends TestCase
         $response->assertRedirect(route('barang.index', ['tab' => 'pembelian']));
     }
 
+    public function test_successful_pembelian_update_redirects_to_pembelian_tab(): void
+    {
+        $pembelian = \App\Models\PembelianBarang::create([
+            'nama_barang' => 'Barang Sebelum Update',
+            'batch' => 'Batch Lama',
+            'qty_rencana' => 10,
+            'qty_terbeli' => 2,
+            'qty_belum' => 8,
+            'harga_satuan' => 100000,
+            'anggaran' => 1000000,
+            'realisasi' => 200000,
+            'sisa' => 800000,
+            'persen_real' => 20,
+        ]);
+
+        $response = $this->actingAs($this->admin())->put(route('barang.pembelian.update', $pembelian), [
+            'nama_barang' => 'Barang Setelah Update',
+            'batch' => 'Batch Baru',
+            'qty_rencana' => 10,
+            'qty_terbeli' => 5,
+            'harga_satuan' => 100000,
+        ]);
+
+        $response->assertRedirect(route('barang.index', ['tab' => 'pembelian']));
+        $this->assertDatabaseHas('pembelian_barang', [
+            'id' => $pembelian->id,
+            'nama_barang' => 'Barang Setelah Update',
+        ]);
+    }
+
     public function test_pembelian_calculates_financial_totals_from_price_and_quantities(): void
     {
         $response = $this->actingAs($this->admin())->post(route('barang.pembelian.store'), [

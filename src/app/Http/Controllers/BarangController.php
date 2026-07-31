@@ -82,7 +82,7 @@ class BarangController extends Controller
         ]);
         $data = $this->hitungPembelian($data);
         $pembelian->update($data);
-        return redirect()->route('barang.index')->with('success', 'Item barang diupdate.');
+        return redirect()->route('barang.index', ['tab' => 'pembelian'])->with('success', 'Item barang diupdate.');
     }
 
     public function destroyPembelian(PembelianBarang $pembelian)
