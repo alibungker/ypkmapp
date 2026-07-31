@@ -81,7 +81,7 @@
 
 @section('styles')
 <style>
-.barang-card-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 18px;border-bottom:1px solid #e5e7eb}.barang-card-header h3{font-size:17px;margin:2px 0 0;color:#111827}.section-kicker,.create-modal__eyebrow{font-size:10px;letter-spacing:.12em;font-weight:800;color:#017723}.icon-action{border:0;background:none;cursor:pointer;padding:6px}.icon-action--danger{color:#dc2626}.empty-row{padding:28px;text-align:center;color:#9ca3af}.create-modal{display:none;position:fixed;inset:0;z-index:1200;align-items:center;justify-content:center;padding:20px}.create-modal.is-open{display:flex}.create-modal__backdrop{position:absolute;inset:0;background:rgba(0,3,74,.66);backdrop-filter:blur(4px)}.create-modal__panel{position:relative;width:min(680px,100%);max-height:calc(100dvh - 40px);overflow:auto;overscroll-behavior:contain;background:#fff;border-radius:18px;box-shadow:0 24px 80px rgba(0,3,74,.3)}.create-modal__header{position:sticky;top:0;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:20px 24px;border-bottom:1px solid #e5e7eb;background:#fff}.create-modal__header h2{margin:3px 0 0;color:#00034a;font-size:21px}.create-modal__close{border:0;background:#f3f4f6;border-radius:50%;min-width:44px;width:44px;height:44px;font-size:24px;cursor:pointer}.create-modal__form{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:24px}.form-field--full,.create-modal__actions{grid-column:1/-1}.form-label span{color:#dc2626}.create-modal__actions{display:flex;justify-content:flex-end;gap:10px;padding-top:6px}.btn-secondary{background:#eef0f4;color:#374151}body.modal-open{overflow:hidden}
+.barang-card-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 18px;border-bottom:1px solid #e5e7eb}.barang-card-header h3{font-size:17px;margin:2px 0 0;color:#111827}.section-kicker,.create-modal__eyebrow{font-size:10px;letter-spacing:.12em;font-weight:800;color:#017723}.icon-action{border:0;background:none;cursor:pointer;padding:6px}.icon-action--danger{color:#dc2626}.empty-row{padding:28px;text-align:center;color:#9ca3af}.create-modal{display:none;position:fixed;inset:0;z-index:1200;align-items:center;justify-content:center;padding:20px}.create-modal.is-open{display:flex}.create-modal__backdrop{position:absolute;inset:0;background:rgba(0,3,74,.66);backdrop-filter:blur(4px)}.create-modal__panel{position:relative;width:min(680px,100%);max-height:calc(100dvh - 40px);overflow:auto;overscroll-behavior:contain;background:#fff;border-radius:18px;box-shadow:0 24px 80px rgba(0,3,74,.3)}.create-modal__header{position:sticky;top:0;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:20px 24px;border-bottom:1px solid #e5e7eb;background:#fff}.create-modal__header h2{margin:3px 0 0;color:#00034a;font-size:21px}.create-modal__close{border:0;background:#f3f4f6;border-radius:50%;min-width:44px;width:44px;height:44px;font-size:24px;cursor:pointer}.create-modal__form{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:24px}.form-field--full,.create-modal__actions{grid-column:1/-1}.form-label span{color:#dc2626}.form-hint{display:block;margin-top:5px;color:#667085;font-size:11px}.auto-total{background:#f5f7fa;color:#00034a;font-weight:700}.create-modal__actions{display:flex;justify-content:flex-end;gap:10px;padding-top:6px}.btn-secondary{background:#eef0f4;color:#374151}body.modal-open{overflow:hidden}
 @media(max-width:640px){.barang-card-header{align-items:stretch;flex-direction:column}.barang-card-header .btn{width:100%}.create-modal{padding:0;align-items:flex-end}.create-modal__panel{border-radius:18px 18px 0 0;max-height:94dvh}.create-modal__form{grid-template-columns:1fr;padding:18px}.form-field--full,.create-modal__actions{grid-column:1}.create-modal__actions{background:#fff;border-top:1px solid #e5e7eb;margin:8px -18px -18px;padding:14px 18px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -6px 16px rgba(0,3,74,.06)}.create-modal__actions .btn{flex:1;min-height:48px}}
 </style>
 @endsection
@@ -121,6 +121,22 @@ function closeCreateModal() {
 }
 document.querySelectorAll('[data-open-modal]').forEach(button => button.addEventListener('click', () => openCreateModal(button.dataset.openModal)));
 document.querySelectorAll('[data-close-modal]').forEach(button => button.addEventListener('click', closeCreateModal));
+
+function calculatePurchaseTotals(form) {
+    const price = Math.max(0, Number(form.elements.harga_satuan?.value) || 0);
+    const planned = Math.max(0, Number(form.elements.qty_rencana?.value) || 0);
+    const purchased = Math.max(0, Number(form.elements.qty_terbeli?.value) || 0);
+    if (form.elements.anggaran) form.elements.anggaran.value = price * planned;
+    if (form.elements.realisasi) form.elements.realisasi.value = price * purchased;
+}
+function bindPurchaseCalculator(form) {
+    if (!form || form.dataset.calculatorBound === 'true') return;
+    form.dataset.calculatorBound = 'true';
+    ['harga_satuan', 'qty_rencana', 'qty_terbeli'].forEach(name => form.elements[name]?.addEventListener('input', () => calculatePurchaseTotals(form)));
+    calculatePurchaseTotals(form);
+}
+document.querySelectorAll('form[action$="/barang/pembelian"], form[data-purchase-calculator]').forEach(bindPurchaseCalculator);
+
 document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && activeCreateModal) closeCreateModal();
     if (event.key !== 'Tab' || !activeCreateModal) return;
@@ -146,7 +162,7 @@ window.editKegiatan = function(id) {
 window.editPembelian = function(id) {
     fetch('/barang/pembelian/' + id + '/edit')
         .then(r => r.text())
-        .then(html => { document.getElementById('editFormContainer').innerHTML = html; document.getElementById('editModal').style.display = 'flex'; })
+        .then(html => { document.getElementById('editFormContainer').innerHTML = html; document.getElementById('editModal').style.display = 'flex'; bindPurchaseCalculator(document.querySelector('#editFormContainer form[data-purchase-calculator]')); })
         .catch(() => alert('Gagal memuat form edit'));
 };
 </script>

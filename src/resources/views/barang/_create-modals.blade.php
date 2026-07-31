@@ -32,8 +32,8 @@
             <div class="form-field"><label class="form-label">Harga Satuan (Rp) <span>*</span></label><input type="number" min="0" step="0.01" name="harga_satuan" class="form-input" required value="{{ old('form_type') === 'pembelian' ? old('harga_satuan') : '' }}"></div>
             <div class="form-field"><label class="form-label">Qty Rencana <span>*</span></label><input type="number" min="0" name="qty_rencana" class="form-input" required value="{{ old('form_type') === 'pembelian' ? old('qty_rencana') : '' }}"></div>
             <div class="form-field"><label class="form-label">Qty Terbeli</label><input type="number" min="0" name="qty_terbeli" class="form-input" value="{{ old('form_type') === 'pembelian' ? old('qty_terbeli', 0) : 0 }}"></div>
-            <div class="form-field"><label class="form-label">Anggaran (Rp) <span>*</span></label><input type="number" min="0" step="0.01" name="anggaran" class="form-input" required value="{{ old('form_type') === 'pembelian' ? old('anggaran') : '' }}"></div>
-            <div class="form-field"><label class="form-label">Realisasi (Rp)</label><input type="number" min="0" step="0.01" name="realisasi" class="form-input" value="{{ old('form_type') === 'pembelian' ? old('realisasi', 0) : 0 }}"></div>
+            <div class="form-field"><label class="form-label">Anggaran Otomatis (Rp)</label><input type="number" min="0" step="0.01" name="anggaran" class="form-input auto-total" readonly value="{{ old('form_type') === 'pembelian' ? old('anggaran', 0) : 0 }}"><small class="form-hint">Harga satuan × jumlah rencana</small></div>
+            <div class="form-field"><label class="form-label">Realisasi Otomatis (Rp)</label><input type="number" min="0" step="0.01" name="realisasi" class="form-input auto-total" readonly value="{{ old('form_type') === 'pembelian' ? old('realisasi', 0) : 0 }}"><small class="form-hint">Harga satuan × jumlah terbeli</small></div>
             <div class="create-modal__actions"><button type="button" class="btn btn-secondary" data-close-modal>Batal</button><button type="submit" class="btn btn-primary">Simpan Pembelian</button></div>
         </form>
     </div>

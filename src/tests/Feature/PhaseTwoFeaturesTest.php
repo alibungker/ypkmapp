@@ -105,6 +105,30 @@ class PhaseTwoFeaturesTest extends TestCase
         $response->assertSessionHasInput('form_type', 'kegiatan');
     }
 
+    public function test_pembelian_calculates_financial_totals_from_price_and_quantities(): void
+    {
+        $response = $this->actingAs($this->admin())->post(route('barang.pembelian.store'), [
+            'nama_barang' => 'Beras Uji Otomatis',
+            'batch' => 'Batch Uji',
+            'qty_rencana' => 100,
+            'qty_terbeli' => 40,
+            'harga_satuan' => 150000,
+            'anggaran' => 1,
+            'realisasi' => 1,
+            'form_type' => 'pembelian',
+        ]);
+
+        $response->assertRedirect(route('barang.index'));
+        $this->assertDatabaseHas('pembelian_barang', [
+            'nama_barang' => 'Beras Uji Otomatis',
+            'anggaran' => 15000000,
+            'realisasi' => 6000000,
+            'sisa' => 9000000,
+            'qty_belum' => 60,
+            'persen_real' => 40,
+        ]);
+    }
+
     public function test_distribusi_normalizes_optional_numeric_values(): void
     {
         $admin = $this->admin();

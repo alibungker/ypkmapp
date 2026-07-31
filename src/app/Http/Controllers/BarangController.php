@@ -59,15 +59,12 @@ class BarangController extends Controller
             'batch' => 'nullable',
             'qty_rencana' => 'required|integer',
             'qty_terbeli' => 'nullable|integer',
-            'harga_satuan' => 'required|numeric',
-            'anggaran' => 'required|numeric',
-            'realisasi' => 'nullable|numeric',
+            'harga_satuan' => 'required|numeric|min:0',
+            'anggaran' => 'nullable|numeric|min:0',
+            'realisasi' => 'nullable|numeric|min:0',
         ]);
         $data['qty_terbeli'] = $data['qty_terbeli'] ?? 0;
-        $data['realisasi'] = $data['realisasi'] ?? 0;
-        $data['qty_belum'] = $data['qty_rencana'] - $data['qty_terbeli'];
-        $data['sisa'] = $data['anggaran'] - $data['realisasi'];
-        $data['persen_real'] = $data['anggaran'] > 0 ? round(($data['realisasi']/$data['anggaran'])*100, 1) : 0;
+        $data = $this->hitungPembelian($data);
         PembelianBarang::create($data);
         return redirect()->route('barang.index')->with('success', 'Item barang berhasil ditambahkan.');
     }
@@ -79,13 +76,11 @@ class BarangController extends Controller
             'batch' => 'nullable',
             'qty_rencana' => 'required|integer',
             'qty_terbeli' => 'required|integer',
-            'harga_satuan' => 'required|numeric',
-            'anggaran' => 'required|numeric',
-            'realisasi' => 'required|numeric',
+            'harga_satuan' => 'required|numeric|min:0',
+            'anggaran' => 'nullable|numeric|min:0',
+            'realisasi' => 'nullable|numeric|min:0',
         ]);
-        $data['qty_belum'] = $data['qty_rencana'] - $data['qty_terbeli'];
-        $data['sisa'] = $data['anggaran'] - $data['realisasi'];
-        $data['persen_real'] = $data['anggaran'] > 0 ? round(($data['realisasi']/$data['anggaran'])*100, 1) : 0;
+        $data = $this->hitungPembelian($data);
         $pembelian->update($data);
         return redirect()->route('barang.index')->with('success', 'Item barang diupdate.');
     }
@@ -94,5 +89,22 @@ class BarangController extends Controller
     {
         $pembelian->delete();
         return redirect()->route('barang.index')->with('success', 'Item barang dihapus.');
+    }
+
+    private function hitungPembelian(array $data): array
+    {
+        $rencana = max(0, (int) $data['qty_rencana']);
+        $terbeli = max(0, (int) ($data['qty_terbeli'] ?? 0));
+        $harga = max(0, (float) $data['harga_satuan']);
+
+        $data['qty_belum'] = max(0, $rencana - $terbeli);
+        $data['anggaran'] = $rencana * $harga;
+        $data['realisasi'] = $terbeli * $harga;
+        $data['sisa'] = max(0, $data['anggaran'] - $data['realisasi']);
+        $data['persen_real'] = $data['anggaran'] > 0
+            ? round(($data['realisasi'] / $data['anggaran']) * 100, 1)
+            : 0;
+
+        return $data;
     }
 }
