@@ -105,6 +105,39 @@ class PhaseTwoFeaturesTest extends TestCase
         $response->assertSessionHasInput('form_type', 'kegiatan');
     }
 
+    public function test_kegiatan_can_allocate_multiple_items_without_changing_purchase_gap(): void
+    {
+        $beras = \App\Models\PembelianBarang::create([
+            'nama_barang' => 'Beras Integrasi', 'batch' => 'B1',
+            'qty_rencana' => 100, 'qty_terbeli' => 80, 'qty_belum' => 20,
+            'harga_satuan' => 100000, 'anggaran' => 10000000,
+            'realisasi' => 8000000, 'sisa' => 2000000, 'persen_real' => 80,
+        ]);
+        $minyak = \App\Models\PembelianBarang::create([
+            'nama_barang' => 'Minyak Integrasi', 'batch' => 'M1',
+            'qty_rencana' => 60, 'qty_terbeli' => 50, 'qty_belum' => 10,
+            'harga_satuan' => 20000, 'anggaran' => 1200000,
+            'realisasi' => 1000000, 'sisa' => 200000, 'persen_real' => 83.3,
+        ]);
+
+        $response = $this->actingAs($this->admin())->post(route('barang.kegiatan.store'), [
+            'nama_anggaran' => 'Distribusi Multi Barang', 'kategori' => 'barang_bantuan',
+            'target_paket' => 30, 'satuan' => 'paket', 'anggaran' => 0,
+            'realisasi' => 0, 'catatan' => 'Integrasi stok', 'form_type' => 'kegiatan',
+            'barang' => [
+                ['pembelian_barang_id' => $beras->id, 'jumlah' => 30],
+                ['pembelian_barang_id' => $minyak->id, 'jumlah' => 25],
+            ],
+        ]);
+
+        $response->assertRedirect(route('barang.index', ['tab' => 'kegiatan']));
+        $kegiatanId = \Illuminate\Support\Facades\DB::table('anggarans')->where('nama_anggaran', 'Distribusi Multi Barang')->value('id');
+        $this->assertDatabaseHas('kegiatan_barang', ['anggaran_id' => $kegiatanId, 'pembelian_barang_id' => $beras->id, 'jumlah' => 30]);
+        $this->assertDatabaseHas('kegiatan_barang', ['anggaran_id' => $kegiatanId, 'pembelian_barang_id' => $minyak->id, 'jumlah' => 25]);
+        $this->assertDatabaseHas('pembelian_barang', ['id' => $beras->id, 'qty_belum' => 20]);
+        $this->assertDatabaseHas('pembelian_barang', ['id' => $minyak->id, 'qty_belum' => 10]);
+    }
+
     public function test_successful_kegiatan_store_redirects_to_kegiatan_tab(): void
     {
         $response = $this->actingAs($this->admin())->post(route('barang.kegiatan.store'), [

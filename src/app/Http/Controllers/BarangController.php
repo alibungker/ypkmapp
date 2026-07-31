@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 use App\Models\Anggaran;
 use App\Models\PembelianBarang;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class BarangController extends Controller
 {
@@ -11,6 +13,12 @@ class BarangController extends Controller
     {
         $anggarans = Anggaran::orderBy('id')->get();
         $pembelian = PembelianBarang::orderBy('id')->get();
+        $tersalurkan = DB::table('kegiatan_barang')
+            ->selectRaw('pembelian_barang_id, SUM(jumlah) as total')
+            ->groupBy('pembelian_barang_id')->pluck('total', 'pembelian_barang_id');
+        $pembelian->each(function ($item) use ($tersalurkan) {
+            $item->stok_tersedia = max(0, $item->qty_terbeli - (int) ($tersalurkan[$item->id] ?? 0));
+        });
         return view('barang.index', compact('anggarans', 'pembelian'));
     }
 
@@ -25,8 +33,33 @@ class BarangController extends Controller
             'anggaran' => 'required|numeric',
             'realisasi' => 'required|numeric',
             'catatan' => 'nullable',
+            'barang' => 'nullable|array',
+            'barang.*.pembelian_barang_id' => 'required_with:barang|integer|distinct|exists:pembelian_barang,id',
+            'barang.*.jumlah' => 'required_with:barang|integer|min:1',
         ]);
-        Anggaran::create($data);
+        $alokasi = $data['barang'] ?? [];
+        unset($data['barang']);
+
+        DB::transaction(function () use ($data, $alokasi) {
+            $kegiatan = Anggaran::create($data);
+            foreach ($alokasi as $baris) {
+                $barang = PembelianBarang::lockForUpdate()->findOrFail($baris['pembelian_barang_id']);
+                $sudahTersalurkan = (int) DB::table('kegiatan_barang')
+                    ->where('pembelian_barang_id', $barang->id)->sum('jumlah');
+                $stokTersedia = max(0, $barang->qty_terbeli - $sudahTersalurkan);
+                if ($baris['jumlah'] > $stokTersedia) {
+                    throw ValidationException::withMessages([
+                        'barang' => "Stok {$barang->nama_barang} hanya tersedia {$stokTersedia}.",
+                    ]);
+                }
+                DB::table('kegiatan_barang')->insert([
+                    'anggaran_id' => $kegiatan->id,
+                    'pembelian_barang_id' => $barang->id,
+                    'jumlah' => $baris['jumlah'],
+                    'created_at' => now(), 'updated_at' => now(),
+                ]);
+            }
+        });
         return redirect()->route('barang.index', ['tab' => 'kegiatan'])->with('success', 'Kegiatan berhasil ditambahkan.');
     }
 

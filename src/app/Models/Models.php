@@ -110,7 +110,7 @@ class DistribusiItem extends Model
 
 class Anggaran extends Model
 {
-    protected $fillable = ['distribusi_id', 'kategori', 'anggaran', 'realisasi', 'catatan'];
+    protected $fillable = ['distribusi_id', 'nama_anggaran', 'kategori', 'target_paket', 'satuan', 'anggaran', 'realisasi', 'catatan'];
     public function distribusi() { return $this->belongsTo(Distribusi::class); }
 }
 

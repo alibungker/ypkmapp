@@ -81,7 +81,7 @@
 
 @section('styles')
 <style>
-.barang-card-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 18px;border-bottom:1px solid #e5e7eb}.barang-card-header h3{font-size:17px;margin:2px 0 0;color:#111827}.section-kicker,.create-modal__eyebrow{font-size:10px;letter-spacing:.12em;font-weight:800;color:#017723}.icon-action{border:0;background:none;cursor:pointer;padding:6px}.icon-action--danger{color:#dc2626}.empty-row{padding:28px;text-align:center;color:#9ca3af}.create-modal{display:none;position:fixed;inset:0;z-index:1200;align-items:center;justify-content:center;padding:20px}.create-modal.is-open{display:flex}.create-modal__backdrop{position:absolute;inset:0;background:rgba(0,3,74,.66);backdrop-filter:blur(4px)}.create-modal__panel{position:relative;width:min(680px,100%);max-height:calc(100dvh - 40px);overflow:auto;overscroll-behavior:contain;background:#fff;border-radius:18px;box-shadow:0 24px 80px rgba(0,3,74,.3)}.create-modal__header{position:sticky;top:0;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:20px 24px;border-bottom:1px solid #e5e7eb;background:#fff}.create-modal__header h2{margin:3px 0 0;color:#00034a;font-size:21px}.create-modal__close{border:0;background:#f3f4f6;border-radius:50%;min-width:44px;width:44px;height:44px;font-size:24px;cursor:pointer}.create-modal__form{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:24px}.form-field--full,.create-modal__actions{grid-column:1/-1}.form-label span{color:#dc2626}.form-hint{display:block;margin-top:5px;color:#667085;font-size:11px}.auto-total{background:#f5f7fa;color:#00034a;font-weight:700}.create-modal__actions{display:flex;justify-content:flex-end;gap:10px;padding-top:6px}.btn-secondary{background:#eef0f4;color:#374151}body.modal-open{overflow:hidden}
+.barang-card-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 18px;border-bottom:1px solid #e5e7eb}.barang-card-header h3{font-size:17px;margin:2px 0 0;color:#111827}.section-kicker,.create-modal__eyebrow{font-size:10px;letter-spacing:.12em;font-weight:800;color:#017723}.icon-action{border:0;background:none;cursor:pointer;padding:6px}.icon-action--danger{color:#dc2626}.empty-row{padding:28px;text-align:center;color:#9ca3af}.create-modal{display:none;position:fixed;inset:0;z-index:1200;align-items:center;justify-content:center;padding:20px}.create-modal.is-open{display:flex}.create-modal__backdrop{position:absolute;inset:0;background:rgba(0,3,74,.66);backdrop-filter:blur(4px)}.create-modal__panel{position:relative;width:min(680px,100%);max-height:calc(100dvh - 40px);overflow:auto;overscroll-behavior:contain;background:#fff;border-radius:18px;box-shadow:0 24px 80px rgba(0,3,74,.3)}.create-modal__header{position:sticky;top:0;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:20px 24px;border-bottom:1px solid #e5e7eb;background:#fff}.create-modal__header h2{margin:3px 0 0;color:#00034a;font-size:21px}.create-modal__close{border:0;background:#f3f4f6;border-radius:50%;min-width:44px;width:44px;height:44px;font-size:24px;cursor:pointer}.create-modal__form{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:24px}.form-field--full,.create-modal__actions{grid-column:1/-1}.form-label span{color:#dc2626}.allocation-list{display:grid;gap:10px;margin-bottom:10px}.allocation-row{display:grid;grid-template-columns:minmax(0,1fr) 130px 44px;gap:8px;align-items:end;padding:10px;background:#f8f9fc;border:1px solid #e5e7eb;border-radius:10px}.allocation-remove{width:44px;height:44px;border:1px solid #fecaca;border-radius:8px;background:#fff;color:#dc2626;cursor:pointer}.form-hint{display:block;margin-top:5px;color:#667085;font-size:11px}.auto-total{background:#f5f7fa;color:#00034a;font-weight:700}.create-modal__actions{display:flex;justify-content:flex-end;gap:10px;padding-top:6px}.btn-secondary{background:#eef0f4;color:#374151}body.modal-open{overflow:hidden}
 @media(max-width:640px){.barang-card-header{align-items:stretch;flex-direction:column}.barang-card-header .btn{width:100%}.create-modal{padding:0;align-items:flex-end}.create-modal__panel{border-radius:18px 18px 0 0;max-height:94dvh}.create-modal__form{grid-template-columns:1fr;padding:18px}.form-field--full,.create-modal__actions{grid-column:1}.create-modal__actions{background:#fff;border-top:1px solid #e5e7eb;margin:8px -18px -18px;padding:14px 18px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -6px 16px rgba(0,3,74,.06)}.create-modal__actions .btn{flex:1;min-height:48px}}
 </style>
 @endsection
@@ -136,6 +136,31 @@ function bindPurchaseCalculator(form) {
     calculatePurchaseTotals(form);
 }
 document.querySelectorAll('form[action$="/barang/pembelian"], form[data-purchase-calculator]').forEach(bindPurchaseCalculator);
+
+const availableItems = {!! json_encode($pembelian->map(function ($item) {
+    return [
+        'id' => $item->id,
+        'label' => $item->nama_barang . ($item->batch ? ' — ' . $item->batch : ''),
+        'stok' => $item->stok_tersedia,
+    ];
+})->values()) !!};
+const allocationRows = document.getElementById('kegiatanBarangRows');
+let allocationIndex = 0;
+function addAllocationRow(selected = '', amount = '') {
+    if (!allocationRows) return;
+    const row = document.createElement('div');
+    row.className = 'allocation-row';
+    const options = availableItems.map(item => `<option value="${item.id}" data-stok="${item.stok}" ${String(item.id) === String(selected) ? 'selected' : ''}>${item.label} — stok ${item.stok}</option>`).join('');
+    row.innerHTML = `<div><label class="form-label">Pilih Barang</label><select class="form-input allocation-item" name="barang[${allocationIndex}][pembelian_barang_id]" required><option value="">-- Pilih barang --</option>${options}</select></div><div><label class="form-label">Jumlah</label><input class="form-input allocation-amount" type="number" min="1" name="barang[${allocationIndex}][jumlah]" value="${amount}" required></div><button type="button" class="allocation-remove" aria-label="Hapus barang">×</button>`;
+    allocationRows.appendChild(row); allocationIndex++;
+    row.querySelector('.allocation-remove').addEventListener('click', () => row.remove());
+    const select = row.querySelector('.allocation-item'), input = row.querySelector('.allocation-amount');
+    const syncMax = () => { const stok = select.selectedOptions[0]?.dataset.stok || ''; input.max = stok; input.title = stok ? `Stok tersedia ${stok}` : ''; };
+    select.addEventListener('change', syncMax); syncMax();
+}
+document.getElementById('addKegiatanBarang')?.addEventListener('click', () => addAllocationRow());
+const oldAllocations = @json(old('form_type') === 'kegiatan' ? old('barang', []) : []);
+oldAllocations.forEach(item => addAllocationRow(item.pembelian_barang_id, item.jumlah));
 
 document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && activeCreateModal) closeCreateModal();

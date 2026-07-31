@@ -15,6 +15,12 @@
             <div class="form-field"><label class="form-label">Anggaran (Rp) <span>*</span></label><input type="number" min="0" step="0.01" name="anggaran" class="form-input" required value="{{ old('form_type') === 'kegiatan' ? old('anggaran') : '' }}"></div>
             <div class="form-field"><label class="form-label">Realisasi (Rp) <span>*</span></label><input type="number" min="0" step="0.01" name="realisasi" class="form-input" required value="{{ old('form_type') === 'kegiatan' ? old('realisasi', 0) : 0 }}"></div>
             <div class="form-field form-field--full"><label class="form-label">Catatan/Status</label><input type="text" name="catatan" class="form-input" value="{{ old('form_type') === 'kegiatan' ? old('catatan') : '' }}" placeholder="Contoh: Direncanakan"></div>
+            <div class="form-field form-field--full">
+                <label class="form-label">Barang yang Disalurkan</label>
+                <div id="kegiatanBarangRows" class="allocation-list"></div>
+                <button type="button" class="btn btn-outline btn-sm" id="addKegiatanBarang">+ Tambah Jenis Barang</button>
+                <small class="form-hint">Stok tersedia dihitung dari jumlah terbeli dikurangi total yang sudah disalurkan.</small>
+            </div>
             <div class="create-modal__actions"><button type="button" class="btn btn-secondary" data-close-modal>Batal</button><button type="submit" class="btn btn-primary">Simpan Kegiatan</button></div>
         </form>
     </div>
