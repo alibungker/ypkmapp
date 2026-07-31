@@ -38,6 +38,7 @@ class KeuanganController extends Controller
             'tanggal_masuk' => 'required|date',
             'jumlah' => 'required|numeric',
             'jenis' => 'required|in:uang_tunai,transfer,barang',
+            'keterangan' => 'nullable|string|max:500',
         ]);
         $data['dicatat_oleh'] = auth()->id();
         DanaDonatur::create($data);

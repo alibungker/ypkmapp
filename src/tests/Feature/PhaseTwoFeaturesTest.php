@@ -74,6 +74,32 @@ class PhaseTwoFeaturesTest extends TestCase
         ];
     }
 
+    public function test_keuangan_index_uses_modal_forms_for_dana_and_biaya(): void
+    {
+        $response = $this->actingAs($this->admin())->get(route('keuangan.index'));
+
+        $response->assertOk();
+        $response->assertSee('id="createDanaModal"', false);
+        $response->assertSee('id="createBiayaModal"', false);
+        $response->assertSee('data-open-finance-modal="createDanaModal"', false);
+        $response->assertSee('data-open-finance-modal="createBiayaModal"', false);
+    }
+
+    public function test_invalid_biaya_reopens_originating_modal_with_input(): void
+    {
+        $response = $this->actingAs($this->admin())->from(route('keuangan.index'))->post(route('keuangan.biaya.store'), [
+            'form_type' => 'biaya',
+            'kategori' => 'transportasi',
+            'deskripsi' => '',
+            'jumlah' => 500000,
+            'tanggal' => now()->toDateString(),
+        ]);
+
+        $response->assertRedirect(route('keuangan.index'));
+        $response->assertSessionHasErrors('deskripsi');
+        $response->assertSessionHasInput('form_type', 'biaya');
+    }
+
     public function test_barang_index_uses_create_modals_for_kegiatan_and_pembelian(): void
     {
         $response = $this->actingAs($this->admin())->get(route('barang.index'));

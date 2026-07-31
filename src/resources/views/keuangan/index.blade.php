@@ -1,5 +1,10 @@
 @extends('layouts.app')
 @section('title', 'Keuangan')
+@section('styles')
+<style>
+.finance-actions{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px 22px;margin-bottom:20px;background:white;border:1px solid #e5e7eb;border-radius:14px}.finance-actions h2{font-size:20px;color:#00034a;margin:3px 0}.finance-actions p{font-size:13px;color:#667085;margin:0}.finance-kicker{font-size:10px;letter-spacing:.14em;font-weight:800;color:#017723}.finance-actions__buttons{display:flex;gap:10px}.finance-modal{display:none;position:fixed;inset:0;z-index:1200;align-items:center;justify-content:center;padding:20px}.finance-modal.is-open{display:flex}.finance-modal__backdrop{position:absolute;inset:0;background:rgba(0,3,74,.68);backdrop-filter:blur(4px)}.finance-modal__panel{position:relative;width:min(650px,100%);max-height:calc(100dvh - 40px);overflow:auto;background:#fff;border-radius:18px;box-shadow:0 24px 80px rgba(0,3,74,.3)}.finance-modal__header{position:sticky;top:0;z-index:1;display:flex;justify-content:space-between;padding:20px 24px;border-bottom:1px solid #e5e7eb;background:white}.finance-modal__header h2{font-size:21px;color:#00034a;margin:3px 0}.finance-modal__close{width:44px;height:44px;border:0;border-radius:50%;font-size:24px;cursor:pointer}.finance-modal__form{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:24px}.form-field--full,.finance-modal__actions{grid-column:1/-1}.finance-modal__actions{display:flex;justify-content:flex-end;gap:10px}body.finance-modal-open{overflow:hidden}@media(max-width:700px){.finance-actions{align-items:stretch;flex-direction:column}.finance-actions__buttons{display:grid}.finance-modal{padding:0;align-items:flex-end}.finance-modal__panel{border-radius:18px 18px 0 0;max-height:94dvh}.finance-modal__form{grid-template-columns:1fr;padding:18px}.form-field--full,.finance-modal__actions{grid-column:1}.finance-modal__actions .btn{flex:1;min-height:48px}}
+</style>
+@endsection
 @section('content')
 {{-- Stats --}}
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:24px;">
@@ -21,97 +26,10 @@
     </div>
 </div>
 
-{{-- Two columns: Forms --}}
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;">
-    {{-- Form Dana Masuk --}}
-    <div class="card">
-        <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;">
-            <h3 style="font-size:15px;font-weight:600;">📥 Tambah Dana Donatur</h3>
-        </div>
-        <div style="padding:20px;">
-            <form method="POST" action="{{ route('keuangan.dana.store') }}">
-                @csrf
-                <div style="margin-bottom:12px;">
-                    <label class="form-label">Nama Donatur <span style="color:#dc2626;">*</span></label>
-                    <input type="text" name="donatur" class="form-input" required placeholder="Pemprov Aceh / Hong Kong SWAB / Donasi Umum">
-                </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                    <div>
-                        <label class="form-label">Tanggal Masuk <span style="color:#dc2626;">*</span></label>
-                        <input type="date" name="tanggal_masuk" class="form-input" required value="{{ date('Y-m-d') }}">
-                    </div>
-                    <div>
-                        <label class="form-label">Jumlah <span style="color:#dc2626;">*</span></label>
-                        <input type="number" name="jumlah" class="form-input" required step="0.01" placeholder="10000000">
-                    </div>
-                </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
-                    <div>
-                        <label class="form-label">Jenis</label>
-                        <select name="jenis" class="form-input">
-                            <option value="transfer">Transfer</option>
-                            <option value="uang_tunai">Uang Tunai</option>
-                            <option value="barang">Barang</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="form-label">Keterangan</label>
-                        <input type="text" name="keterangan" class="form-input" placeholder="Tahap 1, dll">
-                    </div>
-                </div>
-                <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end;">
-                    <button type="submit" class="btn btn-primary">💾 Simpan Dana</button>
-                </div>
-            </form>
-        </div>
-    </div>
+{{-- Aksi transaksi --}}
+<div class="finance-actions"><div><span class="finance-kicker">PENCATATAN KEUANGAN</span><h2>Arus Dana & Operasional</h2><p>Ringkasan dan riwayat transaksi dalam satu dashboard.</p></div><div class="finance-actions__buttons"><button type="button" class="btn btn-outline" data-open-finance-modal="createBiayaModal">+ Biaya Operasional</button><button type="button" class="btn btn-primary" data-open-finance-modal="createDanaModal">+ Dana Donatur</button></div></div>
+@include('keuangan._create-modals')
 
-    {{-- Form Biaya Operasional --}}
-    <div class="card">
-        <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;">
-            <h3 style="font-size:15px;font-weight:600;">🚐 Tambah Biaya Operasional</h3>
-        </div>
-        <div style="padding:20px;">
-            <form method="POST" action="{{ route('keuangan.biaya.store') }}">
-                @csrf
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                    <div>
-                        <label class="form-label">Kategori <span style="color:#dc2626;">*</span></label>
-                        <select name="kategori" class="form-input" required>
-                            <option value="transportasi">🚛 Transportasi</option>
-                            <option value="konsumsi">🍱 Konsumsi</option>
-                            <option value="sewa">🏠 Sewa</option>
-                            <option value="atk">📦 ATK</option>
-                            <option value="komunikasi">📞 Komunikasi</option>
-                            <option value="lainnya">Lainnya</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="form-label">Jumlah <span style="color:#dc2626;">*</span></label>
-                        <input type="number" name="jumlah" class="form-input" required step="0.01" placeholder="500000">
-                    </div>
-                </div>
-                <div style="margin-top:12px;">
-                    <label class="form-label">Deskripsi <span style="color:#dc2626;">*</span></label>
-                    <input type="text" name="deskripsi" class="form-input" required placeholder="Sewa mobil perjalanan Tamiang">
-                </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
-                    <div>
-                        <label class="form-label">Tanggal <span style="color:#dc2626;">*</span></label>
-                        <input type="date" name="tanggal" class="form-input" required value="{{ date('Y-m-d') }}">
-                    </div>
-                    <div>
-                        <label class="form-label">Kaitkan Distribusi</label>
-                        <select name="distribusi_id" class="form-input">
-                            <option value="">— Tidak ada —</option>
-                            @foreach($distribusi_list ?? [] as $d)
-                            <option value="{{ $d->id }}">{{ $d->nama_kegiatan }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-                <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end;">
-                    <button type="submit" class="btn btn-green" style="background:#017723;color:white;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;border:none;cursor:pointer;">💾 Simpan Biaya</button>
 {{-- Ringkasan Anggaran & Pembelian --}}
 <div class="card">
     <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;">
@@ -294,4 +212,17 @@
                         document.getElementById('editModal').style.display = 'none';
                     }
                     </script>
-                    @endsection
+@section('scripts')
+<script>
+let activeFinanceModal=null,financeTrigger=null;
+function openFinanceModal(id){const m=document.getElementById(id);if(!m)return;financeTrigger=document.activeElement;activeFinanceModal=m;m.classList.add('is-open');m.setAttribute('aria-hidden','false');document.body.classList.add('finance-modal-open');m.querySelector('button,input,select')?.focus();}
+function closeFinanceModal(){if(!activeFinanceModal)return;activeFinanceModal.classList.remove('is-open');activeFinanceModal.setAttribute('aria-hidden','true');document.body.classList.remove('finance-modal-open');activeFinanceModal=null;financeTrigger?.focus();}
+document.querySelectorAll('[data-open-finance-modal]').forEach(b=>b.addEventListener('click',()=>openFinanceModal(b.dataset.openFinanceModal)));
+document.querySelectorAll('[data-close-finance-modal]').forEach(b=>b.addEventListener('click',closeFinanceModal));
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&activeFinanceModal)closeFinanceModal();});
+const invalidFinanceForm=@json(old('form_type'));
+if(invalidFinanceForm==='dana')openFinanceModal('createDanaModal');
+if(invalidFinanceForm==='biaya')openFinanceModal('createBiayaModal');
+</script>
+@endsection
+@endsection
