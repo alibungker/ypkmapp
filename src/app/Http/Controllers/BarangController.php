@@ -27,7 +27,7 @@ class BarangController extends Controller
             'catatan' => 'nullable',
         ]);
         Anggaran::create($data);
-        return redirect()->route('barang.index')->with('success', 'Kegiatan berhasil ditambahkan.');
+        return redirect()->route('barang.index', ['tab' => 'kegiatan'])->with('success', 'Kegiatan berhasil ditambahkan.');
     }
 
     public function updateKegiatan(Request $request, Anggaran $anggaran)
@@ -66,7 +66,7 @@ class BarangController extends Controller
         $data['qty_terbeli'] = $data['qty_terbeli'] ?? 0;
         $data = $this->hitungPembelian($data);
         PembelianBarang::create($data);
-        return redirect()->route('barang.index')->with('success', 'Item barang berhasil ditambahkan.');
+        return redirect()->route('barang.index', ['tab' => 'pembelian'])->with('success', 'Item barang berhasil ditambahkan.');
     }
 
     public function updatePembelian(Request $request, PembelianBarang $pembelian)

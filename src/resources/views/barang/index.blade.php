@@ -148,7 +148,9 @@ document.addEventListener('keydown', event => {
 });
 
 const invalidForm = @json(old('form_type'));
-showTab(invalidForm === 'pembelian' ? 'pembelian' : 'kegiatan');
+const requestedTab = @json(request()->query('tab'));
+const activeTab = invalidForm || (requestedTab === 'pembelian' ? 'pembelian' : 'kegiatan');
+showTab(activeTab);
 if (invalidForm === 'kegiatan') openCreateModal('createKegiatanModal');
 if (invalidForm === 'pembelian') openCreateModal('createPembelianModal');
 

@@ -105,6 +105,36 @@ class PhaseTwoFeaturesTest extends TestCase
         $response->assertSessionHasInput('form_type', 'kegiatan');
     }
 
+    public function test_successful_kegiatan_store_redirects_to_kegiatan_tab(): void
+    {
+        $response = $this->actingAs($this->admin())->post(route('barang.kegiatan.store'), [
+            'nama_anggaran' => 'Kegiatan Tab Uji',
+            'kategori' => 'barang_bantuan',
+            'target_paket' => 10,
+            'satuan' => 'paket',
+            'anggaran' => 1000000,
+            'realisasi' => 0,
+            'catatan' => 'Uji tab',
+            'form_type' => 'kegiatan',
+        ]);
+
+        $response->assertRedirect(route('barang.index', ['tab' => 'kegiatan']));
+    }
+
+    public function test_successful_pembelian_store_redirects_to_pembelian_tab(): void
+    {
+        $response = $this->actingAs($this->admin())->post(route('barang.pembelian.store'), [
+            'nama_barang' => 'Barang Tab Uji',
+            'batch' => 'Batch Uji',
+            'qty_rencana' => 10,
+            'qty_terbeli' => 2,
+            'harga_satuan' => 100000,
+            'form_type' => 'pembelian',
+        ]);
+
+        $response->assertRedirect(route('barang.index', ['tab' => 'pembelian']));
+    }
+
     public function test_pembelian_calculates_financial_totals_from_price_and_quantities(): void
     {
         $response = $this->actingAs($this->admin())->post(route('barang.pembelian.store'), [
@@ -118,7 +148,7 @@ class PhaseTwoFeaturesTest extends TestCase
             'form_type' => 'pembelian',
         ]);
 
-        $response->assertRedirect(route('barang.index'));
+        $response->assertRedirect(route('barang.index', ['tab' => 'pembelian']));
         $this->assertDatabaseHas('pembelian_barang', [
             'nama_barang' => 'Beras Uji Otomatis',
             'anggaran' => 15000000,
