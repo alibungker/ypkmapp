@@ -60,17 +60,13 @@
     <div class="card-body">
         <div class="table-wrap desktop-table">
         <table class="table-data">
-            <thead><tr><th>Kegiatan</th><th>Kelompok</th><th>Ketua</th><th>Koordinat</th><th>Paket</th><th>Penerima</th><th>Nilai</th><th>Tanggal</th><th>Status</th><th></th></tr></thead>
+            <thead><tr><th>Kegiatan</th><th>Kelompok</th><th>Target Paket</th><th>Penerima</th><th>Nilai</th><th>Tanggal</th><th>Status</th><th></th></tr></thead>
             <tbody>
                 @forelse($distribusi ?? [] as $d)
                 <tr>
                     <td style="font-weight:500;">{{ $d->nama_kegiatan }}</td>
                     <td>{{ $d->kelompok->nama ?? '-' }}</td>
-                    <td style="color:#6b7280;">{{ optional(optional($d->kelompok)->ketuaUser)->name ?? '-' }}</td>
-                    <td style="color:#6b7280;font-size:12px;font-family:monospace;">
-                        @if($d->titik_koordinat) 📍 {{ $d->titik_koordinat }} @else <span style="color:#dc2626;">Belum diset</span> @endif
-                    </td>
-                    <td style="font-weight:600;">{{ number_format($d->jumlah_paket) }}</td>
+                    <td style="font-weight:700;color:#b07d14;">{{ number_format($d->jumlah_paket) }} paket</td>
                     <td>👥 {{ number_format($d->kelompok->penerima_count ?? 0) }}</td>
                     <td>Rp {{ number_format($d->estimasi_nilai_total,0,',','.') }}</td>
                     <td style="color:#6b7280;">{{ is_object($d->tanggal) ? $d->tanggal->format('d M Y') : date('d M Y', strtotime($d->tanggal)) }}</td>
@@ -93,7 +89,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="10" style="padding:32px;text-align:center;color:#9ca3af;">Belum ada distribusi</td></tr>
+                <tr><td colspan="8" style="padding:32px;text-align:center;color:#9ca3af;">Belum ada distribusi</td></tr>
                 @endforelse
             </tbody>
         </table>
