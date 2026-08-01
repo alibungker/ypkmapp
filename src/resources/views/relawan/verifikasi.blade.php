@@ -99,6 +99,10 @@
         <div style="font-size:24px;font-weight:800;color:#00034a;">{{ $pending->total() + $terverifikasi->total() }}</div>
         <div style="font-size:13px;color:#6b7280;">Total Perlu Diproses</div>
     </div>
+    <div style="flex:1;background:#eef4ff;border:1px solid #d6e4ff;border-radius:10px;padding:16px;text-align:center;">
+        <div style="font-size:24px;font-weight:800;color:#1e40af;">{{ $riwayat->total() }}</div>
+        <div style="font-size:13px;color:#6b7280;">Riwayat Hasil Verifikasi</div>
+    </div>
 </div>
 
 {{-- === TAB 1: VERIFIKASI (Pending) === --}}
@@ -209,6 +213,55 @@
             </div>
             <div style="margin-top:12px;">{{ $terverifikasi->links() }}</div>
         </form>
+        @endif
+    </div>
+</div>
+
+{{-- === TAB 3: RIWAYAT HASIL VERIFIKASI === --}}
+<div class="card" style="margin-bottom:20px;">
+    <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;">
+        <div>
+            <h3 style="font-size:15px;font-weight:600;">📋 Riwayat Hasil Verifikasi</h3>
+            <p style="font-size:12px;color:#6b7280;margin-top:2px;">Data yang sudah diproses (terverifikasi / ditolak / sudah menerima bantuan)</p>
+        </div>
+        <span style="background:#eef4ff;color:#1e40af;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;">{{ $riwayat->total() }} data</span>
+    </div>
+    <div style="padding:16px 20px;overflow-x:auto;">
+        @if($riwayat->isEmpty())
+        <div style="padding:16px;text-align:center;color:#9ca3af;font-size:13px;">Belum ada data yang diproses.</div>
+        @else
+        <table class="table-data">
+            <thead><tr>
+                <th>NIK</th><th>Nama</th><th>Kelompok</th><th>Desa</th><th>Hasil</th><th>Verifikator</th><th>Bantuan</th><th>Waktu</th><th>Aksi</th>
+            </tr></thead>
+            <tbody>
+                @foreach($riwayat as $p)
+                <tr>
+                    <td style="font-family:monospace;font-size:13px;color:#6b7280;"><x-masked-nik :value="$p->nik" /></td>
+                    <td style="font-weight:500;">{{ $p->nama }}</td>
+                    <td>{{ $p->kelompok->nama ?? '-' }}</td>
+                    <td style="color:#6b7280;">{{ $p->desa }}</td>
+                    <td>
+                        @if($p->status == 'terverifikasi') <span class="badge badge-green">✅ Terverifikasi</span>
+                        @else <span class="badge" style="background:#fce8e6;color:#dc2626;">❌ Ditolak</span>
+                        @endif
+                    </td>
+                    <td style="color:#6b7280;font-size:13px;">{{ $p->verifikator->name ?? '-' }}</td>
+                    <td>
+                        @if($p->terima_bantuan) <span class="badge badge-green">✅ Sudah</span>
+                        @elseif($p->status == 'terverifikasi') <span class="badge badge-gold">⏳ Belum</span>
+                        @else <span style="font-size:12px;color:#9ca3af;">-</span>
+                        @endif
+                    </td>
+                    <td style="color:#6b7280;font-size:13px;">{{ $p->verified_at ? (is_object($p->verified_at) ? $p->verified_at->format('d M Y H:i') : date('d M Y H:i', strtotime($p->verified_at))) : '-' }}</td>
+                    <td style="white-space:nowrap;">
+                        <a href="{{ route('penerima.show', $p) }}" class="btn btn-outline btn-sm" style="text-decoration:none;">🔍 Detail</a>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+        <div style="margin-top:12px;">{{ $riwayat->links() }}</div>
         @endif
     </div>
 </div>

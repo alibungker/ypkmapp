@@ -68,6 +68,19 @@ class RelawanController extends Controller
             ->paginate($perPage, ['*'], 'verified_page')
             ->withQueryString();
 
+        // RIWAYAT: semua data yang sudah diproses relawan/admin, termasuk sudah menerima bantuan.
+        // Query dibuat dari filter dasar yang sama supaya pencarian, wilayah, kelompok,
+        // sumber data, dan status tetap konsisten.
+        $riwayat = clone $query;
+        $this->scopeWilayah($riwayat);
+        $riwayat = $riwayat
+            ->whereNotNull('verified_at')
+            ->whereIn('status', ['terverifikasi', 'ditolak'])
+            ->with(['kelompok', 'verifikator', 'penerimaTerima'])
+            ->orderBy('verified_at', 'desc')
+            ->paginate($perPage, ['*'], 'history_page')
+            ->withQueryString();
+
         // Filter options for relawan's wilayah
         $filterKabupaten = \Illuminate\Support\Facades\DB::table('penerimas')
             ->whereNotNull('kabupaten')
@@ -110,7 +123,7 @@ class RelawanController extends Controller
         $filterKelompok = $filterKelompok->orderBy('nama')->get();
 
         return view('relawan.verifikasi', compact(
-            'pending', 'terverifikasi', 'perPage',
+            'pending', 'terverifikasi', 'riwayat', 'perPage',
             'filterKabupaten', 'filterKecamatan', 'filterDesa', 'filterKelompok',
             'request'
         ));
