@@ -75,6 +75,7 @@
                 <button type="button" id="btn-bulk-approve-pending" class="btn btn-primary btn-sm" disabled>✅ Setujui Terpilih</button>
                 <button type="button" id="btn-bulk-reject-pending" class="btn btn-sm" style="background:#dc2626;color:white;border:none;cursor:pointer;" disabled>❌ Tolak Terpilih</button>
             </div>
+            <div style="margin-top:12px;">{{ $pending->links() }}</div>
         </form>
         @endif
     </div>
@@ -136,6 +137,7 @@
                 <span id="selected-count-terima" style="font-size:13px;color:#6b7280;"></span>
                 <button type="button" id="btn-bulk-terima" class="btn btn-primary btn-sm" disabled>✅ Tandai Terima Terpilih</button>
             </div>
+            <div style="margin-top:12px;">{{ $terverifikasi->links() }}</div>
         </form>
         @endif
     </div>

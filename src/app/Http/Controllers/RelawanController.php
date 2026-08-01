@@ -31,12 +31,18 @@ class RelawanController extends Controller
         // Data PENDING (butuh verifikasi)
         $pending = clone $query;
         $this->scopeWilayah($pending);
-        $pending = $pending->where('status', 'pending')->orderBy('created_at', 'desc')->get();
+        $pending = $pending->where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->paginate(100, ['*'], 'pending_page')
+            ->withQueryString();
 
         // Data TERVERIFIKASI (butuh checklist terima bantuan)
         $terverifikasi = clone $query;
         $this->scopeWilayah($terverifikasi);
-        $terverifikasi = $terverifikasi->where('status', 'terverifikasi')->orderBy('verified_at', 'desc')->get();
+        $terverifikasi = $terverifikasi->where('status', 'terverifikasi')
+            ->orderBy('verified_at', 'desc')
+            ->paginate(100, ['*'], 'verified_page')
+            ->withQueryString();
 
         return view('relawan.verifikasi', compact('pending', 'terverifikasi'));
     }
