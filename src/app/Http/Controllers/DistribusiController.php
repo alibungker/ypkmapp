@@ -73,7 +73,7 @@ class DistribusiController extends Controller
                     ->where('pembelian_barang_id', $item->id)->sum('jumlah');
                 $untukDistribusi = (int) DB::table('distribusi_pembelian_barang')
                     ->where('pembelian_barang_id', $item->id)->sum('jumlah');
-                $item->stok_tersedia = max(0, $item->qty_terbeli - $untukKegiatan - $untukDistribusi);
+                $item->stok_tersedia = max(0, $untukKegiatan - $untukDistribusi);
             });
         return view('distribusi.form', compact('kelompoks', 'barang', 'pembelian', 'kegiatans'));
     }
@@ -130,7 +130,7 @@ class DistribusiController extends Controller
                     ->where('pembelian_barang_id', $item->id)
                     ->where('distribusi_id', '!=', $distribusi->id)
                     ->sum('jumlah');
-                $item->stok_tersedia = max(0, $item->qty_terbeli - $untukKegiatan - $untukDistribusi);
+                $item->stok_tersedia = max(0, $untukKegiatan - $untukDistribusi);
             });
         $barang = BarangBantuan::all();
         $kegiatans = Anggaran::with('barangItems')->whereHas('barangItems')->orderBy('nama_anggaran')->get();
@@ -248,11 +248,11 @@ class DistribusiController extends Controller
                 ->where('pembelian_barang_id', $barang->id)
                 ->where('distribusi_id', '!=', $distribusi->id)
                 ->sum('jumlah');
-            $tersedia = max(0, $barang->qty_terbeli - $untukKegiatan - $distribusiLain);
+            $tersedia = max(0, $untukKegiatan - $distribusiLain);
             $jumlah = (int) $baris['jumlah'];
             if ($jumlah > $tersedia) {
                 throw ValidationException::withMessages([
-                    'pembelian_barang' => "Stok {$barang->nama_barang} hanya tersedia {$tersedia}.",
+                    'pembelian_barang' => "Alokasi kegiatan {$barang->nama_barang} tersisa {$tersedia}.",
                 ]);
             }
             $sync[$barang->id] = ['jumlah' => $jumlah];

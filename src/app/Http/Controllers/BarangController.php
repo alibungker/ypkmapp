@@ -22,7 +22,10 @@ class BarangController extends Controller
         $pembelian->each(function ($item) use ($keKegiatan, $keDistribusi) {
             $item->qty_kegiatan = (int) ($keKegiatan[$item->id] ?? 0);
             $item->qty_distribusi = (int) ($keDistribusi[$item->id] ?? 0);
-            $item->stok_tersedia = max(0, $item->qty_terbeli - $item->qty_kegiatan - $item->qty_distribusi);
+            // Distribusi diambil dari alokasi kegiatan.
+            $item->sisa_kegiatan = max(0, $item->qty_kegiatan - $item->qty_distribusi);
+            $item->stok_bebas = max(0, $item->qty_terbeli - $item->qty_kegiatan);
+            $item->stok_tersedia = $item->sisa_kegiatan;
         });
         return view('barang.index', compact('anggarans', 'pembelian', 'keKegiatan', 'keDistribusi'));
     }
@@ -59,9 +62,7 @@ class BarangController extends Controller
                 $barang = PembelianBarang::lockForUpdate()->findOrFail($baris['pembelian_barang_id']);
                 $sudahKegiatan = (int) DB::table('kegiatan_barang')
                     ->where('pembelian_barang_id', $barang->id)->sum('jumlah');
-                $sudahDistribusi = (int) DB::table('distribusi_pembelian_barang')
-                    ->where('pembelian_barang_id', $barang->id)->sum('jumlah');
-                $stokTersedia = max(0, $barang->qty_terbeli - $sudahKegiatan - $sudahDistribusi);
+                $stokTersedia = max(0, $barang->qty_terbeli - $sudahKegiatan);
                 if ($baris['jumlah'] > $stokTersedia) {
                     throw ValidationException::withMessages([
                         'barang' => "Stok {$barang->nama_barang} hanya tersedia {$stokTersedia}.",
