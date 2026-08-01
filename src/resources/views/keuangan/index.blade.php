@@ -109,7 +109,7 @@
                     <td style="font-size:12px;">{{ $p->batch ?? '-' }}</td>
                     <td>{{ number_format($p->qty_rencana) }}</td>
                     <td>{{ number_format($p->qty_terbeli) }}</td>
-                    <td style="color:#dc2626;">{{ $p->qty_belum > 0 ? number_format($p->qty_belum) : '<span style="color:#017723;">0</span>' }}</td>
+                    <td style="color:{{ $p->qty_belum > 0 ? '#dc2626' : '#017723' }};">{{ number_format($p->qty_belum) }}</td>
                     <td>Rp {{ number_format($p->harga_satuan,0,',','.') }}</td>
                     <td>Rp {{ number_format($p->anggaran,0,',','.') }}</td>
                     <td>Rp {{ number_format($p->realisasi,0,',','.') }}</td>
