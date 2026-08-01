@@ -14,7 +14,7 @@ return new class extends Migration
             $table->foreignId('pembelian_barang_id')->constrained('pembelian_barang')->restrictOnDelete();
             $table->unsignedInteger('jumlah');
             $table->timestamps();
-            $table->index(['distribusi_id', 'pembelian_barang_id']);
+            $table->index(['distribusi_id', 'pembelian_barang_id'], 'idx_distribusi_pb');
         });
     }
 
