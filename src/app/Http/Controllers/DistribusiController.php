@@ -33,7 +33,11 @@ class DistribusiController extends Controller
 
     public function index(Request $request)
     {
-        $query = Distribusi::with(['kelompok' => fn ($q) => $q->withCount('penerima')->with('ketuaUser'), 'creator']);
+        $query = Distribusi::with([
+            'kelompok' => fn ($q) => $q->withCount('penerima')->with('ketuaUser'),
+            'creator',
+            'pembelianBarang',
+        ]);
         $user = auth()->user();
         if ($user->isKetuaKelompok()) {
             $query->where('kelompok_id', $user->kelompok_id);

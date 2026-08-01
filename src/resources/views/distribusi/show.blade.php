@@ -21,7 +21,9 @@
                 <tr><td style="padding:6px 0;color:#6b7280;">👤 Ketua Kelompok</td><td style="font-weight:600;">{{ optional(optional($distribusi->kelompok)->ketuaUser)->name ?? '-' }}</td></tr>
                 <tr><td style="padding:6px 0;color:#6b7280;">👥 Jumlah Penerima</td><td style="font-weight:600;">{{ number_format($distribusi->kelompok->penerima_count ?? 0) }} orang</td></tr>
                 <tr><td style="padding:6px 0;color:#6b7280;">📦 Jenis / Paket</td><td style="font-weight:600;">{{ $distribusi->jenis_bantuan }} — {{ number_format($distribusi->jumlah_paket) }} paket</td></tr>
-                @php($selisihPaket = (int) $distribusi->jumlah_paket - (int) ($distribusi->kelompok->penerima_count ?? 0))
+                @php
+                    $selisihPaket = (int) $distribusi->jumlah_paket - (int) ($distribusi->kelompok->penerima_count ?? 0);
+                @endphp
                 @if($selisihPaket !== 0)
                 <tr><td style="padding:6px 0;color:#6b7280;">⚖️ Selisih Paket</td><td style="font-weight:700;color:{{ $selisihPaket > 0 ? '#e5a820' : '#dc2626' }};">{{ $selisihPaket > 0 ? '+' : '' }}{{ number_format($selisihPaket) }} paket terhadap anggota</td></tr>
                 @endif
@@ -58,23 +60,29 @@
 
             @if($distribusi->pembelianBarang->isNotEmpty())
             <div style="margin-top:16px;border-top:1px solid #e5e7eb;padding-top:16px;">
-                <div style="font-size:13px;font-weight:700;color:#00034a;margin-bottom:9px;">📦 Barang yang Dialokasikan</div>
+                <div style="font-size:13px;font-weight:700;color:#00034a;margin-bottom:9px;">📦 Barang yang Dialokasikan ({{ number_format($distribusi->jumlah_paket) }} paket)</div>
                 <table class="table-data">
-                    <thead><tr><th>Nama Barang</th><th>Batch</th><th>Jumlah Keluar</th><th>Harga Satuan</th><th>Subtotal</th></tr></thead>
+                    <thead><tr><th>Nama Barang</th><th>Batch</th><th>Per Paket</th><th>Total Didistribusikan</th><th>Harga Satuan</th><th>Subtotal</th></tr></thead>
                     <tbody>
-                    @php $totalNilai = 0; @endphp
+                    @php $totalNilai = 0; $paket = max(1,(int)$distribusi->jumlah_paket); @endphp
                     @foreach($distribusi->pembelianBarang as $pb)
-                        @php $sub = $pb->pivot->jumlah * $pb->harga_satuan; $totalNilai += $sub; @endphp
+                        @php
+                            $sub = $pb->pivot->jumlah * $pb->harga_satuan;
+                            $totalNilai += $sub;
+                            $perPaket = $pb->pivot->jumlah / $paket;
+                            $perPaketTxt = $perPaket == (int)$perPaket ? number_format($perPaket) : rtrim(rtrim(number_format($perPaket,2,',','.'),'0'),',');
+                        @endphp
                         <tr>
                             <td style="font-weight:500;">{{ $pb->nama_barang }}</td>
                             <td>{{ $pb->batch ?? '-' }}</td>
+                            <td style="font-weight:600;">{{ $perPaketTxt }} /paket</td>
                             <td style="font-weight:600;color:#b07d14;">{{ number_format($pb->pivot->jumlah) }}</td>
                             <td>Rp {{ number_format($pb->harga_satuan,0,',','.') }}</td>
                             <td style="font-weight:500;">Rp {{ number_format($sub,0,',','.') }}</td>
                         </tr>
                     @endforeach
                     </tbody>
-                    <tfoot><tr><td colspan="4" style="font-weight:600;text-align:right;">Total Nilai</td><td style="font-weight:700;color:#017723;">Rp {{ number_format($totalNilai,0,',','.') }}</td></tr></tfoot>
+                    <tfoot><tr><td colspan="5" style="font-weight:600;text-align:right;">Total Nilai</td><td style="font-weight:700;color:#017723;">Rp {{ number_format($totalNilai,0,',','.') }}</td></tr></tfoot>
                 </table>
             </div>
             @endif
