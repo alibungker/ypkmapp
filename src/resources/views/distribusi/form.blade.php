@@ -99,7 +99,7 @@
                 </select>
                 <small class="form-hint">Barang & jumlah dari kegiatan akan ditambahkan ke daftar di bawah. Klik "Ambil" untuk memuat.</small>
                 <input type="hidden" name="kegiatan_id" id="kegiatanIdInput" value="{{ old('kegiatan_id', isset($distribusi) ? $distribusi->anggaran_id : '') }}">
-                <div style="margin-top:8px;"><button type="button" id="ambilKegiatanBtn" class="btn btn-outline btn-sm">📥 Ambil Barang dari Kegiatan</button></div>
+                <div style="margin-top:8px;"><button type="button" id="ambilKegiatanBtn" class="btn btn-outline btn-sm" onclick="ambilKegiatan()">📥 Ambil Barang dari Kegiatan</button></div>
             </div>
 
             <div style="margin-top:18px;padding:16px;border:1px solid #d6e4ff;border-radius:12px;background:#f8fbff;">
@@ -245,15 +245,18 @@ document.getElementById('addDistribusiBarang').addEventListener('click', () => a
 
 // Ambil dari Kegiatan: auto-fill barang rows from selected kegiatan
 const kegSelect = document.getElementById('pilihKegiatan');
-document.getElementById('ambilKegiatanBtn').addEventListener('click', function() {
+window.ambilKegiatan = function() {
     const opt = kegSelect.options[kegSelect.selectedIndex];
     if (!opt.value) return alert('Pilih kegiatan terlebih dahulu.');
     const items = JSON.parse(opt.dataset.items || '[]');
+    purchaseRows.innerHTML = '';
+    purchaseIndex = 0;
     items.forEach(function(item) {
         addPurchaseRow(item.id, item.pivot ? item.pivot.jumlah : item.pivot_jumlah || '');
     });
     document.getElementById('kegiatanIdInput').value = opt.value;
-});
+    document.querySelector('input[name="nama_kegiatan"]').value = opt.textContent.split(' (')[0];
+};
 const existingPurchases = @json($existingPurchasesJs);
 existingPurchases.forEach(item => addPurchaseRow(item.pembelian_barang_id, item.jumlah));
 </script>
