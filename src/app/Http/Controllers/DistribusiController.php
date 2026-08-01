@@ -41,9 +41,18 @@ class DistribusiController extends Controller
                 if ($user->wilayah_desa) $q->where('desa', $user->wilayah_desa);
             });
         }
+
+        // Stats dashboard
+        $stats = [
+            'kelompok' => (clone $query)->distinct('kelompok_id')->count('kelompok_id'),
+            'titik' => (clone $query)->whereNotNull('titik_koordinat')->count(),
+            'paket' => (clone $query)->sum('jumlah_paket'),
+            'anggaran' => (clone $query)->sum('estimasi_nilai_total'),
+        ];
+
         if ($request->status) $query->where('status', $request->status);
-        $distribusi = $query->orderBy('tanggal', 'desc')->paginate(15);
-        return view('distribusi.index', compact('distribusi'));
+        $distribusi = $query->orderBy('tanggal', 'desc')->paginate(15)->withQueryString();
+        return view('distribusi.index', compact('distribusi', 'stats'));
     }
 
     public function create()

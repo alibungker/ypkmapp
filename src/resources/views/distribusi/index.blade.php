@@ -2,12 +2,60 @@
 @section('title', 'Distribusi')
 @section('content')
 @if(session('success'))<div class="alert alert-success">✅ {{ session('success') }}</div>@endif
+
+{{-- Dashboard Stats --}}
+<div class="mobile-stack" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:20px;">
+    <div class="stat-card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <div style="width:40px;height:40px;background:#e8f5ec;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#017723;font-size:20px;">👥</div>
+            <span style="font-size:13px;color:#6b7280;">Kelompok</span>
+        </div>
+        <div class="stat-value" style="color:#017723;">{{ number_format($stats['kelompok']) }}</div>
+        <div style="font-size:12px;color:#6b7280;margin-top:4px;">Kelompok penerima distribusi</div>
+    </div>
+    <div class="stat-card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <div style="width:40px;height:40px;background:#e8e8f0;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#00034a;font-size:20px;">📍</div>
+            <span style="font-size:13px;color:#6b7280;">Titik Distribusi</span>
+        </div>
+        <div class="stat-value">{{ number_format($stats['titik']) }}</div>
+        <div style="font-size:12px;color:#6b7280;margin-top:4px;">Total lokasi distribusi</div>
+    </div>
+    <div class="stat-card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <div style="width:40px;height:40px;background:#fef7e6;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#b07d14;font-size:20px;">📦</div>
+            <span style="font-size:13px;color:#6b7280;">Paket</span>
+        </div>
+        <div class="stat-value" style="color:#b07d14;">{{ number_format($stats['paket']) }}</div>
+        <div style="font-size:12px;color:#6b7280;margin-top:4px;">Total paket distribusi</div>
+    </div>
+    <div class="stat-card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <div style="width:40px;height:40px;background:#fef2f2;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#b42318;font-size:20px;">💰</div>
+            <span style="font-size:13px;color:#6b7280;">Anggaran</span>
+        </div>
+        <div class="stat-value">Rp {{ number_format($stats['anggaran'],0,',','.') }}</div>
+        <div style="font-size:12px;color:#6b7280;margin-top:4px;">Total estimasi nilai</div>
+    </div>
+</div>
+
 <div class="card">
     <div class="card-header">
         <h3 style="font-size:15px;font-weight:600;">Distribusi bantuan</h3>
-        @if(auth()->user()->isAdmin())
-        <a href="{{ route('distribusi.create') }}" class="btn btn-primary btn-sm">+ Buat Distribusi</a>
-        @endif
+        <div style="display:flex;gap:8px;align-items:center;">
+            <form method="GET" style="display:inline;">
+                <select name="status" class="form-input" style="width:170px;font-size:13px;" onchange="this.form.submit()">
+                    <option value="">Semua status</option>
+                    <option value="direncanakan" {{ request('status')=='direncanakan' ? 'selected' : '' }}>📋 Direncanakan</option>
+                    <option value="berlangsung" {{ request('status')=='berlangsung' ? 'selected' : '' }}>⏳ Berlangsung</option>
+                    <option value="selesai" {{ request('status')=='selesai' ? 'selected' : '' }}>✅ Selesai</option>
+                    <option value="dibatalkan" {{ request('status')=='dibatalkan' ? 'selected' : '' }}>❌ Dibatalkan</option>
+                </select>
+            </form>
+            @if(auth()->user()->isAdmin())
+            <a href="{{ route('distribusi.create') }}" class="btn btn-primary btn-sm">+ Buat Distribusi</a>
+            @endif
+        </div>
     </div>
     <div class="card-body">
         <div class="table-wrap desktop-table">
@@ -29,6 +77,7 @@
                     <td>
                         @if($d->status == 'selesai') <span class="badge badge-green">✅ Selesai</span>
                         @elseif($d->status == 'berlangsung') <span class="badge badge-gold">⏳ Berlangsung</span>
+                        @elseif($d->status == 'dibatalkan') <span class="badge" style="background:#fce8e6;color:#dc2626;">❌ Dibatalkan</span>
                         @else <span class="badge badge-navy">📋 Rencana</span>
                         @endif
                     </td>
@@ -60,6 +109,7 @@
                 <div style="margin-top:10px;">
                     @if($d->status == 'selesai') <span class="badge badge-green">Selesai</span>
                     @elseif($d->status == 'berlangsung') <span class="badge badge-gold">Berlangsung</span>
+                    @elseif($d->status == 'dibatalkan') <span class="badge" style="background:#fce8e6;color:#dc2626;">Dibatalkan</span>
                     @else <span class="badge badge-navy">Direncanakan</span>
                     @endif
                 </div>
