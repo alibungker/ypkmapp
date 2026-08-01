@@ -84,6 +84,24 @@
                 </div>
             </div>
 
+            <div style="margin-top:18px;padding:16px;border:1px solid #e9d5ff;border-radius:12px;background:#fdfaff;">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px;">
+                    <div>
+                        <div style="font-size:14px;font-weight:700;color:#00034a;">🗂️ Ambil dari Kegiatan</div>
+                        <div style="font-size:11px;color:#6b7280;margin-top:3px;">Pilih kegiatan yang sudah dibuat di halaman Barang &amp; Kegiatan — barang &amp; jumlah terisi otomatis.</div>
+                    </div>
+                </div>
+                <select id="pilihKegiatan" class="form-input" style="width:100%;">
+                    <option value="">-- Pilih Kegiatan --</option>
+                    @foreach($kegiatans as $kg)
+                    <option value="{{ $kg->id }}" data-items="{{ json_encode($kg->barangItems) }}" {{ old('kegiatan_id') == $kg->id ? 'selected' : '' }}>{{ $kg->nama_anggaran }} ({{ $kg->target_paket ? $kg->target_paket . ' ' . $kg->satuan : 'tanpa target' }})</option>
+                    @endforeach
+                </select>
+                <small class="form-hint">Barang & jumlah dari kegiatan akan ditambahkan ke daftar di bawah. Klik "Ambil" untuk memuat.</small>
+                <input type="hidden" name="kegiatan_id" id="kegiatanIdInput" value="{{ old('kegiatan_id', isset($distribusi) ? $distribusi->anggaran_id : '') }}">
+                <div style="margin-top:8px;"><button type="button" id="ambilKegiatanBtn" class="btn btn-outline btn-sm">📥 Ambil Barang dari Kegiatan</button></div>
+            </div>
+
             <div style="margin-top:18px;padding:16px;border:1px solid #d6e4ff;border-radius:12px;background:#f8fbff;">
                 <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px;">
                     <div>
@@ -224,6 +242,18 @@ function addPurchaseRow(selected = '', jumlah = '') {
     row.querySelector('.purchase-remove').addEventListener('click', () => row.remove());
 }
 document.getElementById('addDistribusiBarang').addEventListener('click', () => addPurchaseRow());
+
+// Ambil dari Kegiatan: auto-fill barang rows from selected kegiatan
+const kegSelect = document.getElementById('pilihKegiatan');
+document.getElementById('ambilKegiatanBtn').addEventListener('click', function() {
+    const opt = kegSelect.options[kegSelect.selectedIndex];
+    if (!opt.value) return alert('Pilih kegiatan terlebih dahulu.');
+    const items = JSON.parse(opt.dataset.items || '[]');
+    items.forEach(function(item) {
+        addPurchaseRow(item.id, item.pivot ? item.pivot.jumlah : item.pivot_jumlah || '');
+    });
+    document.getElementById('kegiatanIdInput').value = opt.value;
+});
 const existingPurchases = @json($existingPurchasesJs);
 existingPurchases.forEach(item => addPurchaseRow(item.pembelian_barang_id, item.jumlah));
 </script>

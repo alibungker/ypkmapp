@@ -146,6 +146,7 @@ const availableItems = {!! json_encode($pembelian->map(function ($item) {
         'id' => $item->id,
         'label' => $item->nama_barang . ($item->batch ? ' — ' . $item->batch : ''),
         'stok' => $item->stok_tersedia,
+        'harga' => (float) $item->harga_satuan,
     ];
 })->values()) !!};
 const allocationRows = document.getElementById('kegiatanBarangRows');
@@ -154,13 +155,30 @@ function addAllocationRow(selected = '', amount = '') {
     if (!allocationRows) return;
     const row = document.createElement('div');
     row.className = 'allocation-row';
-    const options = availableItems.map(item => `<option value="${item.id}" data-stok="${item.stok}" ${String(item.id) === String(selected) ? 'selected' : ''}>${item.label} — stok ${item.stok}</option>`).join('');
-    row.innerHTML = `<div><label class="form-label">Pilih Barang</label><select class="form-input allocation-item" name="barang[${allocationIndex}][pembelian_barang_id]" required><option value="">-- Pilih barang --</option>${options}</select></div><div><label class="form-label">Jumlah</label><input class="form-input allocation-amount" type="number" min="1" name="barang[${allocationIndex}][jumlah]" value="${amount}" required></div><button type="button" class="allocation-remove" aria-label="Hapus barang">×</button>`;
+    const options = availableItems.map(item => `<option value="${item.id}" data-stok="${item.stok}" data-harga="${item.harga}" ${String(item.id) === String(selected) ? 'selected' : ''}>${item.label} — stok ${item.stok} — Rp ${Number(item.harga).toLocaleString('id-ID')}</option>`).join('');
+    row.innerHTML = `<div><label class="form-label">Pilih Barang</label><select class="form-input allocation-item" name="barang[${allocationIndex}][pembelian_barang_id]" required><option value="">-- Pilih barang --</option>${options}</select></div><div><label class="form-label">Jumlah</label><input class="form-input allocation-amount" type="number" min="1" name="barang[${allocationIndex}][jumlah]" value="${amount}" required><small class="allocation-subtotal form-hint">Rp 0</small></div><button type="button" class="allocation-remove" aria-label="Hapus barang">×</button>`;
     allocationRows.appendChild(row); allocationIndex++;
-    row.querySelector('.allocation-remove').addEventListener('click', () => row.remove());
     const select = row.querySelector('.allocation-item'), input = row.querySelector('.allocation-amount');
-    const syncMax = () => { const stok = select.selectedOptions[0]?.dataset.stok || ''; input.max = stok; input.title = stok ? `Stok tersedia ${stok}` : ''; };
-    select.addEventListener('change', syncMax); syncMax();
+    const recalc = () => {
+        let total = 0;
+        allocationRows.querySelectorAll('.allocation-row').forEach(r => {
+            const selectedOption = r.querySelector('.allocation-item').selectedOptions[0];
+            const harga = Number(selectedOption?.dataset.harga || 0);
+            const qty = Number(r.querySelector('.allocation-amount').value || 0);
+            const subtotal = harga * qty;
+            r.querySelector('.allocation-subtotal').textContent = 'Rp ' + subtotal.toLocaleString('id-ID');
+            total += subtotal;
+        });
+        const anggaran = document.getElementById('kegAnggaran');
+        const realisasi = document.getElementById('kegRealisasi');
+        if (anggaran) anggaran.value = total;
+        if (realisasi) realisasi.value = total;
+    };
+    row.querySelector('.allocation-remove').addEventListener('click', () => { row.remove(); recalc(); });
+    const syncMax = () => { const stok = select.selectedOptions[0]?.dataset.stok || ''; input.max = stok; input.title = stok ? `Stok tersedia ${stok}` : ''; recalc(); };
+    select.addEventListener('change', syncMax);
+    input.addEventListener('input', recalc);
+    syncMax();
 }
 document.getElementById('addKegiatanBarang')?.addEventListener('click', () => addAllocationRow());
 const oldAllocations = @json(old('form_type') === 'kegiatan' ? old('barang', []) : []);

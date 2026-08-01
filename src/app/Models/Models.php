@@ -113,6 +113,11 @@ class Anggaran extends Model
 {
     protected $fillable = ['distribusi_id', 'nama_anggaran', 'kategori', 'target_paket', 'satuan', 'anggaran', 'realisasi', 'catatan'];
     public function distribusi() { return $this->belongsTo(Distribusi::class); }
+    public function barangItems()
+    {
+        return $this->belongsToMany(PembelianBarang::class, 'kegiatan_barang', 'anggaran_id', 'pembelian_barang_id')
+            ->withPivot('jumlah');
+    }
 }
 
 class Log extends Model

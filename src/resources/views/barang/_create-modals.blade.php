@@ -12,14 +12,14 @@
             <div class="form-field"><label class="form-label">Kategori <span>*</span></label><select name="kategori" class="form-input" required>@foreach(['barang_bantuan'=>'Barang Bantuan','transportasi'=>'Transportasi','konsumsi'=>'Konsumsi','sewa'=>'Sewa','atk'=>'ATK','cadangan'=>'Cadangan'] as $value=>$label)<option value="{{ $value }}" @selected(old('form_type') === 'kegiatan' && old('kategori') === $value)>{{ $label }}</option>@endforeach</select></div>
             <div class="form-field"><label class="form-label">Target Paket</label><input type="number" min="0" name="target_paket" class="form-input" value="{{ old('form_type') === 'kegiatan' ? old('target_paket') : '' }}" placeholder="5000"></div>
             <div class="form-field"><label class="form-label">Satuan</label><input type="text" name="satuan" class="form-input" value="{{ old('form_type') === 'kegiatan' ? old('satuan') : '' }}" placeholder="paket"></div>
-            <div class="form-field"><label class="form-label">Anggaran (Rp) <span>*</span></label><input type="number" min="0" step="0.01" name="anggaran" class="form-input" required value="{{ old('form_type') === 'kegiatan' ? old('anggaran') : '' }}"></div>
-            <div class="form-field"><label class="form-label">Realisasi (Rp) <span>*</span></label><input type="number" min="0" step="0.01" name="realisasi" class="form-input" required value="{{ old('form_type') === 'kegiatan' ? old('realisasi', 0) : 0 }}"></div>
+            <div class="form-field"><label class="form-label">Anggaran Otomatis (Rp)</label><input type="number" min="0" step="0.01" name="anggaran" id="kegAnggaran" class="form-input auto-total" readonly value="{{ old('form_type') === 'kegiatan' ? old('anggaran', 0) : 0 }}"><small class="form-hint">Σ (harga satuan × jumlah barang)</small></div>
+            <div class="form-field"><label class="form-label">Realisasi Otomatis (Rp)</label><input type="number" min="0" step="0.01" name="realisasi" id="kegRealisasi" class="form-input auto-total" readonly value="{{ old('form_type') === 'kegiatan' ? old('realisasi', 0) : 0 }}"><small class="form-hint">Σ (harga satuan × jumlah barang)</small></div>
             <div class="form-field form-field--full"><label class="form-label">Catatan/Status</label><input type="text" name="catatan" class="form-input" value="{{ old('form_type') === 'kegiatan' ? old('catatan') : '' }}" placeholder="Contoh: Direncanakan"></div>
             <div class="form-field form-field--full">
-                <label class="form-label">Barang yang Disalurkan</label>
+                <label class="form-label">Barang yang Disalurkan <span>*</span></label>
                 <div id="kegiatanBarangRows" class="allocation-list"></div>
                 <button type="button" class="btn btn-outline btn-sm" id="addKegiatanBarang">+ Tambah Jenis Barang</button>
-                <small class="form-hint">Stok tersedia dihitung dari jumlah terbeli dikurangi total yang sudah disalurkan.</small>
+                <small class="form-hint">Pilih barang dari stok pembelian. Anggaran & realisasi terhitung otomatis dari harga satuan × jumlah.</small>
             </div>
             <div class="create-modal__actions"><button type="button" class="btn btn-secondary" data-close-modal>Batal</button><button type="submit" class="btn btn-primary">Simpan Kegiatan</button></div>
         </form>

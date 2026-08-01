@@ -24,7 +24,7 @@ class BarangController extends Controller
             $item->qty_distribusi = (int) ($keDistribusi[$item->id] ?? 0);
             $item->stok_tersedia = max(0, $item->qty_terbeli - $item->qty_kegiatan - $item->qty_distribusi);
         });
-        return view('barang.index', compact('anggarans', 'pembelian'));
+        return view('barang.index', compact('anggarans', 'pembelian', 'keKegiatan', 'keDistribusi'));
     }
 
     // === KEGIATAN ===
@@ -44,6 +44,14 @@ class BarangController extends Controller
         ]);
         $alokasi = $data['barang'] ?? [];
         unset($data['barang']);
+
+        // Nilai kegiatan wajib bersumber dari harga pembelian, bukan input browser.
+        $totalOtomatis = collect($alokasi)->sum(function ($baris) {
+            $harga = (float) PembelianBarang::whereKey($baris['pembelian_barang_id'])->value('harga_satuan');
+            return $harga * (int) $baris['jumlah'];
+        });
+        $data['anggaran'] = $totalOtomatis;
+        $data['realisasi'] = $totalOtomatis;
 
         DB::transaction(function () use ($data, $alokasi) {
             $kegiatan = Anggaran::create($data);

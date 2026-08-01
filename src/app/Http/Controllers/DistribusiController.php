@@ -6,6 +6,7 @@ use App\Models\Kelompok;
 use App\Models\BarangBantuan;
 use App\Models\PembelianBarang;
 use App\Models\BiayaOperasional;
+use App\Models\Anggaran;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -61,6 +62,7 @@ class DistribusiController extends Controller
     {
         $kelompoks = Kelompok::withCount('penerima')->with('ketuaUser')->get();
         $barang = BarangBantuan::all();
+        $kegiatans = Anggaran::with('barangItems')->whereHas('barangItems')->orderBy('nama_anggaran')->get();
         $pembelian = PembelianBarang::orderBy('nama_barang')->get()
             ->each(function ($item) {
                 $untukKegiatan = (int) DB::table('kegiatan_barang')
@@ -69,7 +71,7 @@ class DistribusiController extends Controller
                     ->where('pembelian_barang_id', $item->id)->sum('jumlah');
                 $item->stok_tersedia = max(0, $item->qty_terbeli - $untukKegiatan - $untukDistribusi);
             });
-        return view('distribusi.form', compact('kelompoks', 'barang', 'pembelian'));
+        return view('distribusi.form', compact('kelompoks', 'barang', 'pembelian', 'kegiatans'));
     }
 
     public function store(Request $request)
@@ -123,7 +125,8 @@ class DistribusiController extends Controller
                 $item->stok_tersedia = max(0, $item->qty_terbeli - $untukKegiatan - $untukDistribusi);
             });
         $barang = BarangBantuan::all();
-        return view('distribusi.form', compact('distribusi', 'kelompoks', 'barang', 'pembelian'));
+        $kegiatans = Anggaran::with('barangItems')->whereHas('barangItems')->orderBy('nama_anggaran')->get();
+        return view('distribusi.form', compact('distribusi', 'kelompoks', 'barang', 'pembelian', 'kegiatans'));
     }
 
     public function update(Request $request, Distribusi $distribusi)
