@@ -63,14 +63,8 @@
                         <td style="color:#6b7280;font-size:13px;">{{ $p->created_at ? (is_object($p->created_at) ? $p->created_at->format('d/m') : date('d/m', strtotime($p->created_at))) : '-' }}</td>
                         <td style="white-space:nowrap;">
                             <a href="{{ route('penerima.show', $p) }}" class="btn btn-outline btn-sm" style="text-decoration:none;">🔍 Detail</a>
-                            <form method="POST" action="{{ route('penerima.verify', $p) }}" style="display:inline;">
-                                @csrf <input type="hidden" name="status" value="terverifikasi">
-                                <button class="btn btn-sm" style="background:#017723;color:white;border:none;cursor:pointer;padding:6px 12px;border-radius:6px;font-size:13px;">✅ Setujui</button>
-                            </form>
-                            <form method="POST" action="{{ route('penerima.verify', $p) }}" style="display:inline;" onsubmit="return confirm('Tolak {{ $p->nama }}?')">
-                                @csrf <input type="hidden" name="status" value="ditolak">
-                                <button class="btn btn-sm" style="background:#dc2626;color:white;border:none;cursor:pointer;padding:6px 12px;border-radius:6px;font-size:13px;">❌ Tolak</button>
-                            </form>
+                            <button type="button" class="btn btn-sm single-approve" style="background:#017723;color:white;border:none;cursor:pointer;padding:6px 12px;border-radius:6px;font-size:13px;" data-id="{{ $p->id }}" data-route="{{ route('penerima.verify', $p) }}">✅ Setujui</button>
+                            <button type="button" class="btn btn-sm single-reject" style="background:#dc2626;color:white;border:none;cursor:pointer;padding:6px 12px;border-radius:6px;font-size:13px;" data-id="{{ $p->id }}" data-route="{{ route('penerima.verify', $p) }}" data-nama="{{ $p->nama }}">❌ Tolak</button>
                         </td>
                     </tr>
                     @endforeach
@@ -128,14 +122,11 @@
                         </td>
                         <td style="white-space:nowrap;">
                             <a href="{{ route('penerima.show', $p) }}" class="btn btn-outline btn-sm" style="text-decoration:none;">🔍 Detail</a>
-                            <form method="POST" action="{{ route('penerima.terima-bantuan', $p) }}" style="display:inline;">
-                                @csrf
-                                @if($p->terima_bantuan)
-                                <button class="btn btn-sm" style="background:#dc2626;color:white;border:none;cursor:pointer;padding:6px 12px;border-radius:6px;font-size:13px;">↩️ Batalkan</button>
-                                @else
-                                <button class="btn btn-sm" style="background:#017723;color:white;border:none;cursor:pointer;padding:6px 12px;border-radius:6px;font-size:13px;">✅ Terima Bantuan</button>
-                                @endif
-                            </form>
+                            @if($p->terima_bantuan)
+                            <button type="button" class="btn btn-sm single-batal" style="background:#dc2626;color:white;border:none;cursor:pointer;padding:6px 12px;border-radius:6px;font-size:13px;" data-route="{{ route('penerima.terima-bantuan', $p) }}">↩️ Batalkan</button>
+                            @else
+                            <button type="button" class="btn btn-sm single-terima" style="background:#017723;color:white;border:none;cursor:pointer;padding:6px 12px;border-radius:6px;font-size:13px;" data-route="{{ route('penerima.terima-bantuan', $p) }}">✅ Terima Bantuan</button>
+                            @endif
                         </td>
                     </tr>
                     @endforeach
@@ -221,5 +212,34 @@ if (btnTerima) btnTerima.addEventListener('click', () => {
     if (!confirm('Tandai terima bantuan untuk ' + [...cbsTerima()].filter(c=>c.checked).length + ' data?')) return;
     formTerima.submit();
 });
+
+// Submit aksi per penerima tanpa nested form (HTML valid).
+function submitSingle(route, fields = {}) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = route;
+    const csrf = document.createElement('input');
+    csrf.type = 'hidden'; csrf.name = '_token'; csrf.value = '{{ csrf_token() }}';
+    form.appendChild(csrf);
+    Object.entries(fields).forEach(([name, value]) => {
+        const input = document.createElement('input');
+        input.type = 'hidden'; input.name = name; input.value = value;
+        form.appendChild(input);
+    });
+    document.body.appendChild(form);
+    form.submit();
+}
+document.querySelectorAll('.single-approve').forEach(btn => btn.addEventListener('click', () => {
+    if (confirm('Setujui penerima ini?')) submitSingle(btn.dataset.route, {status:'terverifikasi'});
+}));
+document.querySelectorAll('.single-reject').forEach(btn => btn.addEventListener('click', () => {
+    if (confirm('Tolak ' + btn.dataset.nama + '?')) submitSingle(btn.dataset.route, {status:'ditolak'});
+}));
+document.querySelectorAll('.single-terima').forEach(btn => btn.addEventListener('click', () => {
+    if (confirm('Tandai penerima ini sudah menerima bantuan?')) submitSingle(btn.dataset.route);
+}));
+document.querySelectorAll('.single-batal').forEach(btn => btn.addEventListener('click', () => {
+    if (confirm('Batalkan checklist penerimaan bantuan?')) submitSingle(btn.dataset.route);
+}));
 </script>
 @endsection
