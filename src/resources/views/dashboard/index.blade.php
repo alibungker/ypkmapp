@@ -3,6 +3,22 @@
 @section('subtitle', 'Ringkasan aktivitas penyaluran bantuan')
 
 @section('content')
+<div class="card" style="margin-bottom:20px;border-left:4px solid {{ $role === 'admin' ? '#00034a' : ($role === 'relawan' ? '#017723' : '#b07d14') }};">
+    <div class="card-body" style="padding:14px 18px;">
+        <div style="font-size:16px;font-weight:700;">
+            @if($role === 'admin') Dashboard Admin
+            @elseif($role === 'relawan') Dashboard Relawan
+            @else Dashboard Ketua Kelompok
+            @endif
+        </div>
+        <div style="font-size:13px;color:#667085;margin-top:3px;">
+            @if($role === 'admin') Ringkasan seluruh data operasional YPKM.
+            @elseif($role === 'relawan') Data wilayah kerja: {{ $wilayahLabel ?: 'belum ditetapkan' }}.
+            @else Data khusus kelompok: {{ $kelompokNama ?: 'belum terhubung' }}.
+            @endif
+        </div>
+    </div>
+</div>
 {{-- Stats --}}
 <div class="mobile-stack" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:24px;">
     <div class="stat-card">
@@ -38,10 +54,15 @@
     <div class="stat-card">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
             <div style="width:40px;height:40px;background:#fef2f2;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#b42318;"><x-icon name="wallet" size="20"/></div>
-            <span style="font-size:13px;color:#6b7280;">Nilai Bantuan</span>
+            <span style="font-size:13px;color:#6b7280;">{{ $role === 'admin' ? 'Nilai Bantuan' : 'Sudah Menerima' }}</span>
         </div>
+        @if($role === 'admin')
         <div class="stat-value">Rp {{ number_format($stats['total_nilai_bantuan'],0,',','.') }}</div>
         <div style="font-size:12px;color:#6b7280;margin-top:4px;">💵 Dana masuk: Rp {{ number_format($stats['total_dana_masuk'],0,',','.') }}</div>
+        @else
+        <div class="stat-value">{{ number_format($stats['penerima_diterima']) }}</div>
+        <div style="font-size:12px;color:#6b7280;margin-top:4px;">Penerima sudah menerima bantuan</div>
+        @endif
     </div>
 </div>
 
@@ -57,7 +78,7 @@
             <table class="table-data">
                 <thead><tr><th>Kegiatan</th><th>Daerah</th><th>Tanggal</th><th>Status</th></tr></thead>
                 <tbody>
-                    @forelse($distribusi_terbaru as $d)
+                    @forelse($distribusiTerbaru as $d)
                     <tr>
                         <td style="font-weight:500;">{{ $d->nama_kegiatan }}</td>
                         <td style="color:#6b7280;">{{ $d->kelompok->daerah ?? '-' }}</td>
@@ -83,7 +104,7 @@
             <h3 style="font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;"><x-icon name="report"/> Progres distribusi</h3>
         </div>
         <div style="padding:16px 20px;">
-            @forelse($distribusi_terbaru->take(4) as $d)
+            @forelse($distribusiTerbaru->take(4) as $d)
             @php $persen = $d->status == 'selesai' ? 100 : ($d->status == 'berlangsung' ? 45 : 0); @endphp
             <div style="margin-bottom:14px;">
                 <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
@@ -99,7 +120,8 @@
     </div>
 </div>
 
-{{-- Ringkasan Keuangan --}}
+{{-- Ringkasan Keuangan — hanya Admin --}}
+@if($role === 'admin')
 <div class="card">
     <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;">
         <h3 style="font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;"><x-icon name="wallet"/> Ringkasan keuangan</h3>
@@ -123,4 +145,5 @@
         </div>
     </div>
 </div>
+@endif
 @endsection

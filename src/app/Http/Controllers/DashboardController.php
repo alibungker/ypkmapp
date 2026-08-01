@@ -6,31 +6,105 @@ use App\Models\Kelompok;
 use App\Models\Distribusi;
 use App\Models\DanaDonatur;
 use App\Models\BiayaOperasional;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
     public function index()
     {
+        $user = auth()->user();
+
         $stats = [
-            'penerima' => Penerima::count(),
-            'penerima_terverifikasi' => Penerima::where('status', 'terverifikasi')->count(),
-            'penerima_pending' => Penerima::where('status', 'pending')->count(),
-            'kelompok' => Kelompok::count(),
-            'distribusi' => Distribusi::count(),
-            'distribusi_selesai' => Distribusi::where('status', 'selesai')->count(),
-            'distribusi_berlangsung' => Distribusi::where('status', 'berlangsung')->count(),
-            'total_dana_masuk' => DanaDonatur::sum('jumlah'),
-            'total_biaya' => BiayaOperasional::sum('jumlah'),
-            'total_nilai_bantuan' => Distribusi::sum('estimasi_nilai_total'),
+            'penerima' => 0,
+            'penerima_terverifikasi' => 0,
+            'penerima_pending' => 0,
+            'penerima_ditolak' => 0,
+            'kelompok' => 0,
+            'distribusi' => 0,
+            'distribusi_selesai' => 0,
+            'distribusi_berlangsung' => 0,
+            'total_dana_masuk' => 0,
+            'total_biaya' => 0,
+            'total_nilai_bantuan' => 0,
+            'penerima_diterima' => 0,
         ];
 
-        $distribusi_terbaru = Distribusi::with('kelompok')
-            ->orderBy('tanggal', 'desc')
-            ->take(5)
-            ->get();
+        $role = 'admin';
+        $kelompokNama = null;
+        $wilayahLabel = null;
 
-        return view('dashboard.index', compact('stats', 'distribusi_terbaru'));
+        if ($user->isAdmin()) {
+            $role = 'admin';
+            $stats['penerima'] = Penerima::count();
+            $stats['penerima_terverifikasi'] = Penerima::where('status', 'terverifikasi')->count();
+            $stats['penerima_pending'] = Penerima::where('status', 'pending')->count();
+            $stats['penerima_ditolak'] = Penerima::where('status', 'ditolak')->count();
+            $stats['penerima_diterima'] = Penerima::where('terima_bantuan', true)->count();
+            $stats['kelompok'] = Kelompok::count();
+            $stats['distribusi'] = Distribusi::count();
+            $stats['distribusi_selesai'] = Distribusi::where('status', 'selesai')->count();
+            $stats['distribusi_berlangsung'] = Distribusi::where('status', 'berlangsung')->count();
+            $stats['total_dana_masuk'] = DanaDonatur::sum('jumlah');
+            $stats['total_biaya'] = BiayaOperasional::sum('jumlah');
+            $stats['total_nilai_bantuan'] = Distribusi::sum('estimasi_nilai_total');
+
+            $distribusiTerbaru = Distribusi::with('kelompok')->orderBy('tanggal', 'desc')->take(5)->get();
+
+        } elseif ($user->isKetuaKelompok()) {
+            $role = 'ketua';
+            $kelompokId = $user->kelompok_id;
+            $kelompok = Kelompok::find($kelompokId);
+            $kelompokNama = $kelompok?->nama;
+
+            $stats['penerima'] = Penerima::where('kelompok_id', $kelompokId)->count();
+            $stats['penerima_terverifikasi'] = Penerima::where('kelompok_id', $kelompokId)->where('status', 'terverifikasi')->count();
+            $stats['penerima_pending'] = Penerima::where('kelompok_id', $kelompokId)->where('status', 'pending')->count();
+            $stats['penerima_ditolak'] = Penerima::where('kelompok_id', $kelompokId)->where('status', 'ditolak')->count();
+            $stats['penerima_diterima'] = Penerima::where('kelompok_id', $kelompokId)->where('terima_bantuan', true)->count();
+            $stats['kelompok'] = 1;
+            $stats['distribusi'] = Distribusi::where('kelompok_id', $kelompokId)->count();
+            $stats['distribusi_selesai'] = Distribusi::where('kelompok_id', $kelompokId)->where('status', 'selesai')->count();
+            $stats['distribusi_berlangsung'] = Distribusi::where('kelompok_id', $kelompokId)->where('status', 'berlangsung')->count();
+            $stats['total_nilai_bantuan'] = Distribusi::where('kelompok_id', $kelompokId)->sum('estimasi_nilai_total');
+
+            $distribusiTerbaru = Distribusi::with('kelompok')
+                ->where('kelompok_id', $kelompokId)
+                ->orderBy('tanggal', 'desc')->take(5)->get();
+
+        } elseif ($user->isRelawan()) {
+            $role = 'relawan';
+            $wilayahLabel = trim(($user->wilayah_desa ?: $user->wilayah_kecamatan ?: $user->wilayah_kabupaten ?: '') . '');
+
+            // Scope penerima by wilayah
+            $pQuery = Penerima::query();
+            if ($user->wilayah_kabupaten) $pQuery->where('kabupaten', $user->wilayah_kabupaten);
+            if ($user->wilayah_kecamatan) $pQuery->where('kecamatan', $user->wilayah_kecamatan);
+            if ($user->wilayah_desa) $pQuery->where('desa', $user->wilayah_desa);
+
+            $stats['penerima'] = (clone $pQuery)->count();
+            $stats['penerima_terverifikasi'] = (clone $pQuery)->where('status', 'terverifikasi')->count();
+            $stats['penerima_pending'] = (clone $pQuery)->where('status', 'pending')->count();
+            $stats['penerima_ditolak'] = (clone $pQuery)->where('status', 'ditolak')->count();
+            $stats['penerima_diterima'] = (clone $pQuery)->where('terima_bantuan', true)->count();
+
+            // Scope kelompok by wilayah (kolom: daerah=kabupaten, kecamatan, desa)
+            $kQuery = Kelompok::query();
+            if ($user->wilayah_kabupaten) $kQuery->where('daerah', $user->wilayah_kabupaten);
+            if ($user->wilayah_kecamatan) $kQuery->where('kecamatan', $user->wilayah_kecamatan);
+            if ($user->wilayah_desa) $kQuery->where('desa', $user->wilayah_desa);
+            $stats['kelompok'] = $kQuery->count();
+
+            // Scope distribusi via kelompok_id dari kelompok di wilayah ini
+            $kelompokIds = $kQuery->pluck('id');
+            $dQuery = Distribusi::with('kelompok')->whereIn('kelompok_id', $kelompokIds);
+            $stats['distribusi'] = (clone $dQuery)->count();
+            $stats['distribusi_selesai'] = Distribusi::whereIn('kelompok_id', $kelompokIds)->where('status', 'selesai')->count();
+            $stats['distribusi_berlangsung'] = Distribusi::whereIn('kelompok_id', $kelompokIds)->where('status', 'berlangsung')->count();
+            $stats['total_nilai_bantuan'] = Distribusi::whereIn('kelompok_id', $kelompokIds)->sum('estimasi_nilai_total');
+
+            $distribusiTerbaru = $dQuery->orderBy('tanggal', 'desc')->take(5)->get();
+        }
+
+        return view('dashboard.index', compact('stats', 'distribusiTerbaru', 'role', 'kelompokNama', 'wilayahLabel'));
     }
 }
