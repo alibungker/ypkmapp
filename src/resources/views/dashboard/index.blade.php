@@ -66,6 +66,47 @@
     </div>
 </div>
 
+@if($role === 'admin')
+@php
+  $realisasiPaket = $stats['total_paket_target'] > 0 ? min(100, round($stats['total_paket_terkirim'] / $stats['total_paket_target'] * 100)) : 0;
+  $realisasiPenerima = $stats['penerima'] > 0 ? min(100, round($stats['penerima_diterima'] / $stats['penerima'] * 100)) : 0;
+@endphp
+<div class="card" style="margin-bottom:24px;overflow:hidden;">
+  <div style="background:#00034a;color:white;padding:20px 22px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;">
+    <div>
+      <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#d6b665;font-weight:700;">Dampak Program</div>
+      <div style="font-size:21px;font-weight:750;margin-top:5px;">Jangkauan bantuan YPKM</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.68);margin-top:4px;">Ringkasan cakupan wilayah dan realisasi penyaluran</div>
+    </div>
+    <div style="display:flex;gap:24px;flex-wrap:wrap;">
+      <div><div style="font-size:26px;font-weight:750;">{{ $stats['kabupaten_terjangkau'] }}</div><div style="font-size:11px;color:rgba(255,255,255,.62);">Kabupaten</div></div>
+      <div><div style="font-size:26px;font-weight:750;">{{ $stats['kecamatan_terjangkau'] }}</div><div style="font-size:11px;color:rgba(255,255,255,.62);">Kecamatan</div></div>
+      <div><div style="font-size:26px;font-weight:750;">{{ $stats['desa_terjangkau'] }}</div><div style="font-size:11px;color:rgba(255,255,255,.62);">Desa</div></div>
+    </div>
+  </div>
+  <div class="mobile-stack" style="padding:18px 20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;">
+    <div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px;"><span>Realisasi paket</span><strong>{{ $realisasiPaket }}%</strong></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:{{ $realisasiPaket }}%;background:#017723;"></div></div>
+      <div style="font-size:11px;color:#667085;margin-top:6px;">{{ number_format($stats['total_paket_terkirim']) }} dari {{ number_format($stats['total_paket_target']) }} paket</div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px;"><span>Penerima terlayani</span><strong>{{ $realisasiPenerima }}%</strong></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:{{ $realisasiPenerima }}%;background:#b07d14;"></div></div>
+      <div style="font-size:11px;color:#667085;margin-top:6px;">{{ number_format($stats['penerima_diterima']) }} dari {{ number_format($stats['penerima']) }} penerima</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <a href="{{ route('barang.index', ['tab'=>'pembelian']) }}" style="text-decoration:none;background:{{ $stats['barang_stok_kritis'] > 0 ? '#fef2f2' : '#e8f5ec' }};border-radius:8px;padding:10px 12px;color:#111827;">
+        <div style="font-size:19px;font-weight:750;color:{{ $stats['barang_stok_kritis'] > 0 ? '#b42318' : '#017723' }};">{{ $stats['barang_stok_kritis'] }}</div><div style="font-size:11px;">Stok kritis</div>
+      </a>
+      <a href="{{ route('barang.index', ['tab'=>'kegiatan']) }}" style="text-decoration:none;background:#fef7e6;border-radius:8px;padding:10px 12px;color:#111827;">
+        <div style="font-size:19px;font-weight:750;color:#9a6b0d;">{{ $stats['kegiatan_lunas'] }}</div><div style="font-size:11px;">Kegiatan lunas</div>
+      </a>
+    </div>
+  </div>
+</div>
+@endif
+
 {{-- Two columns --}}
 <div class="mobile-stack" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;">
     {{-- Distribusi Terbaru --}}

@@ -6,6 +6,8 @@ use App\Models\Kelompok;
 use App\Models\Distribusi;
 use App\Models\DanaDonatur;
 use App\Models\BiayaOperasional;
+use App\Models\PembelianBarang;
+use App\Models\Anggaran;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -19,14 +21,25 @@ class DashboardController extends Controller
             'penerima_terverifikasi' => 0,
             'penerima_pending' => 0,
             'penerima_ditolak' => 0,
+            'penerima_diterima' => 0,
+            'penerima_belum_terima' => 0,
             'kelompok' => 0,
+            'kelompok_aktif' => 0,
             'distribusi' => 0,
             'distribusi_selesai' => 0,
             'distribusi_berlangsung' => 0,
+            'distribusi_rencana' => 0,
             'total_dana_masuk' => 0,
             'total_biaya' => 0,
             'total_nilai_bantuan' => 0,
-            'penerima_diterima' => 0,
+            'total_paket_target' => 0,
+            'total_paket_terkirim' => 0,
+            'barang_stok_kritis' => 0,
+            'kegiatan_aktif' => 0,
+            'kegiatan_lunas' => 0,
+            'kabupaten_terjangkau' => 0,
+            'kecamatan_terjangkau' => 0,
+            'desa_terjangkau' => 0,
         ];
 
         $role = 'admin';
@@ -47,6 +60,22 @@ class DashboardController extends Controller
             $stats['total_dana_masuk'] = DanaDonatur::sum('jumlah');
             $stats['total_biaya'] = BiayaOperasional::sum('jumlah');
             $stats['total_nilai_bantuan'] = Distribusi::sum('estimasi_nilai_total');
+            $stats['total_paket_target'] = Distribusi::sum('jumlah_paket');
+            $stats['total_paket_terkirim'] = Distribusi::where('status', 'selesai')->sum('jumlah_paket');
+            $stats['penerima_belum_terima'] = Penerima::where('terima_bantuan', false)->count();
+            $stats['distribusi_rencana'] = Distribusi::where('status', 'direncanakan')->count();
+            $stats['kabupaten_terjangkau'] = Penerima::whereNotNull('kabupaten')->distinct()->count('kabupaten');
+            $stats['kecamatan_terjangkau'] = Penerima::whereNotNull('kecamatan')->distinct()->count('kecamatan');
+            $stats['desa_terjangkau'] = Penerima::whereNotNull('desa')->distinct()->count('desa');
+            $stats['kelompok_aktif'] = Kelompok::has('penerima')->count();
+            $stats['kegiatan_aktif'] = Anggaran::where('realisasi', 0)->count();
+            $stats['kegiatan_lunas'] = Anggaran::whereColumn('realisasi', '>=', 'anggaran')->count();
+            $stats['barang_stok_kritis'] = DB::table('pembelian_barang as pb')
+                ->selectRaw('pb.id, pb.nama_barang, pb.qty_terbeli - COALESCE(k.total,0) as sisa')
+                ->leftJoinSub(
+                    DB::table('kegiatan_barang')->selectRaw('pembelian_barang_id, SUM(jumlah) as total')->groupBy('pembelian_barang_id'),
+                    'k', 'k.pembelian_barang_id', '=', 'pb.id'
+                )->havingRaw('sisa <= 0')->get()->count();
 
             $distribusiTerbaru = Distribusi::with('kelompok')->orderBy('tanggal', 'desc')->take(5)->get();
 
