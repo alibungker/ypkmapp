@@ -133,7 +133,7 @@
     </div>
     <div class="card-body">
         @php
-            $barangPerKegiatan = collect($distribusi ?? [])->flatMap(function ($d) {
+            $barangPerKegiatan = ($distribusi?->getCollection() ?? collect())->flatMap(function ($d) {
                 return ($d->pembelianBarang ?? collect())->map(function ($pb) use ($d) {
                     return [
                         'kegiatan' => $d->nama_kegiatan,
