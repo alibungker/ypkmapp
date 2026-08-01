@@ -44,32 +44,44 @@
         @if($pending->isEmpty())
         <div style="padding:16px;text-align:center;color:#9ca3af;font-size:13px;">✅ Tidak ada data yang menunggu verifikasi</div>
         @else
-        <table class="table-data">
-            <thead><tr><th>NIK</th><th>Nama</th><th>Kelompok</th><th>Desa</th><th>Pengaju</th><th>Tanggal</th><th>Aksi</th></tr></thead>
-            <tbody>
-                @foreach($pending as $p)
-                <tr>
-                    <td style="font-family:monospace;font-size:13px;color:#6b7280;"><x-masked-nik :value="$p->nik" /></td>
-                    <td style="font-weight:500;">{{ $p->nama }}</td>
-                    <td>{{ $p->kelompok->nama ?? '-' }}</td>
-                    <td style="color:#6b7280;">{{ $p->desa }}</td>
-                    <td><span class="badge badge-gold">👤 {{ ucfirst($p->sumber_data) }}</span></td>
-                    <td style="color:#6b7280;font-size:13px;">{{ $p->created_at ? (is_object($p->created_at) ? $p->created_at->format('d/m') : date('d/m', strtotime($p->created_at))) : '-' }}</td>
-                    <td style="white-space:nowrap;">
-                        <a href="{{ route('penerima.show', $p) }}" class="btn btn-outline btn-sm" style="text-decoration:none;">🔍 Detail</a>
-                        <form method="POST" action="{{ route('penerima.verify', $p) }}" style="display:inline;">
-                            @csrf <input type="hidden" name="status" value="terverifikasi">
-                            <button class="btn btn-sm" style="background:#017723;color:white;border:none;cursor:pointer;padding:6px 12px;border-radius:6px;font-size:13px;">✅ Setujui</button>
-                        </form>
-                        <form method="POST" action="{{ route('penerima.verify', $p) }}" style="display:inline;" onsubmit="return confirm('Tolak {{ $p->nama }}?')">
-                            @csrf <input type="hidden" name="status" value="ditolak">
-                            <button class="btn btn-sm" style="background:#dc2626;color:white;border:none;cursor:pointer;padding:6px 12px;border-radius:6px;font-size:13px;">❌ Tolak</button>
-                        </form>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+        <form method="POST" action="{{ route('relawan.bulk-verify') }}" id="form-verifikasi">
+            @csrf
+            <table class="table-data">
+                <thead><tr>
+                    <th style="width:36px;"><input type="checkbox" id="select-all-pending" title="Pilih semua" style="cursor:pointer;"></th>
+                    <th>NIK</th><th>Nama</th><th>Kelompok</th><th>Desa</th><th>Pengaju</th><th>Tanggal</th><th>Aksi</th>
+                </tr></thead>
+                <tbody>
+                    @foreach($pending as $p)
+                    <tr>
+                        <td><input type="checkbox" name="ids[]" value="{{ $p->id }}" class="cb-pending" style="cursor:pointer;"></td>
+                        <td style="font-family:monospace;font-size:13px;color:#6b7280;"><x-masked-nik :value="$p->nik" /></td>
+                        <td style="font-weight:500;">{{ $p->nama }}</td>
+                        <td>{{ $p->kelompok->nama ?? '-' }}</td>
+                        <td style="color:#6b7280;">{{ $p->desa }}</td>
+                        <td><span class="badge badge-gold">👤 {{ ucfirst($p->sumber_data) }}</span></td>
+                        <td style="color:#6b7280;font-size:13px;">{{ $p->created_at ? (is_object($p->created_at) ? $p->created_at->format('d/m') : date('d/m', strtotime($p->created_at))) : '-' }}</td>
+                        <td style="white-space:nowrap;">
+                            <a href="{{ route('penerima.show', $p) }}" class="btn btn-outline btn-sm" style="text-decoration:none;">🔍 Detail</a>
+                            <form method="POST" action="{{ route('penerima.verify', $p) }}" style="display:inline;">
+                                @csrf <input type="hidden" name="status" value="terverifikasi">
+                                <button class="btn btn-sm" style="background:#017723;color:white;border:none;cursor:pointer;padding:6px 12px;border-radius:6px;font-size:13px;">✅ Setujui</button>
+                            </form>
+                            <form method="POST" action="{{ route('penerima.verify', $p) }}" style="display:inline;" onsubmit="return confirm('Tolak {{ $p->nama }}?')">
+                                @csrf <input type="hidden" name="status" value="ditolak">
+                                <button class="btn btn-sm" style="background:#dc2626;color:white;border:none;cursor:pointer;padding:6px 12px;border-radius:6px;font-size:13px;">❌ Tolak</button>
+                            </form>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            <div style="margin-top:12px;display:flex;gap:8px;align-items:center;">
+                <span id="selected-count-pending" style="font-size:13px;color:#6b7280;"></span>
+                <button type="button" id="btn-bulk-approve-pending" class="btn btn-primary btn-sm" disabled>✅ Setujui Terpilih</button>
+                <button type="button" id="btn-bulk-reject-pending" class="btn btn-sm" style="background:#dc2626;color:white;border:none;cursor:pointer;" disabled>❌ Tolak Terpilih</button>
+            </div>
+        </form>
         @endif
     </div>
 </div>
@@ -87,39 +99,127 @@
         @if($terverifikasi->isEmpty())
         <div style="padding:16px;text-align:center;color:#9ca3af;font-size:13px;">✅ Semua penerima sudah dichecklist</div>
         @else
-        <table class="table-data">
-            <thead><tr><th>NIK</th><th>Nama</th><th>Kelompok</th><th>Desa</th><th>Verifikator</th><th>Status</th><th>Aksi</th></tr></thead>
-            <tbody>
-                @foreach($terverifikasi as $p)
-                <tr style="{{ $p->terima_bantuan ? 'background:#f0faf0;' : '' }}">
-                    <td style="font-family:monospace;font-size:13px;color:#6b7280;"><x-masked-nik :value="$p->nik" /></td>
-                    <td style="font-weight:500;">{{ $p->nama }}</td>
-                    <td>{{ $p->kelompok->nama ?? '-' }}</td>
-                    <td style="color:#6b7280;">{{ $p->desa }}</td>
-                    <td style="color:#6b7280;font-size:13px;">{{ $p->verifikator->name ?? '-' }}</td>
-                    <td>
-                        @if($p->terima_bantuan)
-                        <span class="badge badge-green">✅ SUDAH TERIMA</span>
+        <form method="POST" action="{{ route('relawan.bulk-terima') }}" id="form-terima">
+            @csrf
+            <table class="table-data">
+                <thead><tr>
+                    <th style="width:36px;"><input type="checkbox" id="select-all-terima" title="Pilih semua" style="cursor:pointer;"></th>
+                    <th>NIK</th><th>Nama</th><th>Kelompok</th><th>Desa</th><th>Verifikator</th><th>Status</th><th>Aksi</th>
+                </tr></thead>
+                <tbody>
+                    @foreach($terverifikasi as $p)
+                    <tr style="{{ $p->terima_bantuan ? 'background:#f0faf0;' : '' }}">
+                        @if(!$p->terima_bantuan)
+                        <td><input type="checkbox" name="ids[]" value="{{ $p->id }}" class="cb-terima" style="cursor:pointer;"></td>
                         @else
-                        <span class="badge badge-gold">⏳ Menunggu</span>
+                        <td><span style="display:inline-block;width:14px;"></span></td>
                         @endif
-                    </td>
-                    <td style="white-space:nowrap;">
-                        <a href="{{ route('penerima.show', $p) }}" class="btn btn-outline btn-sm" style="text-decoration:none;">🔍 Detail</a>
-                        <form method="POST" action="{{ route('penerima.terima-bantuan', $p) }}" style="display:inline;">
-                            @csrf
+                        <td style="font-family:monospace;font-size:13px;color:#6b7280;"><x-masked-nik :value="$p->nik" /></td>
+                        <td style="font-weight:500;">{{ $p->nama }}</td>
+                        <td>{{ $p->kelompok->nama ?? '-' }}</td>
+                        <td style="color:#6b7280;">{{ $p->desa }}</td>
+                        <td style="color:#6b7280;font-size:13px;">{{ $p->verifikator->name ?? '-' }}</td>
+                        <td>
                             @if($p->terima_bantuan)
-                            <button class="btn btn-sm" style="background:#dc2626;color:white;border:none;cursor:pointer;padding:6px 12px;border-radius:6px;font-size:13px;">↩️ Batalkan</button>
+                            <span class="badge badge-green">✅ SUDAH TERIMA</span>
                             @else
-                            <button class="btn btn-sm" style="background:#017723;color:white;border:none;cursor:pointer;padding:6px 12px;border-radius:6px;font-size:13px;">✅ Terima Bantuan</button>
+                            <span class="badge badge-gold">⏳ Menunggu</span>
                             @endif
-                        </form>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+                        </td>
+                        <td style="white-space:nowrap;">
+                            <a href="{{ route('penerima.show', $p) }}" class="btn btn-outline btn-sm" style="text-decoration:none;">🔍 Detail</a>
+                            <form method="POST" action="{{ route('penerima.terima-bantuan', $p) }}" style="display:inline;">
+                                @csrf
+                                @if($p->terima_bantuan)
+                                <button class="btn btn-sm" style="background:#dc2626;color:white;border:none;cursor:pointer;padding:6px 12px;border-radius:6px;font-size:13px;">↩️ Batalkan</button>
+                                @else
+                                <button class="btn btn-sm" style="background:#017723;color:white;border:none;cursor:pointer;padding:6px 12px;border-radius:6px;font-size:13px;">✅ Terima Bantuan</button>
+                                @endif
+                            </form>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            <div style="margin-top:12px;display:flex;gap:8px;align-items:center;">
+                <span id="selected-count-terima" style="font-size:13px;color:#6b7280;"></span>
+                <button type="button" id="btn-bulk-terima" class="btn btn-primary btn-sm" disabled>✅ Tandai Terima Terpilih</button>
+            </div>
+        </form>
         @endif
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+// --- Select All + Bulk: Tab 1 (Pending Verifikasi) ---
+const selectAllPending = document.getElementById('select-all-pending');
+const cbsPending = () => document.querySelectorAll('.cb-pending');
+const countPending  = document.getElementById('selected-count-pending');
+const btnApprove    = document.getElementById('btn-bulk-approve-pending');
+const btnReject     = document.getElementById('btn-bulk-reject-pending');
+const formVerify    = document.getElementById('form-verifikasi');
+
+function updateBulkPending() {
+    const checked = [...cbsPending()].filter(c => c.checked).length;
+    const total   = cbsPending().length;
+    countPending.textContent = checked > 0 ? `${checked} dari ${total} dipilih` : '';
+    if (btnApprove) btnApprove.disabled = checked === 0;
+    if (btnReject)  btnReject.disabled  = checked === 0;
+    if (selectAllPending) selectAllPending.checked = total > 0 && checked === total;
+}
+if (selectAllPending) selectAllPending.addEventListener('change', () => {
+    cbsPending().forEach(cb => cb.checked = selectAllPending.checked);
+    updateBulkPending();
+});
+document.addEventListener('change', e => { if (e.target.classList.contains('cb-pending')) updateBulkPending(); });
+
+if (btnApprove) btnApprove.addEventListener('click', () => {
+    if (!confirm('Setujui ' + [...cbsPending()].filter(c=>c.checked).length + ' data?')) return;
+    // hapus input status ditolak jika ada, set status terverifikasi
+    let hidden = formVerify.querySelector('input[name="status"][value="ditolak"]');
+    if (hidden) hidden.remove();
+    if (!formVerify.querySelector('input[name="status"]')) {
+        const h = document.createElement('input'); h.type='hidden'; h.name='status'; h.value='terverifikasi';
+        formVerify.appendChild(h);
+    }
+    formVerify.submit();
+});
+if (btnReject) btnReject.addEventListener('click', () => {
+    if (!confirm('Tolak ' + [...cbsPending()].filter(c=>c.checked).length + ' data?')) return;
+    let hidden = formVerify.querySelector('input[name="status"][value="terverifikasi"]');
+    if (hidden) hidden.remove();
+    if (!formVerify.querySelector('input[name="status"]')) {
+        const h = document.createElement('input'); h.type='hidden'; h.name='status'; h.value='ditolak';
+        formVerify.appendChild(h);
+    }
+    formVerify.submit();
+});
+
+// --- Select All + Bulk: Tab 2 (Terima Bantuan) ---
+const selectAllTerima = document.getElementById('select-all-terima');
+const cbsTerima = () => document.querySelectorAll('.cb-terima');
+const countTerima = document.getElementById('selected-count-terima');
+const btnTerima   = document.getElementById('btn-bulk-terima');
+const formTerima  = document.getElementById('form-terima');
+
+function updateBulkTerima() {
+    const checked = [...cbsTerima()].filter(c => c.checked).length;
+    const total   = cbsTerima().length;
+    countTerima.textContent = checked > 0 ? `${checked} dari ${total} dipilih` : '';
+    if (btnTerima) btnTerima.disabled = checked === 0;
+    if (selectAllTerima) selectAllTerima.checked = total > 0 && checked === total;
+}
+if (selectAllTerima) selectAllTerima.addEventListener('change', () => {
+    cbsTerima().forEach(cb => cb.checked = selectAllTerima.checked);
+    updateBulkTerima();
+});
+document.addEventListener('change', e => { if (e.target.classList.contains('cb-terima')) updateBulkTerima(); });
+
+if (btnTerima) btnTerima.addEventListener('click', () => {
+    if (!confirm('Tandai terima bantuan untuk ' + [...cbsTerima()].filter(c=>c.checked).length + ' data?')) return;
+    formTerima.submit();
+});
+</script>
 @endsection

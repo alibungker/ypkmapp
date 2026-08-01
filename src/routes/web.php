@@ -146,6 +146,8 @@ Route::middleware('auth')->group(function () {
     // ============================================================
     Route::prefix('relawan')->name('relawan.')->middleware(\App\Http\Middleware\OperationalOnly::class)->group(function () {
         Route::get('/', [RelawanController::class, 'verifikasi'])->name('verifikasi');
+        Route::post('bulk-verify', [RelawanController::class, 'bulkVerify'])->name('bulk-verify');
+        Route::post('bulk-terima', [RelawanController::class, 'bulkTerima'])->name('bulk-terima');
     });
 
     // ============================================================
