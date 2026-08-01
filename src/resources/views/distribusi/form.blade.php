@@ -191,12 +191,25 @@ selKelompok.addEventListener('change', function() {
 if (selKelompok.value) selKelompok.dispatchEvent(new Event('change'));
 
 // Alokasi barang pembelian ke distribusi
-const purchaseItems = @json($pembelian->map(fn($p) => [
-    'id' => $p->id,
-    'label' => $p->nama_barang . ($p->batch ? ' — '.$p->batch : ''),
-    'stok' => $p->stok_tersedia,
-    'harga' => $p->harga_satuan,
-])->values());
+@php
+$purchaseItemsJs = $pembelian->map(function ($p) {
+    return [
+        'id' => $p->id,
+        'label' => $p->nama_barang . ($p->batch ? ' — '.$p->batch : ''),
+        'stok' => $p->stok_tersedia,
+        'harga' => $p->harga_satuan,
+    ];
+})->values();
+$existingPurchasesJs = old('pembelian_barang');
+if ($existingPurchasesJs === null) {
+    $existingPurchasesJs = isset($distribusi)
+        ? $distribusi->pembelianBarang->map(function ($p) {
+            return ['pembelian_barang_id' => $p->id, 'jumlah' => $p->pivot->jumlah];
+        })->values()->all()
+        : [];
+}
+@endphp
+const purchaseItems = @json($purchaseItemsJs);
 const purchaseRows = document.getElementById('distribusiBarangRows');
 let purchaseIndex = 0;
 function addPurchaseRow(selected = '', jumlah = '') {
@@ -211,7 +224,7 @@ function addPurchaseRow(selected = '', jumlah = '') {
     row.querySelector('.purchase-remove').addEventListener('click', () => row.remove());
 }
 document.getElementById('addDistribusiBarang').addEventListener('click', () => addPurchaseRow());
-const existingPurchases = @json(old('pembelian_barang', isset($distribusi) ? $distribusi->pembelianBarang->map(fn($p) => ['pembelian_barang_id'=>$p->id,'jumlah'=>$p->pivot->jumlah])->values()->all() : []));
+const existingPurchases = @json($existingPurchasesJs);
 existingPurchases.forEach(item => addPurchaseRow(item.pembelian_barang_id, item.jumlah));
 </script>
 @endsection
