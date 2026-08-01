@@ -12,9 +12,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('distribusi_id')->constrained('distribusis')->cascadeOnDelete();
             $table->foreignId('pembelian_barang_id')->constrained('pembelian_barang')->restrictOnDelete();
-            $table->unsignedInteger('jumlah')->comment('Jumlah barang keluar untuk distribusi ini');
+            $table->unsignedInteger('jumlah');
             $table->timestamps();
-            $table->unique(['distribusi_id', 'pembelian_barang_id']);
+            $table->index(['distribusi_id', 'pembelian_barang_id']);
         });
     }
 
