@@ -52,6 +52,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     // Penerima — semua role bisa lihat & input; verifikasi utk admin/relawan
+    Route::get('penerima-import/template', [PenerimaController::class, 'importTemplate'])->name('penerima.import.template');
+    Route::post('penerima-import/preview', [PenerimaController::class, 'importPreview'])->name('penerima.import.preview');
+    Route::post('penerima-import/store', [PenerimaController::class, 'importStore'])->name('penerima.import.store');
+    Route::post('penerima-import/cancel', [PenerimaController::class, 'importCancel'])->name('penerima.import.cancel');
     Route::resource('penerima', PenerimaController::class);
     Route::middleware(\App\Http\Middleware\OperationalOnly::class)->group(function () {
         Route::post('penerima/{penerima}/verify', [PenerimaController::class, 'verify'])->name('penerima.verify');

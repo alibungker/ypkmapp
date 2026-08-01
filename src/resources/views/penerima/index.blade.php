@@ -5,6 +5,7 @@
     <div class="card-header">
         <h3 style="font-size:15px;font-weight:600;">Data penerima manfaat</h3>
         <div class="button-row">
+            <a href="{{ route('penerima.import.template') }}" class="btn btn-outline btn-sm" style="text-decoration:none;">⬇️ Template CSV</a>
             <a href="{{ route('penerima.create') }}" class="btn btn-primary btn-sm">+ Tambah</a>
         </div>
     </div>
@@ -53,6 +54,18 @@
             <button class="btn btn-outline btn-sm">Terapkan</button>
             <a href="{{ route('penerima.index') }}" class="btn btn-outline btn-sm">Bersihkan filter</a>
         </form>
+        <details style="margin-bottom:16px;border:1px dashed #cbd5e1;border-radius:8px;padding:8px 12px;">
+            <summary style="font-size:13px;color:#00034a;cursor:pointer;">📥 Import data dari CSV</summary>
+            <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                <form method="POST" action="{{ route('penerima.import.preview') }}" enctype="multipart/form-data" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                    @csrf
+                    <input type="file" name="csv_file" accept=".csv,.txt" required class="form-input" style="font-size:13px;">
+                    <button type="submit" class="btn btn-primary btn-sm">🔍 Preview & Cek</button>
+                </form>
+                <a href="{{ route('penerima.import.template') }}" class="btn btn-outline btn-sm" style="text-decoration:none;">⬇️ Download template dulu</a>
+            </div>
+            <p style="font-size:12px;color:#667085;margin:8px 0 0;">Format: CSV (kolom sesuai template). Data valid langsung ditampilkan untuk dikonfirmasi sebelum disimpan. NIK duplikat & data tidak lengkap otomatis ditolak.</p>
+        </details>
         <p style="font-size:13px;color:#667085;margin:0 0 12px;">Menampilkan {{ number_format($penerima->total()) }} penerima</p>
         <div class="table-wrap desktop-table">
             <table class="table-data">

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 use App\Models\Penerima;
 use App\Models\Kelompok;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class PenerimaController extends Controller
 {
@@ -304,5 +306,213 @@ class PenerimaController extends Controller
 
         Penerima::create($data);
         return back()->with('success', 'Pendaftaran berhasil! Data Anda akan diverifikasi petugas YPKM.');
+    }
+
+    // ============================================================
+    // CSV IMPORT: template download, preview, store
+    // ============================================================
+
+    private const CSV_HEADERS = [
+        'nik', 'no_kk', 'nama', 'tempat_lahir', 'tanggal_lahir',
+        'jenis_kelamin', 'alamat', 'kabupaten', 'kecamatan', 'desa',
+        'rt_rw', 'phone', 'pekerjaan', 'jumlah_keluarga',
+        'kelompok_id', 'sumber_data',
+    ];
+
+    public function importTemplate()
+    {
+        $filename = 'template-import-penerima.csv';
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function () {
+            $handle = fopen('php://output', 'w');
+            // Add UTF-8 BOM for Excel
+            fprintf($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
+            fputcsv($handle, self::CSV_HEADERS);
+            // Example row
+            fputcsv($handle, [
+                '1101010101900001', '', 'Contoh Nama', 'Banda Aceh', '1990-01-01',
+                'L', 'Jl. Contoh No. 1', 'Aceh Selatan', 'Sekerak', 'Juar',
+                '002/001', '081234567890', 'Petani', '4',
+                '1', 'relawan',
+            ]);
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    public function importPreview(Request $request)
+    {
+        $request->validate([
+            'csv_file' => 'required|file|mimes:csv,txt|max:5120',
+        ]);
+
+        $file = $request->file('csv_file');
+        $path = $file->getRealPath();
+        $rows = $this->parseCsv($path);
+
+        // Get existing NIKs for duplicate detection
+        $niks = array_filter(array_column($rows, 'nik'));
+        $existingNiks = [];
+        if ($niks) {
+            $existingNiks = Penerima::whereIn('nik', $niks)->pluck('nik')->toArray();
+        }
+
+        // Validate kelompok_ids
+        $kelompokIds = array_filter(array_column($rows, 'kelompok_id'));
+        $validKelompokIds = [];
+        if ($kelompokIds) {
+            $validKelompokIds = Kelompok::whereIn('id', $kelompokIds)->pluck('id')->toArray();
+        }
+
+        $validRows = [];
+        $errorRows = [];
+        $validSumber = ['mandiri', 'relawan', 'ketua_kelompok'];
+
+        foreach ($rows as $i => $row) {
+            $lineNo = $i + 2; // +1 for 0-index, +1 for header
+            $errors = [];
+
+            if (empty($row['nik'])) {
+                $errors[] = 'NIK kosong';
+            } elseif (!preg_match('/^\d{16}$/', $row['nik'])) {
+                $errors[] = 'NIK harus 16 digit angka';
+            } elseif (in_array($row['nik'], $existingNiks)) {
+                $errors[] = 'NIK sudah terdaftar di database';
+            }
+
+            if (empty($row['nama'])) $errors[] = 'Nama kosong';
+            if (empty($row['alamat'])) $errors[] = 'Alamat kosong';
+            if (empty($row['kabupaten'])) $errors[] = 'Kabupaten kosong';
+            if (empty($row['kecamatan'])) $errors[] = 'Kecamatan kosong';
+            if (empty($row['desa'])) $errors[] = 'Desa kosong';
+            if (empty($row['phone'])) $errors[] = 'No HP kosong';
+
+            if (!empty($row['jenis_kelamin']) && !in_array($row['jenis_kelamin'], ['L', 'P'])) {
+                $errors[] = 'Jenis kelamin harus L atau P';
+            }
+
+            if (!empty($row['kelompok_id'])) {
+                if (!in_array((int)$row['kelompok_id'], $validKelompokIds)) {
+                    $errors[] = 'Kelompok ID tidak ditemukan';
+                }
+            } else {
+                $errors[] = 'Kelompok ID kosong';
+            }
+
+            $sumber = $row['sumber_data'] ?? 'relawan';
+            if (!in_array($sumber, $validSumber)) {
+                $errors[] = 'Sumber data tidak valid';
+            }
+
+            // Check NIK duplicate within the same file
+            $nikCount = array_count_values(array_filter(array_column($rows, 'nik')));
+            if (!empty($row['nik']) && ($nikCount[$row['nik']] ?? 0) > 1) {
+                $errors[] = 'NIK duplikat dalam file';
+            }
+
+            if ($errors) {
+                $row['_line'] = $lineNo;
+                $row['_errors'] = $errors;
+                $errorRows[] = $row;
+            } else {
+                $row['_line'] = $lineNo;
+                $validRows[] = $row;
+            }
+        }
+
+        // Store parsed data in session for the actual import
+        session(['import_data' => array_map(function ($r) {
+            unset($r['_line'], $r['_errors']);
+            return $r;
+        }, $validRows)]);
+
+        return view('penerima.import-preview', compact('validRows', 'errorRows'));
+    }
+
+    public function importStore(Request $request)
+    {
+        $data = session('import_data');
+        if (!$data || !is_array($data)) {
+            return redirect()->route('penerima.index')->with('error', 'Sesi import kedaluwarsa. Upload ulang file CSV.');
+        }
+
+        $imported = 0;
+        $errors = [];
+
+        DB::transaction(function () use ($data, &$imported, &$errors) {
+            foreach ($data as $i => $row) {
+                try {
+                    Penerima::create([
+                        'nik' => $row['nik'],
+                        'no_kk' => $row['no_kk'] ?? null,
+                        'nama' => $row['nama'],
+                        'tempat_lahir' => $row['tempat_lahir'] ?? null,
+                        'tanggal_lahir' => $row['tanggal_lahir'] ?? null,
+                        'jenis_kelamin' => $row['jenis_kelamin'] ?? null,
+                        'alamat' => $row['alamat'],
+                        'provinsi' => 'Aceh',
+                        'kabupaten' => $row['kabupaten'],
+                        'kecamatan' => $row['kecamatan'],
+                        'desa' => $row['desa'],
+                        'rt_rw' => $row['rt_rw'] ?? null,
+                        'phone' => $row['phone'],
+                        'pekerjaan' => $row['pekerjaan'] ?? null,
+                        'jumlah_keluarga' => !empty($row['jumlah_keluarga']) ? (int)$row['jumlah_keluarga'] : null,
+                        'kelompok_id' => (int)$row['kelompok_id'],
+                        'sumber_data' => $row['sumber_data'] ?? 'relawan',
+                        'status' => 'pending',
+                    ]);
+                    $imported++;
+                } catch (\Exception $e) {
+                    $errors[] = "Baris " . ($i + 2) . ": " . $e->getMessage();
+                }
+            }
+        });
+
+        session()->forget('import_data');
+
+        $msg = "✅ {$imported} penerima berhasil diimport.";
+        if ($errors) {
+            $msg .= " ⚠️ " . count($errors) . " baris gagal: " . implode('; ', array_slice($errors, 0, 3));
+        }
+        return redirect()->route('penerima.index')->with('success', $msg);
+    }
+
+    public function importCancel()
+    {
+        session()->forget('import_data');
+        return redirect()->route('penerima.index')->with('success', 'Import dibatalkan.');
+    }
+
+    private function parseCsv(string $path): array
+    {
+        $handle = fopen($path, 'r');
+        // Skip BOM if present
+        $bom = fread($handle, 3);
+        if ($bom !== "\xEF\xBB\xBF") {
+            rewind($handle);
+        }
+
+        $headers = fgetcsv($handle);
+        if (!$headers) {
+            fclose($handle);
+            return [];
+        }
+
+        // Trim and lowercase headers
+        $headers = array_map(fn($h) => strtolower(trim($h)), $headers);
+
+        $rows = [];
+        while (($row = fgetcsv($handle)) !== false) {
+            if (count($row) === 1 && $row[0] === null) continue; // Skip empty lines
+            $rows[] = array_combine($headers, array_pad($row, count($headers), ''));
+        }
+        fclose($handle);
+        return $rows;
     }
 }
