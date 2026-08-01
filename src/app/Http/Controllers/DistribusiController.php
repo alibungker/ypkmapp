@@ -91,6 +91,8 @@ class DistribusiController extends Controller
         $data['created_by'] = auth()->id();
         $pembelianDistribusi = $data['pembelian_barang'] ?? [];
         unset($data['pembelian_barang']);
+        $data = $this->isiRingkasanDariKegiatan($data, $request->input('kegiatan_id'), $pembelianDistribusi);
+        unset($data['kegiatan_id']);
 
         try {
             DB::transaction(function () use ($data, $legacyUpload, $uploads, &$newPaths, $pembelianDistribusi) {
@@ -138,6 +140,8 @@ class DistribusiController extends Controller
         unset($data['bukti_file'], $data['lampiran'], $data['hapus_lampiran']);
         $pembelianDistribusi = $data['pembelian_barang'] ?? [];
         unset($data['pembelian_barang']);
+        $data = $this->isiRingkasanDariKegiatan($data, $request->input('kegiatan_id'), $pembelianDistribusi);
+        unset($data['kegiatan_id']);
 
         $oldLegacyPath = $distribusi->bukti_file;
         $kelompokBerubah = (int) $distribusi->kelompok_id !== (int) $data['kelompok_id'];
@@ -274,9 +278,7 @@ class DistribusiController extends Controller
             'lokasi' => 'required|string|max:255',
             'titik_koordinat' => ['required', 'regex:/^-?\d{1,2}(?:\.\d+)?,\s*-?\d{1,3}(?:\.\d+)?$/'],
             'kelompok_id' => 'required|exists:kelompoks,id',
-            'jenis_bantuan' => 'required|string|max:100',
-            'jumlah_paket' => 'required|integer|min:1|max:10000000',
-            'estimasi_nilai_total' => 'nullable|numeric|min:0',
+            'kegiatan_id' => 'required|exists:anggarans,id',
             'sumber_dana' => 'nullable|string|max:255',
             'catatan' => 'nullable|string|max:5000',
             'bukti_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
@@ -296,9 +298,31 @@ class DistribusiController extends Controller
         ]);
 
         // Hindari NULL eksplisit pada kolom database yang mempunyai default.
-        $data['estimasi_nilai_total'] = $data['estimasi_nilai_total'] ?? 0;
+        $data['estimasi_nilai_total'] = 0;
         $data['sumber_dana'] = $data['sumber_dana'] ?? '';
 
+        return $data;
+    }
+
+    private function isiRingkasanDariKegiatan(array $data, $kegiatanId, array $alokasi): array
+    {
+        $kegiatan = Anggaran::with('barangItems')->find($kegiatanId);
+        $barangTerkait = $kegiatan?->barangItems->pluck('id')->all() ?? [];
+        $totalNilai = 0;
+        $totalJumlah = 0;
+        foreach ($alokasi as $b) {
+            if (!in_array((int) $b['pembelian_barang_id'], $barangTerkait, true)) {
+                throw ValidationException::withMessages([
+                    'pembelian_barang' => 'Barang tidak termasuk dalam kegiatan terpilih.',
+                ]);
+            }
+            $harga = (float) PembelianBarang::whereKey($b['pembelian_barang_id'])->value('harga_satuan');
+            $totalNilai += $harga * (int) $b['jumlah'];
+            $totalJumlah += (int) $b['jumlah'];
+        }
+        $data['estimasi_nilai_total'] = $totalNilai;
+        $data['jenis_bantuan'] = ucwords(str_replace('_', ' ', $kegiatan->kategori ?: 'Lainnya'));
+        $data['jumlah_paket'] = max(1, (int) ($kegiatan->target_paket ?? $totalJumlah));
         return $data;
     }
 

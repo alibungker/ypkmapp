@@ -49,25 +49,6 @@
                 <div id="pickmap"></div>
             </div>
 
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:16px;">
-                <div>
-                    <label class="form-label">Jenis Bantuan <span style="color:#dc2626;">*</span></label>
-                    <select name="jenis_bantuan" class="form-input" required>
-                        @foreach(['Sembako','Uang Tunai','Alat Pertanian','Paket Pendidikan','Lainnya'] as $j)
-                        <option value="{{ $j }}" {{ old('jenis_bantuan', $distribusi->jenis_bantuan ?? '') == $j ? 'selected' : '' }}>{{ $j }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label class="form-label">Jumlah Paket <span style="color:#dc2626;">*</span></label>
-                    <input type="number" name="jumlah_paket" id="jmlPaket" class="form-input" required min="1" max="10000000" value="{{ old('jumlah_paket', $distribusi->jumlah_paket ?? '') }}" placeholder="250">
-                </div>
-                <div>
-                    <label class="form-label">Estimasi Nilai (Rp)</label>
-                    <input type="number" name="estimasi_nilai_total" class="form-input" step="0.01" min="0" value="{{ old('estimasi_nilai_total', $distribusi->estimasi_nilai_total ?? 0) }}" placeholder="37500000">
-                </div>
-            </div>
-
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
                 <div>
                     <label class="form-label">Sumber Dana</label>
@@ -153,6 +134,10 @@
                 @endif
             </div>
 
+            <input type="hidden" name="jenis_bantuan" value="Sembako">
+            <input type="hidden" name="jumlah_paket" value="{{ old('jumlah_paket', $distribusi->jumlah_paket ?? '') }}">
+            <input type="hidden" name="estimasi_nilai_total" value="{{ old('estimasi_nilai_total', $distribusi->estimasi_nilai_total ?? 0) }}">
+
             <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid #e5e7eb;">
                 <a href="{{ route('distribusi.index') }}" class="btn btn-outline">Batal</a>
                 <button type="submit" class="btn btn-primary">💾 {{ isset($distribusi) ? 'Update' : 'Simpan' }} Distribusi</button>
@@ -195,15 +180,13 @@ koordInput.addEventListener('change', function() {
     }
 });
 
-// Info kelompok: auto-isi jumlah paket sesuai anggota
+// Info kelompok
 const selKelompok = document.getElementById('selKelompok');
 const infoKelompok = document.getElementById('infoKelompok');
-const jmlPaket = document.getElementById('jmlPaket');
 selKelompok.addEventListener('change', function() {
     const opt = this.options[this.selectedIndex];
     if (opt.value) {
         infoKelompok.textContent = '👥 ' + opt.dataset.anggota + ' penerima · Ketua: ' + opt.dataset.ketua;
-        if (!jmlPaket.value) jmlPaket.value = opt.dataset.anggota;
     } else { infoKelompok.textContent = ''; }
 });
 if (selKelompok.value) selKelompok.dispatchEvent(new Event('change'));
