@@ -49,9 +49,11 @@ class BarangController extends Controller
             $kegiatan = Anggaran::create($data);
             foreach ($alokasi as $baris) {
                 $barang = PembelianBarang::lockForUpdate()->findOrFail($baris['pembelian_barang_id']);
-                $sudahTersalurkan = (int) DB::table('kegiatan_barang')
+                $sudahKegiatan = (int) DB::table('kegiatan_barang')
                     ->where('pembelian_barang_id', $barang->id)->sum('jumlah');
-                $stokTersedia = max(0, $barang->qty_terbeli - $sudahTersalurkan);
+                $sudahDistribusi = (int) DB::table('distribusi_pembelian_barang')
+                    ->where('pembelian_barang_id', $barang->id)->sum('jumlah');
+                $stokTersedia = max(0, $barang->qty_terbeli - $sudahKegiatan - $sudahDistribusi);
                 if ($baris['jumlah'] > $stokTersedia) {
                     throw ValidationException::withMessages([
                         'barang' => "Stok {$barang->nama_barang} hanya tersedia {$stokTersedia}.",
@@ -125,6 +127,13 @@ class BarangController extends Controller
 
     public function destroyPembelian(PembelianBarang $pembelian)
     {
+        $dipakaiDistribusi = DB::table('distribusi_pembelian_barang')
+            ->where('pembelian_barang_id', $pembelian->id)->exists();
+        if ($dipakaiDistribusi) {
+            return back()->withErrors([
+                'barang' => "Barang {$pembelian->nama_barang} sudah dipakai pada distribusi. Tidak bisa dihapus.",
+            ])->withInput();
+        }
         $pembelian->delete();
         return redirect()->route('barang.index')->with('success', 'Item barang dihapus.');
     }
