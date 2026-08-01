@@ -28,12 +28,15 @@ class RelawanController extends Controller
             });
         }
 
+        $perPage = (int) $request->query('per_page', 30);
+        $perPage = in_array($perPage, [30, 50, 100]) ? $perPage : 30;
+
         // Data PENDING (butuh verifikasi)
         $pending = clone $query;
         $this->scopeWilayah($pending);
         $pending = $pending->where('status', 'pending')
             ->orderBy('created_at', 'desc')
-            ->paginate(100, ['*'], 'pending_page')
+            ->paginate($perPage, ['*'], 'pending_page')
             ->withQueryString();
 
         // Data TERVERIFIKASI (butuh checklist terima bantuan)
@@ -41,7 +44,7 @@ class RelawanController extends Controller
         $this->scopeWilayah($terverifikasi);
         $terverifikasi = $terverifikasi->where('status', 'terverifikasi')
             ->orderBy('verified_at', 'desc')
-            ->paginate(100, ['*'], 'verified_page')
+            ->paginate($perPage, ['*'], 'verified_page')
             ->withQueryString();
 
         return view('relawan.verifikasi', compact('pending', 'terverifikasi'));

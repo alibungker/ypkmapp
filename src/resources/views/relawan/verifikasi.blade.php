@@ -12,6 +12,12 @@
         <input type="text" name="search" class="form-input" style="max-width:360px;" value="{{ request('search') }}" placeholder="🔍 Cari NIK atau Nama lengkap...">
         <button type="submit" class="btn btn-primary btn-sm">Cari</button>
         @if(request('search'))<a href="{{ route('relawan.verifikasi') }}" class="btn btn-outline btn-sm" style="text-decoration:none;">↩️ Reset</a>@endif
+        <span style="margin-left:auto;font-size:13px;color:#6b7280;">
+            Per halaman:
+            <a href="{{ request()->fullUrlWithQuery(['per_page' => 30]) }}" style="text-decoration:none;font-weight:600;color:#00034a;">30</a> |
+            <a href="{{ request()->fullUrlWithQuery(['per_page' => 50]) }}" style="text-decoration:none;font-weight:600;color:#00034a;">50</a> |
+            <a href="{{ request()->fullUrlWithQuery(['per_page' => 100]) }}" style="text-decoration:none;font-weight:600;color:#00034a;">100</a>
+        </span>
     </div>
 </form>
 
