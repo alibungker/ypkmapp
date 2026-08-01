@@ -126,46 +126,4 @@
     </div>
 </div>
 
-{{-- Tabel total barang didistribusikan per kegiatan --}}
-<div class="card" style="margin-top:20px;">
-    <div class="card-header">
-        <h3 style="font-size:15px;font-weight:600;">📦 Total Barang Didistribusikan per Kegiatan</h3>
-    </div>
-    <div class="card-body">
-        @php
-            $barangPerKegiatan = ($distribusi?->getCollection() ?? collect())->flatMap(function ($d) {
-                return ($d->pembelianBarang ?? collect())->map(function ($pb) use ($d) {
-                    return [
-                        'kegiatan' => $d->nama_kegiatan,
-                        'barang' => $pb->nama_barang,
-                        'batch' => $pb->batch ?? '-',
-                        'jumlah' => (int) $pb->pivot->jumlah,
-                        'paket' => (int) $d->jumlah_paket,
-                        'satuan' => 'unit',
-                    ];
-                });
-            });
-        @endphp
-        @if($barangPerKegiatan->isNotEmpty())
-        <div class="table-wrap desktop-table">
-        <table class="table-data">
-            <thead><tr><th>Kegiatan</th><th>Barang</th><th>Batch</th><th>Total Didistribusikan</th><th>Paket</th></tr></thead>
-            <tbody>
-                @foreach($barangPerKegiatan as $b)
-                <tr>
-                    <td style="font-weight:500;">{{ $b['kegiatan'] }}</td>
-                    <td>{{ $b['barang'] }}</td>
-                    <td style="color:#6b7280;">{{ $b['batch'] }}</td>
-                    <td style="font-weight:600;color:#b07d14;">{{ number_format($b['jumlah']) }} unit</td>
-                    <td>{{ number_format($b['paket']) }} paket</td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-        </div>
-        @else
-        <div style="padding:24px;text-align:center;color:#9ca3af;">Belum ada barang didistribusikan</div>
-        @endif
-    </div>
-</div>
 @endsection
