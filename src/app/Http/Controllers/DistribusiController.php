@@ -113,7 +113,7 @@ class DistribusiController extends Controller
         $kelompoks = Kelompok::withCount('penerima')->with('ketuaUser')->get();
         $distribusi->load('lampiran', 'pembelianBarang');
         $pembelian = PembelianBarang::orderBy('nama_barang')->get()
-            ->each(function ($item) {
+            ->each(function ($item) use ($distribusi) {
                 $untukKegiatan = (int) DB::table('kegiatan_barang')
                     ->where('pembelian_barang_id', $item->id)->sum('jumlah');
                 $untukDistribusi = (int) DB::table('distribusi_pembelian_barang')
