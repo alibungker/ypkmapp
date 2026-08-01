@@ -95,7 +95,9 @@ class DistribusiController extends Controller
         $data['created_by'] = auth()->id();
         $pembelianDistribusi = $data['pembelian_barang'] ?? [];
         unset($data['pembelian_barang']);
-        $data = $this->isiRingkasanDariKegiatan($data, $request->input('kegiatan_id'), $pembelianDistribusi);
+        if ($request->input('kegiatan_id')) {
+            $data = $this->isiRingkasanDariKegiatan($data, $request->input('kegiatan_id'), $pembelianDistribusi);
+        }
         unset($data['kegiatan_id']);
 
         try {
@@ -144,7 +146,9 @@ class DistribusiController extends Controller
         unset($data['bukti_file'], $data['lampiran'], $data['hapus_lampiran']);
         $pembelianDistribusi = $data['pembelian_barang'] ?? [];
         unset($data['pembelian_barang']);
-        $data = $this->isiRingkasanDariKegiatan($data, $request->input('kegiatan_id'), $pembelianDistribusi);
+        if ($request->input('kegiatan_id')) {
+            $data = $this->isiRingkasanDariKegiatan($data, $request->input('kegiatan_id'), $pembelianDistribusi);
+        }
         unset($data['kegiatan_id']);
 
         $oldLegacyPath = $distribusi->bukti_file;
@@ -282,7 +286,8 @@ class DistribusiController extends Controller
             'lokasi' => 'required|string|max:255',
             'titik_koordinat' => ['required', 'regex:/^-?\d{1,2}(?:\.\d+)?,\s*-?\d{1,3}(?:\.\d+)?$/'],
             'kelompok_id' => 'required|exists:kelompoks,id',
-            'kegiatan_id' => 'required|exists:anggarans,id',
+            'kegiatan_id' => 'nullable|exists:anggarans,id',
+            'jumlah_paket' => 'required|integer|min:1|max:10000000',
             'sumber_dana' => 'nullable|string|max:255',
             'catatan' => 'nullable|string|max:5000',
             'bukti_file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
@@ -326,7 +331,7 @@ class DistribusiController extends Controller
         }
         $data['estimasi_nilai_total'] = $totalNilai;
         $data['jenis_bantuan'] = ucwords(str_replace('_', ' ', $kegiatan->kategori ?: 'Lainnya'));
-        $data['jumlah_paket'] = max(1, (int) ($kegiatan->target_paket ?? $totalJumlah));
+        $data['jumlah_paket'] = max(1, (int) ($data['jumlah_paket'] ?? $kegiatan->target_paket ?? $totalJumlah));
         return $data;
     }
 

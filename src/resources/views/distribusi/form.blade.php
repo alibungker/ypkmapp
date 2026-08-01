@@ -49,10 +49,14 @@
                 <div id="pickmap"></div>
             </div>
 
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:16px;">
                 <div>
                     <label class="form-label">Sumber Dana</label>
                     <input type="text" name="sumber_dana" class="form-input" value="{{ old('sumber_dana', $distribusi->sumber_dana ?? '') }}" placeholder="YPKM - Hong Kong SWAB">
+                </div>
+                <div>
+                    <label class="form-label">Target Paket <span style="color:#dc2626;">*</span></label>
+                    <input type="number" name="jumlah_paket" class="form-input" min="1" required value="{{ old('jumlah_paket', $distribusi->jumlah_paket ?? '') }}" placeholder="500">
                 </div>
                 <div>
                     <label class="form-label">Status <span style="color:#dc2626;">*</span></label>
@@ -135,7 +139,6 @@
             </div>
 
             <input type="hidden" name="jenis_bantuan" value="Sembako">
-            <input type="hidden" name="jumlah_paket" value="{{ old('jumlah_paket', $distribusi->jumlah_paket ?? '') }}">
             <input type="hidden" name="estimasi_nilai_total" value="{{ old('estimasi_nilai_total', $distribusi->estimasi_nilai_total ?? 0) }}">
 
             <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid #e5e7eb;">
