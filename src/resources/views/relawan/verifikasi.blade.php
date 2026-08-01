@@ -21,6 +21,70 @@
     </div>
 </form>
 
+{{-- Filter Lanjutan --}}
+<details style="margin-bottom:16px;border:1px dashed #cbd5e1;border-radius:8px;padding:12px 16px;">
+    <summary style="font-size:13px;color:#00034a;cursor:pointer;">🔽 Filter Lanjutan</summary>
+    <form method="GET" style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
+        <input type="hidden" name="search" value="{{ request('search') }}">
+        <div style="display:flex;flex-direction:column;gap:4px;">
+            <label style="font-size:11px;color:#6b7280;">Status</label>
+            <select name="status" class="form-input" style="width:180px;font-size:13px;">
+                <option value="">Semua</option>
+                <option value="pending" {{ request('status')=='pending' ? 'selected' : '' }}>⏳ Menunggu Verifikasi</option>
+                <option value="terverifikasi" {{ request('status')=='terverifikasi' ? 'selected' : '' }}>📦 Terverifikasi</option>
+                <option value="ditolak" {{ request('status')=='ditolak' ? 'selected' : '' }}>❌ Ditolak</option>
+            </select>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+            <label style="font-size:11px;color:#6b7280;">Kabupaten</label>
+            <select name="kabupaten" id="f_kab_relawan" class="form-input" style="width:180px;font-size:13px;">
+                <option value="">Semua Kabupaten</option>
+                @foreach($filterKabupaten as $k)
+                <option value="{{ $k }}" {{ request('kabupaten') === $k ? 'selected' : '' }}>{{ $k }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+            <label style="font-size:11px;color:#6b7280;">Kecamatan</label>
+            <select name="kecamatan" id="f_kec_relawan" class="form-input" style="width:180px;font-size:13px;">
+                <option value="">Semua Kecamatan</option>
+                @foreach($filterKecamatan as $k)
+                <option value="{{ $k }}" {{ request('kecamatan') === $k ? 'selected' : '' }}>{{ $k }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+            <label style="font-size:11px;color:#6b7280;">Desa</label>
+            <select name="desa" id="f_desa_relawan" class="form-input" style="width:180px;font-size:13px;">
+                <option value="">Semua Desa</option>
+                @foreach($filterDesa as $d)
+                <option value="{{ $d }}" {{ request('desa') === $d ? 'selected' : '' }}>{{ $d }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+            <label style="font-size:11px;color:#6b7280;">Kelompok</label>
+            <select name="kelompok_id" class="form-input" style="width:200px;font-size:13px;">
+                <option value="">Semua Kelompok</option>
+                @foreach($filterKelompok as $k)
+                <option value="{{ $k->id }}" {{ request('kelompok_id') == $k->id ? 'selected' : '' }}>{{ $k->nama }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+            <label style="font-size:11px;color:#6b7280;">Sumber Data</label>
+            <select name="sumber_data" class="form-input" style="width:160px;font-size:13px;">
+                <option value="">Semua</option>
+                <option value="mandiri" {{ request('sumber_data')=='mandiri' ? 'selected' : '' }}>Mandiri</option>
+                <option value="relawan" {{ request('sumber_data')=='relawan' ? 'selected' : '' }}>Relawan</option>
+                <option value="ketua_kelompok" {{ request('sumber_data')=='ketua_kelompok' ? 'selected' : '' }}>Ketua Kelompok</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm">Terapkan</button>
+        <a href="{{ route('relawan.verifikasi') }}" class="btn btn-outline btn-sm" style="text-decoration:none;">Bersihkan</a>
+    </form>
+</details>
+
 {{-- Stats --}}
 <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
     <div style="flex:1;background:#fef7e6;border:1px solid #f0dcae;border-radius:10px;padding:16px;text-align:center;">

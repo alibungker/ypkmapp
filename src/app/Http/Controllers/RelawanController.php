@@ -28,6 +28,26 @@ class RelawanController extends Controller
             });
         }
 
+        // Filters
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('kabupaten')) {
+            $query->where('kabupaten', $request->kabupaten);
+        }
+        if ($request->filled('kecamatan')) {
+            $query->where('kecamatan', $request->kecamatan);
+        }
+        if ($request->filled('desa')) {
+            $query->where('desa', $request->desa);
+        }
+        if ($request->filled('kelompok_id')) {
+            $query->where('kelompok_id', $request->integer('kelompok_id'));
+        }
+        if ($request->filled('sumber_data')) {
+            $query->where('sumber_data', $request->sumber_data);
+        }
+
         $perPage = (int) $request->query('per_page', 30);
         $perPage = in_array($perPage, [30, 50, 100]) ? $perPage : 30;
 
@@ -43,11 +63,57 @@ class RelawanController extends Controller
         $terverifikasi = clone $query;
         $this->scopeWilayah($terverifikasi);
         $terverifikasi = $terverifikasi->where('status', 'terverifikasi')
+            ->where('terima_bantuan', false)
             ->orderBy('verified_at', 'desc')
             ->paginate($perPage, ['*'], 'verified_page')
             ->withQueryString();
 
-        return view('relawan.verifikasi', compact('pending', 'terverifikasi'));
+        // Filter options for relawan's wilayah
+        $filterKabupaten = \Illuminate\Support\Facades\DB::table('penerimas')
+            ->whereNotNull('kabupaten')
+            ->where('kabupaten', '!=', '-')
+            ->distinct()
+            ->orderBy('kabupaten')
+            ->pluck('kabupaten');
+
+        $filterKecamatan = collect();
+        $filterDesa = collect();
+        if ($request->filled('kabupaten')) {
+            $filterKecamatan = \Illuminate\Support\Facades\DB::table('penerimas')
+                ->where('kabupaten', $request->kabupaten)
+                ->whereNotNull('kecamatan')
+                ->where('kecamatan', '!=', '-')
+                ->distinct()
+                ->orderBy('kecamatan')
+                ->pluck('kecamatan');
+        }
+        if ($request->filled('kecamatan')) {
+            $filterDesa = \Illuminate\Support\Facades\DB::table('penerimas')
+                ->where('kabupaten', $request->kabupaten)
+                ->where('kecamatan', $request->kecamatan)
+                ->whereNotNull('desa')
+                ->where('desa', '!=', '-')
+                ->distinct()
+                ->orderBy('desa')
+                ->pluck('desa');
+        }
+
+        $filterKelompok = \App\Models\Kelompok::query();
+        $user = auth()->user();
+        if ($user->isKetuaKelompok()) {
+            $filterKelompok->whereKey($user->kelompok_id);
+        } elseif ($user->isRelawan()) {
+            if ($user->wilayah_kabupaten) $filterKelompok->where('daerah', $user->wilayah_kabupaten);
+            if ($user->wilayah_kecamatan) $filterKelompok->where('kecamatan', $user->wilayah_kecamatan);
+            if ($user->wilayah_desa) $filterKelompok->where('desa', $user->wilayah_desa);
+        }
+        $filterKelompok = $filterKelompok->orderBy('nama')->get();
+
+        return view('relawan.verifikasi', compact(
+            'pending', 'terverifikasi', 'perPage',
+            'filterKabupaten', 'filterKecamatan', 'filterDesa', 'filterKelompok',
+            'request'
+        ));
     }
 
     public function bulkVerify(Request $request)
