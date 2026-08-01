@@ -85,10 +85,16 @@ class BarangController extends Controller
             'kategori' => 'required',
             'target_paket' => 'nullable|integer',
             'satuan' => 'nullable',
-            'anggaran' => 'required|numeric',
-            'realisasi' => 'required|numeric',
             'catatan' => 'nullable',
         ]);
+
+        // Harga tetap bersumber dari pembelian dan alokasi barang kegiatan.
+        $totalOtomatis = (float) DB::table('kegiatan_barang as kb')
+            ->join('pembelian_barang as pb', 'pb.id', '=', 'kb.pembelian_barang_id')
+            ->where('kb.anggaran_id', $anggaran->id)
+            ->sum(DB::raw('kb.jumlah * pb.harga_satuan'));
+        $data['anggaran'] = $totalOtomatis;
+        $data['realisasi'] = $totalOtomatis;
         $anggaran->update($data);
         return redirect()->route('barang.index')->with('success', 'Kegiatan diupdate.');
     }

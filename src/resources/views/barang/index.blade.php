@@ -76,7 +76,7 @@
 
 {{-- Edit Modal Kegiatan --}}
 <div id="editModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:999;align-items:center;justify-content:center;" onclick="if(event.target===this)closeEdit()">
-    <div style="background:white;border-radius:12px;padding:24px;width:90%;max-width:500px;max-height:90vh;overflow-y:auto;" onclick="event.stopPropagation()">
+    <div style="background:white;border-radius:14px;padding:24px;width:min(900px,94vw);max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,3,74,.3);" onclick="event.stopPropagation()">
         <h3 style="font-size:16px;font-weight:600;margin-bottom:16px;">✏️ Edit</h3>
         <div id="editFormContainer"></div>
     </div>

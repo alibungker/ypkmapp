@@ -179,8 +179,18 @@ Route::middleware('auth')->group(function () {
         Route::get('barang', [\App\Http\Controllers\BarangController::class, 'index'])->name('barang.index');
         Route::post('barang/kegiatan', [\App\Http\Controllers\BarangController::class, 'storeKegiatan'])->name('barang.kegiatan.store');
         Route::get('barang/kegiatan/{anggaran}/edit', function (\App\Models\Anggaran $anggaran) {
-            $a = $anggaran;
-            return view('barang.edit-kegiatan', compact('a'));
+            $anggaran->load('barangItems');
+            $pembelian = \App\Models\PembelianBarang::orderBy('id')->get();
+            $keKegiatan = DB::table('kegiatan_barang')
+                ->selectRaw('pembelian_barang_id, SUM(jumlah) as total')
+                ->groupBy('pembelian_barang_id')->pluck('total', 'pembelian_barang_id');
+            $keDistribusi = DB::table('distribusi_pembelian_barang')
+                ->selectRaw('pembelian_barang_id, SUM(jumlah) as total')
+                ->groupBy('pembelian_barang_id')->pluck('total', 'pembelian_barang_id');
+            foreach ($pembelian as $item) {
+                $item->stok_tersedia = max(0, $item->qty_terbeli - (int)($keKegiatan[$item->id] ?? 0) - (int)($keDistribusi[$item->id] ?? 0));
+            }
+            return view('barang.edit-kegiatan', compact('anggaran', 'pembelian'));
         })->name('barang.kegiatan.edit');
         Route::put('barang/kegiatan/{anggaran}', [\App\Http\Controllers\BarangController::class, 'updateKegiatan'])->name('barang.kegiatan.update');
         Route::delete('barang/kegiatan/{anggaran}', [\App\Http\Controllers\BarangController::class, 'destroyKegiatan'])->name('barang.kegiatan.destroy');
