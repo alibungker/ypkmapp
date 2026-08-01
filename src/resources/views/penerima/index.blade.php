@@ -11,11 +11,13 @@
     <div class="card-body">
         <form method="GET" class="filter-grid" style="margin-bottom:16px;">
             <input type="text" name="search" placeholder="Cari NIK/nama..." value="{{ request('search') }}" class="form-input" style="width:170px;padding:8px 12px;font-size:13px;">
-            <select name="status" class="form-input" style="width:145px;padding:8px 12px;font-size:13px;">
-                <option value="">Semua status data</option>
-                <option value="pending" {{ request('status')=='pending' ? 'selected' : '' }}>Menunggu verifikasi</option>
-                <option value="terverifikasi" {{ request('status')=='terverifikasi' ? 'selected' : '' }}>Terverifikasi</option>
-                <option value="ditolak" {{ request('status')=='ditolak' ? 'selected' : '' }}>Ditolak</option>
+            <select name="status" class="form-input" style="width:170px;padding:8px 12px;font-size:13px;">
+                <option value="">Semua status</option>
+                <option value="pending" {{ request('status')=='pending' ? 'selected' : '' }}>⏳ Menunggu Verifikasi</option>
+                <option value="terverifikasi" {{ request('status')=='terverifikasi' ? 'selected' : '' }}>📦 Terverifikasi</option>
+                <option value="menunggu_bantuan" {{ request('status')=='menunggu_bantuan' ? 'selected' : '' }}>📦 Menunggu Bantuan</option>
+                <option value="menerima_bantuan" {{ request('status')=='menerima_bantuan' ? 'selected' : '' }}>✅ Menerima Bantuan</option>
+                <option value="ditolak" {{ request('status')=='ditolak' ? 'selected' : '' }}>❌ Ditolak</option>
             </select>
             <select name="kabupaten" id="f_kab" data-selected="{{ request('kabupaten') }}" class="form-input" style="width:170px;padding:8px 12px;font-size:13px;">
                 <option value="">Semua Kabupaten</option>
@@ -64,9 +66,10 @@
                         <td style="color:#6b7280;">{{ $p->kecamatan }}</td>
                         <td style="color:#6b7280;">{{ $p->desa }}</td>
                         <td>
-                            @if($p->status == 'terverifikasi') <span class="badge badge-green">✅ Terverifikasi</span>
-                            @elseif($p->status == 'pending') <span class="badge badge-gold">⏳ Pending</span>
-                            @else <span class="badge" style="background:#fce8e6;color:#dc2626;">❌ Ditolak</span>
+                            @if($p->status == 'ditolak') <span class="badge" style="background:#fce8e6;color:#dc2626;">❌ Ditolak</span>
+                            @elseif($p->status == 'pending') <span class="badge" style="background:#fef3c2;color:#92400e;">⏳ Menunggu Verifikasi</span>
+                            @elseif($p->terima_bantuan) <span class="badge badge-green">✅ Menerima Bantuan</span>
+                            @else <span class="badge" style="background:#dbeafe;color:#1e40af;">📦 Menunggu Bantuan</span>
                             @endif
                         </td>
                         <td>
@@ -98,9 +101,10 @@
                             {{ $p->kecamatan ?: '-' }} · {{ $p->desa ?: '-' }}
                         </div>
                     </div>
-                    @if($p->status == 'terverifikasi') <span class="badge badge-green">Terverifikasi</span>
-                    @elseif($p->status == 'pending') <span class="badge badge-gold">Menunggu</span>
-                    @else <span class="badge" style="background:#fce8e6;color:#dc2626;">Ditolak</span>
+                    @if($p->status == 'ditolak') <span class="badge" style="background:#fce8e6;color:#dc2626;">❌ Ditolak</span>
+                    @elseif($p->status == 'pending') <span class="badge" style="background:#fef3c2;color:#92400e;">⏳ Menunggu Verifikasi</span>
+                    @elseif($p->terima_bantuan) <span class="badge badge-green">✅ Menerima Bantuan</span>
+                    @else <span class="badge" style="background:#dbeafe;color:#1e40af;">📦 Menunggu Bantuan</span>
                     @endif
                 </div>
                 <div class="mobile-data-card__actions">

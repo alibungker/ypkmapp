@@ -55,7 +55,23 @@ class PenerimaController extends Controller
             });
         }
         if ($request->status) {
-            $query->where('status', $request->status);
+            switch ($request->status) {
+                case 'pending':
+                    $query->where('status', 'pending');
+                    break;
+                case 'ditolak':
+                    $query->where('status', 'ditolak');
+                    break;
+                case 'terverifikasi':
+                    $query->where('status', 'terverifikasi');
+                    break;
+                case 'menunggu_bantuan':
+                    $query->where('status', 'terverifikasi')->where('terima_bantuan', false);
+                    break;
+                case 'menerima_bantuan':
+                    $query->where('status', 'terverifikasi')->where('terima_bantuan', true);
+                    break;
+            }
         }
         if ($request->sumber_data) {
             $query->where('sumber_data', $request->sumber_data);
