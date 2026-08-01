@@ -18,15 +18,15 @@
 {{-- Stats --}}
 <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
     <div style="flex:1;background:#fef7e6;border:1px solid #f0dcae;border-radius:10px;padding:16px;text-align:center;">
-        <div style="font-size:24px;font-weight:800;color:#b07d14;">{{ $pending->count() }}</div>
+        <div style="font-size:24px;font-weight:800;color:#b07d14;">{{ $pending->total() }}</div>
         <div style="font-size:13px;color:#6b7280;">Menunggu Verifikasi</div>
     </div>
     <div style="flex:1;background:#e8f5ec;border:1px solid #c6e6d0;border-radius:10px;padding:16px;text-align:center;">
-        <div style="font-size:24px;font-weight:800;color:#017723;">{{ $terverifikasi->count() }}</div>
+        <div style="font-size:24px;font-weight:800;color:#017723;">{{ $terverifikasi->total() }}</div>
         <div style="font-size:13px;color:#6b7280;">Menunggu Checklist</div>
     </div>
     <div style="flex:1;background:#e8e8f0;border:1px solid #d0d0e0;border-radius:10px;padding:16px;text-align:center;">
-        <div style="font-size:24px;font-weight:800;color:#00034a;">{{ $pending->count() + $terverifikasi->count() }}</div>
+        <div style="font-size:24px;font-weight:800;color:#00034a;">{{ $pending->total() + $terverifikasi->total() }}</div>
         <div style="font-size:13px;color:#6b7280;">Total Perlu Diproses</div>
     </div>
 </div>
@@ -38,7 +38,7 @@
             <h3 style="font-size:15px;font-weight:600;">🔍 Verifikasi Penerima</h3>
             <p style="font-size:12px;color:#6b7280;margin-top:2px;">Data diajukan oleh Ketua Kelompok — pastikan data sesuai KTP</p>
         </div>
-        <span style="background:#fef7e6;color:#b07d14;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;">{{ $pending->count() }} menunggu</span>
+        <span style="background:#fef7e6;color:#b07d14;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;">{{ $pending->total() }} menunggu</span>
     </div>
     <div style="padding:16px 20px;overflow-x:auto;">
         @if($pending->isEmpty())
@@ -88,7 +88,7 @@
             <h3 style="font-size:15px;font-weight:600;">✅ Validasi Terima Bantuan</h3>
             <p style="font-size:12px;color:#6b7280;margin-top:2px;">Checklist penerima yang sudah menerima bantuan secara langsung</p>
         </div>
-        <span style="background:#e8f5ec;color:#017723;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;">{{ $terverifikasi->count() }} menunggu</span>
+        <span style="background:#e8f5ec;color:#017723;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;">{{ $terverifikasi->total() }} menunggu</span>
     </div>
     <div style="padding:16px 20px;overflow-x:auto;">
         @if($terverifikasi->isEmpty())
