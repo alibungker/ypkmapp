@@ -13,11 +13,16 @@ class BarangController extends Controller
     {
         $anggarans = Anggaran::orderBy('id')->get();
         $pembelian = PembelianBarang::orderBy('id')->get();
-        $tersalurkan = DB::table('kegiatan_barang')
+        $keKegiatan = DB::table('kegiatan_barang')
             ->selectRaw('pembelian_barang_id, SUM(jumlah) as total')
             ->groupBy('pembelian_barang_id')->pluck('total', 'pembelian_barang_id');
-        $pembelian->each(function ($item) use ($tersalurkan) {
-            $item->stok_tersedia = max(0, $item->qty_terbeli - (int) ($tersalurkan[$item->id] ?? 0));
+        $keDistribusi = DB::table('distribusi_pembelian_barang')
+            ->selectRaw('pembelian_barang_id, SUM(jumlah) as total')
+            ->groupBy('pembelian_barang_id')->pluck('total', 'pembelian_barang_id');
+        $pembelian->each(function ($item) use ($keKegiatan, $keDistribusi) {
+            $item->qty_kegiatan = (int) ($keKegiatan[$item->id] ?? 0);
+            $item->qty_distribusi = (int) ($keDistribusi[$item->id] ?? 0);
+            $item->stok_tersedia = max(0, $item->qty_terbeli - $item->qty_kegiatan - $item->qty_distribusi);
         });
         return view('barang.index', compact('anggarans', 'pembelian'));
     }

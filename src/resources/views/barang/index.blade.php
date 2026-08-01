@@ -57,11 +57,15 @@
         </div>
         <div style="padding:14px 18px;overflow-x:auto;">
             <table class="table-data">
-                <thead><tr><th>No</th><th>Nama Barang</th><th>Batch</th><th>Qty Renc</th><th>Qty Beli</th><th>Belum</th><th>Harga</th><th>Anggaran</th><th>Realisasi</th><th>Sisa</th><th>%</th><th></th></tr></thead>
+                <thead><tr><th>No</th><th>Nama Barang</th><th>Batch</th><th>Qty Renc</th><th>Qty Beli</th><th>Belum</th><th>Untuk Kegiatan</th><th>Untuk Distribusi</th><th>Sisa Stok</th><th>Harga</th><th>Anggaran</th><th>Realisasi</th><th>Sisa</th><th>%</th><th></th></tr></thead>
                 <tbody>
                     @forelse($pembelian as $i => $p)
-                    <tr><td>{{ $i+1 }}</td><td style="font-weight:500;font-size:13px;">{{ $p->nama_barang }}</td><td>{{ $p->batch ?? '-' }}</td><td>{{ number_format($p->qty_rencana) }}</td><td>{{ number_format($p->qty_terbeli) }}</td><td>{{ $p->qty_belum > 0 ? number_format($p->qty_belum) : '0' }}</td><td>{{ number_format($p->harga_satuan) }}</td><td>{{ number_format($p->anggaran) }}</td><td>{{ number_format($p->realisasi) }}</td><td>{{ number_format($p->sisa) }}</td><td>{{ $p->persen_real }}%</td><td style="white-space:nowrap;"><button onclick="editPembelian({{ $p->id }})" class="icon-action">✏️</button><form method="POST" action="{{ route('barang.pembelian.destroy', $p) }}" style="display:inline;" onsubmit="return confirm('Hapus?')">@csrf @method('DELETE')<button class="icon-action icon-action--danger">🗑️</button></form></td></tr>
-                    @empty<tr><td colspan="12" class="empty-row">Belum ada item barang</td></tr>@endforelse
+                    <tr><td>{{ $i+1 }}</td><td style="font-weight:500;font-size:13px;">{{ $p->nama_barang }}</td><td>{{ $p->batch ?? '-' }}</td><td>{{ number_format($p->qty_rencana) }}</td><td>{{ number_format($p->qty_terbeli) }}</td><td>{{ $p->qty_belum > 0 ? number_format($p->qty_belum) : '0' }}</td>
+                    <td style="color:#00034a;">{{ $p->qty_kegiatan > 0 ? number_format($p->qty_kegiatan) : '0' }}</td>
+                    <td style="color:#b07d14;">{{ $p->qty_distribusi > 0 ? number_format($p->qty_distribusi) : '0' }}</td>
+                    <td style="font-weight:700;color:{{ $p->stok_tersedia > 0 ? '#017723' : '#dc2626' }};">{{ number_format($p->stok_tersedia) }}</td>
+                    <td>{{ number_format($p->harga_satuan) }}</td><td>{{ number_format($p->anggaran) }}</td><td>{{ number_format($p->realisasi) }}</td><td>{{ number_format($p->sisa) }}</td><td>{{ $p->persen_real }}%</td><td style="white-space:nowrap;"><button onclick="editPembelian({{ $p->id }})" class="icon-action">✏️</button><form method="POST" action="{{ route('barang.pembelian.destroy', $p) }}" style="display:inline;" onsubmit="return confirm('Hapus?')">@csrf @method('DELETE')<button class="icon-action icon-action--danger">🗑️</button></form></td></tr>
+                    @empty<tr><td colspan="15" class="empty-row">Belum ada item barang</td></tr>@endforelse
                 </tbody>
             </table>
         </div>

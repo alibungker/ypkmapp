@@ -84,6 +84,17 @@
                 </div>
             </div>
 
+            <div style="margin-top:18px;padding:16px;border:1px solid #d6e4ff;border-radius:12px;background:#f8fbff;">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px;">
+                    <div>
+                        <div style="font-size:14px;font-weight:700;color:#00034a;">📦 Barang Keluar dari Pembelian</div>
+                        <div style="font-size:11px;color:#6b7280;margin-top:3px;">Pilih barang pembelian yang dipakai. Stok tersisa otomatis berkurang.</div>
+                    </div>
+                    <button type="button" id="addDistribusiBarang" class="btn btn-outline btn-sm">+ Tambah Barang</button>
+                </div>
+                <div id="distribusiBarangRows" style="display:grid;gap:9px;"></div>
+            </div>
+
             <div style="margin-top:16px;">
                 <label class="form-label">Catatan</label>
                 <textarea name="catatan" class="form-input" rows="3" maxlength="5000" placeholder="Catatan tambahan distribusi...">{{ old('catatan', $distribusi->catatan ?? '') }}</textarea>
@@ -178,5 +189,29 @@ selKelompok.addEventListener('change', function() {
     } else { infoKelompok.textContent = ''; }
 });
 if (selKelompok.value) selKelompok.dispatchEvent(new Event('change'));
+
+// Alokasi barang pembelian ke distribusi
+const purchaseItems = @json($pembelian->map(fn($p) => [
+    'id' => $p->id,
+    'label' => $p->nama_barang . ($p->batch ? ' — '.$p->batch : ''),
+    'stok' => $p->stok_tersedia,
+    'harga' => $p->harga_satuan,
+])->values());
+const purchaseRows = document.getElementById('distribusiBarangRows');
+let purchaseIndex = 0;
+function addPurchaseRow(selected = '', jumlah = '') {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:grid;grid-template-columns:minmax(0,1fr) 150px 44px;gap:8px;align-items:end;padding:10px;background:white;border:1px solid #e5e7eb;border-radius:10px;';
+    const options = purchaseItems.map(item => `<option value="${item.id}" data-stok="${item.stok}" ${String(item.id)===String(selected)?'selected':''}>${item.label} — stok ${item.stok}</option>`).join('');
+    row.innerHTML = `<div><label class="form-label">Barang Pembelian</label><select class="form-input purchase-select" name="pembelian_barang[${purchaseIndex}][pembelian_barang_id]" required><option value="">-- Pilih barang --</option>${options}</select></div><div><label class="form-label">Jumlah Keluar</label><input class="form-input purchase-qty" type="number" min="1" name="pembelian_barang[${purchaseIndex}][jumlah]" value="${jumlah}" required></div><button type="button" class="purchase-remove" style="width:44px;height:44px;border:1px solid #fecaca;border-radius:8px;background:white;color:#dc2626;cursor:pointer;">×</button>`;
+    purchaseRows.appendChild(row); purchaseIndex++;
+    const sel = row.querySelector('.purchase-select'), qty = row.querySelector('.purchase-qty');
+    const sync = () => { const stok = sel.selectedOptions[0]?.dataset.stok || ''; qty.max = stok; qty.title = stok ? `Stok tersedia ${stok}` : ''; };
+    sel.addEventListener('change', sync); sync();
+    row.querySelector('.purchase-remove').addEventListener('click', () => row.remove());
+}
+document.getElementById('addDistribusiBarang').addEventListener('click', () => addPurchaseRow());
+const existingPurchases = @json(old('pembelian_barang', isset($distribusi) ? $distribusi->pembelianBarang->map(fn($p) => ['pembelian_barang_id'=>$p->id,'jumlah'=>$p->pivot->jumlah])->values()->all() : []));
+existingPurchases.forEach(item => addPurchaseRow(item.pembelian_barang_id, item.jumlah));
 </script>
 @endsection

@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 use App\Models\Distribusi;
 use App\Models\Kelompok;
 use App\Models\BarangBantuan;
+use App\Models\PembelianBarang;
 use App\Models\BiayaOperasional;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -59,7 +61,15 @@ class DistribusiController extends Controller
     {
         $kelompoks = Kelompok::withCount('penerima')->with('ketuaUser')->get();
         $barang = BarangBantuan::all();
-        return view('distribusi.form', compact('kelompoks', 'barang'));
+        $pembelian = PembelianBarang::orderBy('nama_barang')->get()
+            ->each(function ($item) {
+                $untukKegiatan = (int) DB::table('kegiatan_barang')
+                    ->where('pembelian_barang_id', $item->id)->sum('jumlah');
+                $untukDistribusi = (int) DB::table('distribusi_pembelian_barang')
+                    ->where('pembelian_barang_id', $item->id)->sum('jumlah');
+                $item->stok_tersedia = max(0, $item->qty_terbeli - $untukKegiatan - $untukDistribusi);
+            });
+        return view('distribusi.form', compact('kelompoks', 'barang', 'pembelian'));
     }
 
     public function store(Request $request)
@@ -77,14 +87,17 @@ class DistribusiController extends Controller
         }
         $data['kode_distribusi'] = 'DST-' . now()->format('Ymd') . '-' . strtoupper(Str::random(4));
         $data['created_by'] = auth()->id();
+        $pembelianDistribusi = $data['pembelian_barang'] ?? [];
+        unset($data['pembelian_barang']);
 
         try {
-            DB::transaction(function () use ($data, $legacyUpload, $uploads, &$newPaths) {
+            DB::transaction(function () use ($data, $legacyUpload, $uploads, &$newPaths, $pembelianDistribusi) {
                 $distribusi = Distribusi::create($data);
                 if ($legacyUpload && $distribusi->bukti_file) {
                     $this->recordLampiran($distribusi, $legacyUpload, $distribusi->bukti_file);
                 }
                 $this->storeLampiran($distribusi, $uploads, $newPaths);
+                $this->syncStokDistribusi($distribusi, $pembelianDistribusi);
                 $this->syncPenerima($distribusi);
             });
         } catch (\Throwable $e) {
@@ -98,8 +111,19 @@ class DistribusiController extends Controller
     public function edit(Distribusi $distribusi)
     {
         $kelompoks = Kelompok::withCount('penerima')->with('ketuaUser')->get();
-        $distribusi->load('lampiran');
-        return view('distribusi.form', compact('distribusi', 'kelompoks'));
+        $distribusi->load('lampiran', 'pembelianBarang');
+        $pembelian = PembelianBarang::orderBy('nama_barang')->get()
+            ->each(function ($item) {
+                $untukKegiatan = (int) DB::table('kegiatan_barang')
+                    ->where('pembelian_barang_id', $item->id)->sum('jumlah');
+                $untukDistribusi = (int) DB::table('distribusi_pembelian_barang')
+                    ->where('pembelian_barang_id', $item->id)
+                    ->where('distribusi_id', '!=', $distribusi->id)
+                    ->sum('jumlah');
+                $item->stok_tersedia = max(0, $item->qty_terbeli - $untukKegiatan - $untukDistribusi);
+            });
+        $barang = BarangBantuan::all();
+        return view('distribusi.form', compact('distribusi', 'kelompoks', 'barang', 'pembelian'));
     }
 
     public function update(Request $request, Distribusi $distribusi)
@@ -109,6 +133,8 @@ class DistribusiController extends Controller
         $uploads = $data['lampiran'] ?? [];
         $deleteIds = $data['hapus_lampiran'] ?? [];
         unset($data['bukti_file'], $data['lampiran'], $data['hapus_lampiran']);
+        $pembelianDistribusi = $data['pembelian_barang'] ?? [];
+        unset($data['pembelian_barang']);
 
         $oldLegacyPath = $distribusi->bukti_file;
         $kelompokBerubah = (int) $distribusi->kelompok_id !== (int) $data['kelompok_id'];
@@ -121,7 +147,7 @@ class DistribusiController extends Controller
         $newPaths = [];
         $pathsToDelete = [];
         try {
-            DB::transaction(function () use ($distribusi, &$data, $legacyUpload, $oldLegacyPath, $uploads, $deleteIds, $kelompokBerubah, &$newPaths, &$pathsToDelete) {
+            DB::transaction(function () use ($distribusi, &$data, $legacyUpload, $oldLegacyPath, $uploads, $deleteIds, $kelompokBerubah, &$newPaths, &$pathsToDelete, $pembelianDistribusi) {
                 if ($legacyUpload) {
                     $legacyPath = $legacyUpload->store('distribusi/bukti', 'public');
                     $newPaths[] = $legacyPath;
@@ -147,6 +173,7 @@ class DistribusiController extends Controller
                     $this->recordLampiran($distribusi, $legacyUpload, $distribusi->bukti_file);
                 }
                 $this->storeLampiran($distribusi, $uploads, $newPaths);
+                $this->syncStokDistribusi($distribusi, $pembelianDistribusi);
                 if ($kelompokBerubah) {
                     $distribusi->penerimaDistribusi()->delete();
                     $this->syncPenerima($distribusi);
@@ -195,6 +222,29 @@ class DistribusiController extends Controller
         ]);
     }
 
+    private function syncStokDistribusi(Distribusi $distribusi, array $alokasi): void
+    {
+        $sync = [];
+        foreach ($alokasi as $baris) {
+            $barang = PembelianBarang::lockForUpdate()->findOrFail($baris['pembelian_barang_id']);
+            $untukKegiatan = (int) DB::table('kegiatan_barang')
+                ->where('pembelian_barang_id', $barang->id)->sum('jumlah');
+            $distribusiLain = (int) DB::table('distribusi_pembelian_barang')
+                ->where('pembelian_barang_id', $barang->id)
+                ->where('distribusi_id', '!=', $distribusi->id)
+                ->sum('jumlah');
+            $tersedia = max(0, $barang->qty_terbeli - $untukKegiatan - $distribusiLain);
+            $jumlah = (int) $baris['jumlah'];
+            if ($jumlah > $tersedia) {
+                throw ValidationException::withMessages([
+                    'pembelian_barang' => "Stok {$barang->nama_barang} hanya tersedia {$tersedia}.",
+                ]);
+            }
+            $sync[$barang->id] = ['jumlah' => $jumlah];
+        }
+        $distribusi->pembelianBarang()->sync($sync);
+    }
+
     private function syncPenerima(Distribusi $distribusi): void
     {
         $ids = Kelompok::findOrFail($distribusi->kelompok_id)
@@ -232,6 +282,9 @@ class DistribusiController extends Controller
             'hapus_lampiran' => 'nullable|array',
             'hapus_lampiran.*' => 'integer|distinct',
             'status' => 'required|in:direncanakan,berlangsung,selesai,dibatalkan',
+            'pembelian_barang' => 'nullable|array',
+            'pembelian_barang.*.pembelian_barang_id' => 'required_with:pembelian_barang|integer|distinct|exists:pembelian_barang,id',
+            'pembelian_barang.*.jumlah' => 'required_with:pembelian_barang|integer|min:1',
         ], [
             'titik_koordinat.regex' => 'Format koordinat harus latitude,longitude, contoh: 4.2991424,97.8653578.',
             'lampiran.max' => 'Maksimal 10 file dapat diunggah dalam satu kali penyimpanan.',
@@ -251,7 +304,7 @@ class DistribusiController extends Controller
         abort_unless($this->bolehLihat($distribusi), 403, 'Distribusi di luar wilayah atau penugasan Anda.');
         $distribusi->load([
             'kelompok' => fn ($q) => $q->withCount('penerima')->with('ketuaUser'),
-            'creator', 'penerimaDistribusi.penerima', 'items.barang', 'biayaOperasional', 'lampiran'
+            'creator', 'penerimaDistribusi.penerima', 'items.barang', 'biayaOperasional', 'lampiran', 'pembelianBarang'
         ]);
         return view('distribusi.show', compact('distribusi'));
     }

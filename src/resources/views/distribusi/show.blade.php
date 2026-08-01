@@ -56,7 +56,30 @@
                 <div style="margin-top:12px;"><a href="{{ Storage::url($distribusi->bukti_file) }}" target="_blank" rel="noopener">Lihat bukti lama</a></div>
             @endif
 
-            <div style="margin-top:16px;display:flex;gap:8px;">
+            @if($distribusi->pembelianBarang->isNotEmpty())
+            <div style="margin-top:16px;border-top:1px solid #e5e7eb;padding-top:16px;">
+                <div style="font-size:13px;font-weight:700;color:#00034a;margin-bottom:9px;">📦 Barang yang Dialokasikan</div>
+                <table class="table-data">
+                    <thead><tr><th>Nama Barang</th><th>Batch</th><th>Jumlah Keluar</th><th>Harga Satuan</th><th>Subtotal</th></tr></thead>
+                    <tbody>
+                    @php $totalNilai = 0; @endphp
+                    @foreach($distribusi->pembelianBarang as $pb)
+                        @php $sub = $pb->pivot->jumlah * $pb->harga_satuan; $totalNilai += $sub; @endphp
+                        <tr>
+                            <td style="font-weight:500;">{{ $pb->nama_barang }}</td>
+                            <td>{{ $pb->batch ?? '-' }}</td>
+                            <td style="font-weight:600;color:#b07d14;">{{ number_format($pb->pivot->jumlah) }}</td>
+                            <td>Rp {{ number_format($pb->harga_satuan,0,',','.') }}</td>
+                            <td style="font-weight:500;">Rp {{ number_format($sub,0,',','.') }}</td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                    <tfoot><tr><td colspan="4" style="font-weight:600;text-align:right;">Total Nilai</td><td style="font-weight:700;color:#017723;">Rp {{ number_format($totalNilai,0,',','.') }}</td></tr></tfoot>
+                </table>
+            </div>
+            @endif
+
+            @if(auth()->user()->isAdmin())
                 @if(auth()->user()->isAdmin())
                 <a href="{{ route('distribusi.edit', $distribusi) }}" class="btn btn-primary btn-sm">✏️ Edit</a>
                 @endif

@@ -46,6 +46,7 @@ class Distribusi extends Model
     public function items() { return $this->hasMany(DistribusiItem::class); }
     public function biayaOperasional() { return $this->hasMany(BiayaOperasional::class); }
     public function lampiran() { return $this->hasMany(DistribusiLampiran::class); }
+    public function pembelianBarang() { return $this->belongsToMany(PembelianBarang::class, 'distribusi_pembelian_barang')->withPivot('jumlah')->withTimestamps(); }
 }
 
 class DistribusiLampiran extends Model
