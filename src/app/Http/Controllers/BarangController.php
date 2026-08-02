@@ -48,7 +48,9 @@ class BarangController extends Controller
             // Distribusi diambil dari alokasi kegiatan.
             $item->sisa_kegiatan = max(0, $item->qty_kegiatan - $item->qty_distribusi);
             $item->stok_bebas = max(0, $item->qty_terbeli - $item->qty_kegiatan);
-            $item->stok_tersedia = $item->sisa_kegiatan;
+            // Stok untuk dialokasikan ke kegiatan berasal dari stok bebas.
+            // Barang baru yang belum pernah dialokasikan tetap harus tersedia.
+            $item->stok_tersedia = $item->stok_bebas;
         });
         return view('barang.index', compact('anggarans', 'pembelian', 'keKegiatan', 'keDistribusi', 'kategoriBarangs'));
     }

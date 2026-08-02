@@ -188,7 +188,9 @@ Route::middleware('auth')->group(function () {
                 ->selectRaw('pembelian_barang_id, SUM(jumlah) as total')
                 ->groupBy('pembelian_barang_id')->pluck('total', 'pembelian_barang_id');
             foreach ($pembelian as $item) {
-                $item->stok_tersedia = max(0, $item->qty_terbeli - (int)($keKegiatan[$item->id] ?? 0) - (int)($keDistribusi[$item->id] ?? 0));
+                // Distribusi mengambil stok yang sudah dialokasikan ke kegiatan,
+                // sehingga tidak boleh dikurangi lagi dari stok bebas.
+                $item->stok_tersedia = max(0, $item->qty_terbeli - (int)($keKegiatan[$item->id] ?? 0));
             }
             return view('barang.edit-kegiatan', compact('anggaran', 'pembelian'));
         })->name('barang.kegiatan.edit');
