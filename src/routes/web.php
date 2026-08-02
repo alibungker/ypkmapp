@@ -220,5 +220,11 @@ Route::middleware('auth')->group(function () {
         Route::get('laporan/export-csv', [LaporanController::class, 'exportCsv'])->name('laporan.export-csv');
 
         Route::get('crm', [CrmController::class, 'index'])->name('crm.index');
+        Route::get('crm/{type}/create', [CrmController::class, 'create'])->name('crm.create');
+        Route::post('crm/{type}', [CrmController::class, 'store'])->name('crm.store');
+        Route::get('crm/{type}/{id}/edit', [CrmController::class, 'edit'])->name('crm.edit')->whereNumber('id');
+        Route::put('crm/{type}/{id}', [CrmController::class, 'update'])->name('crm.update')->whereNumber('id');
+        Route::delete('crm/{type}/{id}', [CrmController::class, 'destroy'])->name('crm.destroy')->whereNumber('id');
+        Route::patch('crm/{type}/{id}', [CrmController::class, 'update'])->whereNumber('id');
     });
 });

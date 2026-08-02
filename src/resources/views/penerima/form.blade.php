@@ -65,6 +65,45 @@
                 </div>
             </div>
 
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
+                <div>
+                    <label class="form-label">Penghasilan Bulanan</label>
+                    <input type="number" name="penghasilan" min="0" class="form-input" value="{{ old('penghasilan', $penerima->penghasilan ?? 0) }}">
+                </div>
+                <div>
+                    <label class="form-label">Titik Koordinat</label>
+                    <input type="text" name="titik_koordinat" class="form-input" value="{{ old('titik_koordinat', $penerima->titik_koordinat ?? '') }}" placeholder="5.548290, 95.323753">
+                </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px;" class="mobile-stack">
+                <div>
+                    <label class="form-label">Kategori Kerentanan</label>
+                    <select name="kategori_kerentanan" class="form-input">
+                        <option value="">— Pilih —</option>
+                        @foreach(['lansia'=>'Lansia','yatim_piatu'=>'Yatim/Piatu','korban_bencana'=>'Korban Bencana','keluarga_miskin'=>'Keluarga Miskin'] as $v=>$l)
+                        <option value="{{ $v }}" @selected(old('kategori_kerentanan', $penerima->kategori_kerentanan ?? '')===$v)>{{ $l }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Tingkat Penghasilan</label>
+                    <select name="tingkat_penghasilan" class="form-input">
+                        @foreach(['rendah'=>'Rendah','menengah'=>'Menengah','tinggi'=>'Tinggi','tidak_ada'=>'Tidak Ada'] as $v=>$l)
+                        <option value="{{ $v }}" @selected(old('tingkat_penghasilan', $penerima->tingkat_penghasilan ?? 'rendah')===$v)>{{ $l }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Status Kelayakan</label>
+                    <select name="status_kelayakan" class="form-input">
+                        @foreach(['layak'=>'Layak','perlu_verifikasi'=>'Perlu Verifikasi','tidak_layak'=>'Tidak Layak'] as $v=>$l)
+                        <option value="{{ $v }}" @selected(old('status_kelayakan', $penerima->status_kelayakan ?? 'perlu_verifikasi')===$v)>{{ $l }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
             <div style="margin-top:16px;">
                 <label class="form-label">Alamat Lengkap <span style="color:#dc2626;">*</span></label>
                 <input type="text" name="alamat" class="form-input" required value="{{ old('alamat', $penerima->alamat ?? '') }}" placeholder="Jl. ... No. ...">

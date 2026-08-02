@@ -1,0 +1,25 @@
+@extends('layouts.app')
+@php $editing=isset($record); $title=['pengurus'=>'Pengurus & Staf','mitra'=>'Mitra & Donatur','relawan'=>'Relawan'][$type]; @endphp
+@section('title', ($editing?'Edit ':'Tambah ').$title)
+@section('content')
+<div class="card" style="max-width:820px"><div class="card-header"><h3>{{ $editing?'Edit':'Tambah' }} {{ $title }}</h3></div><div class="card-body">
+<form method="POST" action="{{ $editing?route('crm.update',[$type,$record->id]):route('crm.store',$type) }}">@csrf @if($editing) @method('PUT') @endif
+@if($errors->any())<div style="background:#fef2f2;color:#991b1b;padding:12px;border-radius:8px;margin-bottom:16px">{{ $errors->first() }}</div>@endif
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px" class="mobile-stack">
+@if($type==='pengurus')
+@foreach([['name','Nama Lengkap','text'],['nip','NIP','text'],['jabatan','Jabatan','text'],['email','Email','email'],['phone','Phone','text'],['password',$editing?'Password Baru (opsional)':'Password','password']] as $f)<div><label class="form-label">{{ $f[1] }}</label><input class="form-input" type="{{ $f[2] }}" name="{{ $f[0] }}" value="{{ $f[2]==='password'?'':old($f[0],$record->{$f[0]}??'') }}" {{ in_array($f[0],['name','jabatan','email'])||($f[0]==='password'&&!$editing)?'required':'' }}></div>@endforeach
+<div><label class="form-label">Role</label><select class="form-input" name="role" required>@foreach(['admin'=>'Admin','relawan'=>'Relawan'] as $v=>$l)<option value="{{ $v }}" @selected(old('role',$record->role??'')===$v)>{{ $l }}</option>@endforeach</select></div>
+<div><label class="form-label">Status</label><select class="form-input" name="status_aktif"><option value="1" @selected(old('status_aktif',$record->status_aktif??1)==1)>Aktif</option><option value="0" @selected(old('status_aktif',$record->status_aktif??1)==0)>Nonaktif</option></select></div>
+@elseif($type==='mitra')
+@foreach([['nama_instansi','Nama Instansi','text'],['pic_nama','Nama PIC','text'],['pic_email','Email PIC','email'],['pic_phone','Phone PIC','text'],['no_mou','Nomor MOU','text'],['total_kontribusi','Total Kontribusi','number']] as $f)<div><label class="form-label">{{ $f[1] }}</label><input class="form-input" type="{{ $f[2] }}" name="{{ $f[0] }}" value="{{ old($f[0],$record->{$f[0]}??'') }}" {{ in_array($f[0],['nama_instansi','total_kontribusi'])?'required':'' }}></div>@endforeach
+<div><label class="form-label">Kategori</label><select class="form-input" name="kategori" required>@foreach(['csr_perusahaan'=>'CSR Perusahaan','lembaga_donor'=>'Lembaga Donor','komunitas'=>'Komunitas','perorangan'=>'Perorangan'] as $v=>$l)<option value="{{ $v }}" @selected(old('kategori',$record->kategori??'')===$v)>{{ $l }}</option>@endforeach</select></div>
+<div><label class="form-label">Jenis Dukungan</label><select class="form-input" name="jenis_dukungan" required>@foreach(['finansial'=>'Finansial','barang'=>'Barang','jasa'=>'Jasa'] as $v=>$l)<option value="{{ $v }}" @selected(old('jenis_dukungan',$record->jenis_dukungan??'')===$v)>{{ $l }}</option>@endforeach</select></div>
+@else
+@foreach([['nama_lengkap','Nama Lengkap','text'],['nik','NIK 16 Digit','text'],['tempat_tanggal_lahir','Tempat, Tanggal Lahir','text'],['phone','Phone','text'],['email','Email','email'],['jam_kontribusi','Jam Kontribusi','number'],['domisili_kota','Domisili Kota','text']] as $f)<div><label class="form-label">{{ $f[1] }}</label><input class="form-input" type="{{ $f[2] }}" name="{{ $f[0] }}" value="{{ old($f[0],$record->{$f[0]}??'') }}" required @if($f[0]==='nik') maxlength="16" @endif></div>@endforeach
+<div><label class="form-label">Jenis Kelamin</label><select class="form-input" name="jenis_kelamin" required><option value="L" @selected(old('jenis_kelamin',$record->jenis_kelamin??'')==='L')>Laki-laki</option><option value="P" @selected(old('jenis_kelamin',$record->jenis_kelamin??'')==='P')>Perempuan</option></select></div>
+<div><label class="form-label">Keahlian Utama</label><select class="form-input" name="keahlian_utama" required>@foreach(['Medis','Logistik','SAR/Evakuasi','IT/Dokumentasi','Pengajar'] as $v)<option @selected(old('keahlian_utama',$record->keahlian_utama??'')===$v)>{{ $v }}</option>@endforeach</select></div>
+<div><label class="form-label">Ketersediaan</label><select class="form-input" name="status_ketersediaan" required>@foreach(['siap_tanggap_bencana'=>'Siap Tanggap Bencana','akhir_pekan'=>'Akhir Pekan','nonaktif'=>'Nonaktif'] as $v=>$l)<option value="{{ $v }}" @selected(old('status_ketersediaan',$record->status_ketersediaan??'')===$v)>{{ $l }}</option>@endforeach</select></div>
+@endif
+</div><div style="display:flex;justify-content:flex-end;gap:10px;margin-top:22px"><a class="btn btn-outline" href="{{ route('crm.index',['tab'=>$type]) }}">Batal</a><button class="btn btn-primary" type="submit">Simpan</button></div></form>
+</div></div>
+@endsection

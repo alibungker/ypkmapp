@@ -135,6 +135,11 @@ class PenerimaController extends Controller
             'phone' => 'required',
             'pekerjaan' => 'nullable',
             'jumlah_keluarga' => 'nullable|integer',
+            'penghasilan' => 'nullable|numeric',
+            'titik_koordinat' => 'nullable',
+            'kategori_kerentanan' => 'nullable|in:lansia,yatim_piatu,korban_bencana,keluarga_miskin',
+            'tingkat_penghasilan' => 'nullable|in:rendah,menengah,tinggi,tidak_ada',
+            'status_kelayakan' => 'nullable|in:layak,perlu_verifikasi,tidak_layak',
             'kelompok_id' => 'required|exists:kelompoks,id',
             'sumber_data' => 'required|in:mandiri,relawan,ketua_kelompok',
         ]);
@@ -206,6 +211,11 @@ class PenerimaController extends Controller
             'phone' => 'required',
             'pekerjaan' => 'nullable',
             'jumlah_keluarga' => 'nullable|integer',
+            'penghasilan' => 'nullable|numeric',
+            'titik_koordinat' => 'nullable',
+            'kategori_kerentanan' => 'nullable|in:lansia,yatim_piatu,korban_bencana,keluarga_miskin',
+            'tingkat_penghasilan' => 'nullable|in:rendah,menengah,tinggi,tidak_ada',
+            'status_kelayakan' => 'nullable|in:layak,perlu_verifikasi,tidak_layak',
             'kelompok_id' => 'required|exists:kelompoks,id',
             'sumber_data' => 'nullable|in:mandiri,relawan,ketua_kelompok',
         ]);
