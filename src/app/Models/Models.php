@@ -11,6 +11,7 @@ class Penerima extends Model
         'phone', 'jumlah_keluarga', 'pekerjaan', 'penghasilan', 'titik_koordinat',
         'foto_ktp', 'foto_kk', 'foto_rumah', 'sumber_data', 'status',
         'catatan_verifikasi', 'verified_by', 'verified_at', 'kelompok_id',
+        'kategori_kerentanan', 'tingkat_penghasilan', 'status_kelayakan',
         'terima_bantuan', 'terima_by', 'terima_at'
     ];
 
@@ -92,7 +93,11 @@ class PenerimaDistribusi extends Model
 
 class Relawan extends Model
 {
-    protected $fillable = ['user_id', 'daerah_tugas', 'keahlian', 'status'];
+    protected $fillable = [
+        'user_id', 'nama_lengkap', 'nik', 'tempat_tanggal_lahir', 'jenis_kelamin',
+        'phone', 'email', 'keahlian_utama', 'daerah_tugas', 'keahlian', 'status',
+        'status_ketersediaan', 'jam_kontribusi', 'domisili_kota'
+    ];
     public function user() { return $this->belongsTo(User::class); }
 }
 

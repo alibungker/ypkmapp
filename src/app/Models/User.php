@@ -10,7 +10,8 @@ class User extends Authenticatable
 
     protected $fillable = ['name', 'email', 'password', 'role', 'kelompok_id', 'phone', 'foto', 'is_active',
         'wilayah_kabupaten', 'wilayah_kecamatan', 'wilayah_desa',
-        'nik', 'tempat_lahir', 'tanggal_lahir', 'jenis_kelamin', 'alamat_lengkap'];
+        'nik', 'nip', 'jabatan', 'status_aktif',
+        'tempat_lahir', 'tanggal_lahir', 'jenis_kelamin', 'alamat_lengkap'];
     protected $hidden = ['password', 'remember_token'];
 
     public function isAdmin(): bool { return $this->role === 'admin'; }
