@@ -33,7 +33,7 @@ class UserController extends Controller
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:6',
-            'role' => 'required|in:admin,relawan,ketua_kelompok',
+            'role' => 'required|in:super_admin,pengurus,bendahara,staff,staff_keuangan,relawan,ketua_kelompok',
             'kelompok_id' => 'nullable|exists:kelompoks,id',
             'phone' => 'nullable',
             'tempat_lahir' => 'nullable',
@@ -76,7 +76,7 @@ class UserController extends Controller
             'name' => 'required',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'password' => 'nullable|min:6',
-            'role' => 'required|in:admin,relawan,ketua_kelompok',
+            'role' => 'required|in:super_admin,pengurus,bendahara,staff,staff_keuangan,relawan,ketua_kelompok',
             'kelompok_id' => 'nullable|exists:kelompoks,id',
             'phone' => 'nullable',
             'tempat_lahir' => 'nullable',
@@ -124,5 +124,32 @@ class UserController extends Controller
         }
         $user->delete();
         return redirect()->route('users.index')->with('success', 'User dihapus.');
+    }
+
+    public function profile()
+    {
+        $user = auth()->user();
+        return view('users.profile', compact('user'));
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = auth()->user();
+        $data = $request->validate([
+            'name' => 'required|max:150',
+            'phone' => 'nullable|max:20',
+            'nip' => 'nullable|max:20',
+            'tempat_lahir' => 'nullable|max:100',
+            'tanggal_lahir' => 'nullable|date',
+            'jenis_kelamin' => 'nullable|in:L,P',
+            'alamat_lengkap' => 'nullable|max:500',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'password' => 'nullable|min:6',
+        ]);
+        if (empty($data['password'])) unset($data['password']);
+        else $data['password'] = Hash::make($data['password']);
+        if ($request->hasFile('foto')) $data['foto'] = $request->file('foto')->store('users/foto', 'public');
+        $user->update($data);
+        return back()->with('success', 'Profil diperbarui.');
     }
 }

@@ -8,35 +8,55 @@ class User extends Authenticatable
 {
     use Notifiable;
 
-    protected $fillable = ['name', 'email', 'password', 'role', 'kelompok_id', 'phone', 'foto', 'is_active',
-        'wilayah_kabupaten', 'wilayah_kecamatan', 'wilayah_desa',
-        'nik', 'nip', 'jabatan', 'status_aktif',
-        'tempat_lahir', 'tanggal_lahir', 'jenis_kelamin', 'alamat_lengkap'];
-    protected $hidden = ['password', 'remember_token'];
+    protected $fillable = ['name','email','password','role','kelompok_id','phone','foto','is_active','wilayah_kabupaten','wilayah_kecamatan','wilayah_desa','nik','nip','jabatan','status_aktif','tempat_lahir','tanggal_lahir','jenis_kelamin','alamat_lengkap'];
+    protected $hidden = ['password','remember_token'];
 
-    public function isAdmin(): bool { return $this->role === 'admin'; }
+    public function isSuperAdmin(): bool { return $this->role === 'super_admin'; }
+    public function isAdmin(): bool { return in_array($this->role, ['super_admin','pengurus']); }
+    public function isBendahara(): bool { return $this->role === 'bendahara'; }
+    public function isStaffKeuangan(): bool { return $this->role === 'staff_keuangan'; }
+    public function isStaff(): bool { return in_array($this->role, ['staff','staff_keuangan']); }
     public function isRelawan(): bool { return $this->role === 'relawan'; }
     public function isKetuaKelompok(): bool { return $this->role === 'ketua_kelompok'; }
+    public function isPengurus(): bool { return in_array($this->role, ['super_admin','pengurus']); }
+    public function canTopUp(): bool { return in_array($this->role, ['super_admin','pengurus','bendahara']); }
+    public function canApproveTopUp(): bool { return in_array($this->role, ['super_admin','pengurus']); }
+    public function canManageUser(): bool { return $this->role === 'super_admin'; }
+    public function canFinalizeLaporan(): bool { return in_array($this->role, ['super_admin','pengurus']); }
+    public function canCreateLaporan(): bool { return in_array($this->role, ['super_admin','pengurus','bendahara','staff_keuangan']); }
+    public function canViewKeuangan(): bool { return in_array($this->role, ['super_admin','pengurus','bendahara','staff_keuangan']); }
+    public function canEditKeuangan(): bool { return in_array($this->role, ['super_admin','pengurus','bendahara']); }
+    public function canDeleteKeuangan(): bool { return $this->role === 'super_admin'; }
+
+    public function hasPermission(string $permission): bool
+    {
+        return match ($permission) {
+            'anggaran.topup' => $this->canTopUp(),
+            'anggaran.topup.approve' => $this->canApproveTopUp(),
+            'user.manage' => $this->canManageUser(),
+            'laporan.finalize' => $this->canFinalizeLaporan(),
+            'laporan.create' => $this->canCreateLaporan(),
+            'keuangan.view' => $this->canViewKeuangan(),
+            'keuangan.edit' => $this->canEditKeuangan(),
+            'keuangan.delete' => $this->canDeleteKeuangan(),
+            'profile.update-own' => true,
+            default => false,
+        };
+    }
+
     public function kelompok() { return $this->belongsTo(Kelompok::class); }
 
-    // Label wilayah kerja user (utk tampilan)
     public function wilayahLabel(): string
     {
         if ($this->wilayah_desa) return "Desa {$this->wilayah_desa}, Kec. {$this->wilayah_kecamatan}, {$this->wilayah_kabupaten}";
         if ($this->wilayah_kecamatan) return "Kec. {$this->wilayah_kecamatan}, {$this->wilayah_kabupaten}";
-        if ($this->wilayah_kabupaten) return $this->wilayah_kabupaten;
-        return 'Semua Wilayah';
+        return $this->wilayah_kabupaten ?: 'Semua Wilayah';
     }
 
-    // Scope query penerima sesuai kunci wilayah user
     public function scopePenerima($query)
     {
         if ($this->isAdmin()) return $query;
-        if ($this->isKetuaKelompok()) {
-            return $this->kelompok_id
-                ? $query->where('kelompok_id', $this->kelompok_id)
-                : $query->whereRaw('1 = 0');
-        }
+        if ($this->isKetuaKelompok()) return $this->kelompok_id ? $query->where('kelompok_id', $this->kelompok_id) : $query->whereRaw('1 = 0');
         if ($this->wilayah_kabupaten) $query->where('kabupaten', $this->wilayah_kabupaten);
         if ($this->wilayah_kecamatan) $query->where('kecamatan', $this->wilayah_kecamatan);
         if ($this->wilayah_desa) $query->where('desa', $this->wilayah_desa);

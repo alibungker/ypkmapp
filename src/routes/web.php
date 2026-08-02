@@ -206,19 +206,30 @@ Route::middleware('auth')->group(function () {
         Route::put('barang/pembelian/{pembelian}', [\App\Http\Controllers\BarangController::class, 'updatePembelian'])->name('barang.pembelian.update');
         Route::delete('barang/pembelian/{pembelian}', [\App\Http\Controllers\BarangController::class, 'destroyPembelian'])->name('barang.pembelian.destroy');
 
-        Route::prefix('keuangan')->name('keuangan.')->group(function () {
-            Route::get('/', [KeuanganController::class, 'index'])->name('index');
-            Route::post('dana', [KeuanganController::class, 'storeDana'])->name('dana.store');
-            Route::post('dana/{id}/update', [KeuanganController::class, 'updateDana'])->name('dana.update');
-            Route::post('dana/{id}/delete', [KeuanganController::class, 'destroyDana'])->name('dana.delete');
-            Route::post('biaya', [KeuanganController::class, 'storeBiaya'])->name('biaya.store');
-            Route::post('anggaran', [KeuanganController::class, 'storeAnggaran'])->name('anggaran.store');
-            Route::get('rekap', [KeuanganController::class, 'rekap'])->name('rekap');
+    }); // akhir AdminOnly operasional
+
+    Route::prefix('keuangan')->name('keuangan.')->middleware(\App\Http\Middleware\FinanceAccess::class)->group(function () {
+            Route::get('/', [KeuanganController::class, 'index'])->name('index')->middleware(\App\Http\Middleware\FinanceAccess::class);
+            Route::post('dana', [KeuanganController::class, 'storeDana'])->name('dana.store')->middleware(\App\Http\Middleware\FinanceAccess::class);
+            Route::post('dana/{id}/update', [KeuanganController::class, 'updateDana'])->name('dana.update')->middleware(\App\Http\Middleware\FinanceAccess::class);
+            Route::post('dana/{id}/delete', [KeuanganController::class, 'destroyDana'])->name('dana.delete')->middleware(\App\Http\Middleware\FinanceAccess::class);
+            Route::post('biaya', [KeuanganController::class, 'storeBiaya'])->name('biaya.store')->middleware(\App\Http\Middleware\FinanceAccess::class);
+            Route::post('anggaran', [KeuanganController::class, 'storeAnggaran'])->name('anggaran.store')->middleware(\App\Http\Middleware\FinanceAccess::class);
+            Route::get('rekap', [KeuanganController::class, 'rekap'])->name('rekap')->middleware(\App\Http\Middleware\FinanceAccess::class);
+            Route::get('topup', [KeuanganController::class, 'topupIndex'])->name('topup.index')->middleware(\App\Http\Middleware\FinanceAccess::class);
+            Route::post('topup', [KeuanganController::class, 'topupStore'])->name('topup.store')->middleware(\App\Http\Middleware\FinanceAccess::class);
+            Route::post('topup/{topup}/approve', [KeuanganController::class, 'topupApprove'])->name('topup.approve')->middleware(\App\Http\Middleware\AdminOnly::class);
+            Route::post('topup/{topup}/reject', [KeuanganController::class, 'topupReject'])->name('topup.reject')->middleware(\App\Http\Middleware\AdminOnly::class);
         });
 
-        Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index');
-        Route::get('laporan/export-csv', [LaporanController::class, 'exportCsv'])->name('laporan.export-csv');
+        // Profil mandiri (semua role)
+        Route::get('profil', [UserController::class, 'profile'])->name('users.profile');
+        Route::put('profil', [UserController::class, 'updateProfile'])->name('users.profile.update');
 
+        Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index')->middleware(\App\Http\Middleware\FinanceAccess::class);
+        Route::get('laporan/export-csv', [LaporanController::class, 'exportCsv'])->name('laporan.export-csv')->middleware(\App\Http\Middleware\FinanceAccess::class);
+
+    Route::middleware(\App\Http\Middleware\AdminOnly::class)->group(function () {
         Route::get('crm', [CrmController::class, 'index'])->name('crm.index');
         Route::get('crm/{type}/create', [CrmController::class, 'create'])->name('crm.create');
         Route::post('crm/{type}', [CrmController::class, 'store'])->name('crm.store');

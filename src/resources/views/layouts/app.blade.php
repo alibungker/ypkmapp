@@ -71,18 +71,23 @@
         <a href="{{ route('kelompok.index') }}" class="nav-item {{ request()->routeIs('kelompok*') ? 'active' : '' }}" @if(request()->routeIs('kelompok*')) aria-current="page" @endif><x-icon name="group"/><span>Kelompok</span></a>
         <a href="{{ route('distribusi.index') }}" class="nav-item {{ request()->routeIs('distribusi*') ? 'active' : '' }}" @if(request()->routeIs('distribusi*')) aria-current="page" @endif><x-icon name="truck"/><span>Distribusi</span></a>
         <a href="{{ route('peta.index') }}" class="nav-item {{ request()->routeIs('peta*') ? 'active' : '' }}" @if(request()->routeIs('peta*')) aria-current="page" @endif><x-icon name="map"/><span>Peta</span></a>
-        @if(auth()->check() && auth()->user()->isAdmin())
+        @if(auth()->check() && auth()->user()->isSuperAdmin())
         <div style="margin:14px 8px 5px;font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;">Administrasi</div>
         <a href="{{ route('barang.index') }}" class="nav-item {{ request()->routeIs('barang*') ? 'active' : '' }}"><x-icon name="box"/><span>Barang & Kegiatan</span></a>
-        <a href="{{ route('users.index') }}" class="nav-item {{ request()->routeIs('users*') ? 'active' : '' }}"><x-icon name="users"/><span>Pengguna</span></a>
+        <a href="{{ route('users.index') }}" class="nav-item {{ request()->routeIs('users.index') ? 'active' : '' }}"><x-icon name="users"/><span>Pengguna</span></a>
         <a href="{{ route('crm.index') }}" class="nav-item {{ request()->routeIs('crm*') ? 'active' : '' }}"><x-icon name="group"/><span>CRM Yayasan</span></a>
-        <a href="{{ route('keuangan.index') }}" class="nav-item {{ request()->routeIs('keuangan*') ? 'active' : '' }}"><x-icon name="wallet"/><span>Keuangan</span></a>
+        @endif
+        @if(auth()->check() && auth()->user()->canViewKeuangan())
+        <div style="margin:14px 8px 5px;font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;">Keuangan</div>
+        <a href="{{ route('keuangan.index') }}" class="nav-item {{ request()->routeIs('keuangan.index') ? 'active' : '' }}"><x-icon name="wallet"/><span>Keuangan</span></a>
+        <a href="{{ route('keuangan.topup.index') }}" class="nav-item {{ request()->routeIs('keuangan.topup*') ? 'active' : '' }}"><x-icon name="wallet"/><span>Top-up Anggaran</span></a>
         <a href="{{ route('laporan.index') }}" class="nav-item {{ request()->routeIs('laporan*') ? 'active' : '' }}"><x-icon name="report"/><span>Laporan</span></a>
         @endif
+        <a href="{{ route('users.profile') }}" class="nav-item {{ request()->routeIs('users.profile*') ? 'active' : '' }}"><x-icon name="users"/><span>Profil Saya</span></a>
         @endif
     </nav>
     <div style="position:absolute;bottom:0;left:0;right:0;padding:16px;border-top:1px solid rgba(255,255,255,.08);background:var(--navy);">
-        @auth<div style="padding:0 8px 10px;display:flex;align-items:center;gap:8px;"><div style="width:30px;height:30px;background:rgba(255,255,255,.1);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;color:white;">{{ strtoupper(substr(auth()->user()->name,0,1)) }}</div><div style="min-width:0;"><div style="font-size:13px;color:white;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ auth()->user()->name }}</div><div style="font-size:11px;color:var(--gold);">{{ ['admin'=>'Admin','relawan'=>'Relawan','ketua_kelompok'=>'Ketua Kelompok'][auth()->user()->role] ?? auth()->user()->role }}</div></div></div>@endauth
+        @auth<div style="padding:0 8px 10px;display:flex;align-items:center;gap:8px;"><div style="width:30px;height:30px;background:rgba(255,255,255,.1);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;color:white;">{{ strtoupper(substr(auth()->user()->name,0,1)) }}</div><div style="min-width:0;"><div style="font-size:13px;color:white;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ auth()->user()->name }}</div><div style="font-size:11px;color:var(--gold);">{{ ['super_admin'=>'Super Admin','admin'=>'Admin','pengurus'=>'Pengurus','bendahara'=>'Bendahara','staff'=>'Staff','staff_keuangan'=>'Staf Keuangan','relawan'=>'Relawan','ketua_kelompok'=>'Ketua Kelompok'][auth()->user()->role] ?? auth()->user()->role }}</div></div></div>@endauth
         <form method="POST" action="{{ route('logout') }}">@csrf<button class="flex items-center gap-3 text-white/60 hover:text-white w-full" style="padding:8px;border-radius:8px;font-size:14px;" type="submit"><x-icon name="logout"/><span>Keluar</span></button></form>
     </div>
 </aside>

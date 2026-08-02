@@ -129,4 +129,55 @@ class KeuanganController extends Controller
         $total = $biaya->sum('jumlah');
         return response()->json(compact('distribusi', 'biaya', 'total'));
     }
+
+    public function topupIndex()
+    {
+        $topups = \DB::table('topup_anggarans')->orderByDesc('created_at')->get();
+        $anggarans = Anggaran::orderBy('kategori')->get();
+        return view('keuangan.topup', compact('topups', 'anggarans'));
+    }
+
+    public function topupStore(Request $request)
+    {
+        abort_unless(auth()->user()->canTopUp(), 403, 'Tidak dapat mengajukan top-up.');
+        $data = $request->validate([
+            'anggaran_id' => 'nullable|exists:anggarans,id',
+            'nominal' => 'required|numeric|min:1',
+            'tanggal' => 'required|date',
+            'sumber_dana' => 'nullable|max:150',
+            'nomor_referensi' => 'nullable|max:100',
+            'keterangan' => 'nullable|max:500',
+        ]);
+        $data['diajukan_oleh'] = auth()->id();
+        $data['status'] = 'diajukan';
+        \DB::table('topup_anggarans')->insert($data + ['created_at' => now(), 'updated_at' => now()]);
+        \DB::table('audit_logs')->insert(['user_id' => auth()->id(), 'aksi' => 'topup.create', 'model' => 'TopupAnggaran', 'detail' => json_encode($data), 'ip' => $request->ip(), 'created_at' => now(), 'updated_at' => now()]);
+        return back()->with('success', 'Pengajuan top-up anggaran dibuat.');
+    }
+
+    public function topupApprove(Request $request, $id)
+    {
+        abort_unless(auth()->user()->canApproveTopUp(), 403, 'Tidak dapat menyetujui top-up.');
+        $topup = \DB::table('topup_anggarans')->where('id', $id)->where('status', 'diajukan')->first();
+        abort_unless($topup, 404, 'Pengajuan tidak ditemukan.');
+        $oldAnggaran = $topup->anggaran_id ? Anggaran::find($topup->anggaran_id)->anggaran ?? 0 : 0;
+        \DB::transaction(function () use ($topup, $id) {
+            \DB::table('topup_anggarans')->where('id', $id)->update(['status' => 'disetujui', 'disetujui_oleh' => auth()->id(), 'updated_at' => now()]);
+            if ($topup->anggaran_id) {
+                Anggaran::where('id', $topup->anggaran_id)->increment('anggaran', $topup->nominal);
+            }
+            \DB::table('dana_donaturs')->insert(['donatur' => $topup->sumber_dana ?: 'Top-up Anggaran', 'tanggal_masuk' => $topup->tanggal, 'jumlah' => $topup->nominal, 'jenis' => 'transfer', 'keterangan' => 'Top-up: ' . $topup->keterangan, 'dicatat_oleh' => auth()->id(), 'created_at' => now(), 'updated_at' => now()]);
+        });
+        \DB::table('audit_logs')->insert(['user_id' => auth()->id(), 'aksi' => 'topup.approve', 'model' => 'TopupAnggaran', 'model_id' => $id, 'detail' => json_encode(['nominal' => $topup->nominal, 'old_anggaran' => $oldAnggaran, 'new_anggaran' => $oldAnggaran + $topup->nominal]), 'ip' => $request->ip(), 'created_at' => now(), 'updated_at' => now()]);
+        return back()->with('success', 'Top-up disetujui. Anggaran dan dana masuk diperbarui.');
+    }
+
+    public function topupReject(Request $request, $id)
+    {
+        abort_unless(auth()->user()->canApproveTopUp(), 403, 'Tidak dapat menolak top-up.');
+        $data = $request->validate(['alasan_penolakan' => 'required|max:500']);
+        \DB::table('topup_anggarans')->where('id', $id)->where('status', 'diajukan')->update(['status' => 'ditolak', 'alasan_penolakan' => $data['alasan_penolakan'], 'updated_at' => now()]);
+        \DB::table('audit_logs')->insert(['user_id' => auth()->id(), 'aksi' => 'topup.reject', 'model' => 'TopupAnggaran', 'model_id' => $id, 'detail' => $data['alasan_penolakan'], 'ip' => $request->ip(), 'created_at' => now(), 'updated_at' => now()]);
+        return back()->with('success', 'Pengajuan top-up ditolak.');
+    }
 }
