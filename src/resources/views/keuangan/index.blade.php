@@ -125,6 +125,51 @@
     </div>
 </div>
 
+{{-- Rekap Biaya per Batch --}}
+<div class="card" style="margin-top:20px;">
+    <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;">
+        <div><h3 style="font-size:15px;font-weight:600;">📦 Rekap Biaya per Batch / Kegiatan</h3>
+        <p style="font-size:12px;color:#6b7280;">Total biaya operasional dikelompokkan per batch untuk memudahkan kontrol anggaran.</p></div>
+    </div>
+    <div style="padding:16px 20px;overflow-x:auto;">
+        <table class="table-data">
+            <thead><tr><th>Batch / Kegiatan</th><th>Jumlah Transaksi</th><th style="text-align:right;">Total Biaya</th><th style="text-align:right;">% dari Total</th></tr></thead>
+            <tbody>
+                @forelse($biayaBatch ?? [] as $b)
+                <tr>
+                    <td style="font-weight:600;color:#00034a;">{{ $b->batch }}</td>
+                    <td>{{ $b->jumlah_transaksi }}</td>
+                    <td style="text-align:right;font-weight:700;">Rp {{ number_format($b->total,0,',','.') }}</td>
+                    <td style="text-align:right;">{{ $total_biaya > 0 ? round($b->total/$total_biaya*100,1) : 0 }}%</td>
+                </tr>
+                @empty<tr><td colspan="4" class="transaction-empty">Belum ada biaya operasional tercatat.</td></tr>@endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{{-- Riwayat Biaya Operasional --}}
+<div class="card transaction-history" style="margin-top:20px;">
+    <div class="transaction-history__header"><div><span class="finance-kicker">AUDIT PENGELUARAN</span><h3>Riwayat Biaya Operasional</h3><p>{{ count($biaya ?? []) }} transaksi terbaru</p></div></div>
+    <div class="transaction-table-wrap desktop-transactions"><table class="transaction-table"><thead><tr><th>Tanggal</th><th>Kategori</th><th>Batch</th><th>Pihak Penerima</th><th>Deskripsi</th><th class="amount-col">Jumlah</th></tr></thead><tbody>
+    @forelse($biaya ?? [] as $b)
+    <tr>
+        <td class="date-cell">{{ is_object($b->tanggal) ? $b->tanggal->format('d M Y') : date('d M Y', strtotime($b->tanggal)) }}</td>
+        <td><span class="transaction-type">{{ ucfirst(str_replace('_',' ',$b->kategori)) }}</span></td>
+        <td style="font-size:12px;">{{ $b->batch_kegiatan ?? '-' }}</td>
+        <td>{{ $b->pihak_penerima ?? '-' }}</td>
+        <td class="description-cell">{{ $b->deskripsi }}</td>
+        <td class="amount-cell">Rp {{ number_format($b->jumlah,0,',','.') }}</td>
+    </tr>
+    @empty<tr><td colspan="6" class="transaction-empty">Belum ada biaya operasional.</td></tr>@endforelse
+    </tbody></table></div>
+    <div class="mobile-transactions">
+    @forelse($biaya ?? [] as $b)
+    <article class="transaction-card"><div class="transaction-card__top"><div><h4>{{ $b->deskripsi }}</h4><time>{{ is_object($b->tanggal) ? $b->tanggal->format('d M Y') : date('d M Y', strtotime($b->tanggal)) }} • {{ $b->batch_kegiatan ?? '-' }}</time></div><strong>Rp {{ number_format($b->jumlah,0,',','.') }}</strong></div><div class="transaction-card__meta"><span class="transaction-type">{{ ucfirst(str_replace('_',' ',$b->kategori)) }}</span><p>{{ $b->pihak_penerima ?? 'Tanpa pihak' }}</p></div></article>
+    @empty<div class="transaction-empty">Belum ada biaya operasional.</div>@endforelse
+    </div>
+</div>
+
 {{-- Riwayat Dana Masuk --}}
 <div class="card transaction-history">
     <div class="transaction-history__header"><div><span class="finance-kicker">AUDIT DANA MASUK</span><h3>Riwayat Transaksi</h3><p>{{ count($dana_masuk ?? []) }} transaksi tercatat</p></div></div>

@@ -76,6 +76,8 @@ class DashboardController extends Controller
                     DB::table('kegiatan_barang')->selectRaw('pembelian_barang_id, SUM(jumlah) as total')->groupBy('pembelian_barang_id'),
                     'k', 'k.pembelian_barang_id', '=', 'pb.id'
                 )->havingRaw('sisa <= 0')->get()->count();
+            $stats['biaya_batch'] = BiayaOperasional::selectRaw('COALESCE(batch_kegiatan, "-") as batch, SUM(jumlah) as total, COUNT(*) as count')
+                ->groupBy('batch')->orderByDesc('total')->take(6)->get();
 
             $distribusiTerbaru = Distribusi::with('kelompok')->orderBy('tanggal', 'desc')->take(5)->get();
 

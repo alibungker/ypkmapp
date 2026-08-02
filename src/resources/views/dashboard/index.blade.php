@@ -70,11 +70,12 @@
 @php
   $realisasiPaket = $stats['total_paket_target'] > 0 ? min(100, round($stats['total_paket_terkirim'] / $stats['total_paket_target'] * 100)) : 0;
   $realisasiPenerima = $stats['penerima'] > 0 ? min(100, round($stats['penerima_diterima'] / $stats['penerima'] * 100)) : 0;
+  $batch = $stats['biaya_batch'] ?? collect();
 @endphp
 <div class="card" style="margin-bottom:24px;overflow:hidden;">
   <div style="background:#00034a;color:white;padding:20px 22px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;">
     <div>
-      <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#d6b665;font-weight:700;">Dampak Program</div>
+      <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#d6b665;font-weight:700;">DAMPAK PROGRAM</div>
       <div style="font-size:21px;font-weight:750;margin-top:5px;">Jangkauan bantuan YPKM</div>
       <div style="font-size:13px;color:rgba(255,255,255,.68);margin-top:4px;">Ringkasan cakupan wilayah dan realisasi penyaluran</div>
     </div>
@@ -105,6 +106,22 @@
     </div>
   </div>
 </div>
+@if($batch->isNotEmpty())
+<div class="card" style="margin-bottom:24px;overflow:hidden;">
+  <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;"><h3 style="font-size:14px;font-weight:600;">📦 Biaya Operasional per Batch</h3><p style="font-size:11px;color:#6b7280;">Distribusi biaya terkini per kegiatan/batch.</p></div>
+  <div style="padding:12px 20px;">
+    <table class="table-data" style="font-size:13px;">
+      <thead><tr><th>Batch</th><th style="text-align:right;"># Transaksi</th><th style="text-align:right;">Total Biaya</th><th style="text-align:right;">% dari Total</th></tr></thead>
+      <tbody>
+        @foreach($batch as $b)
+        <tr><td style="font-weight:600;">{{ $b->batch }}</td><td style="text-align:right;">{{ $b->count }}</td><td style="text-align:right;">Rp {{ number_format($b->total,0,',','.') }}</td>
+          <td style="text-align:right;">{{ $stats['total_biaya'] > 0 ? round($b->total/$stats['total_biaya']*100,1) : 0 }}%</td></tr>
+        @endforeach
+      </tbody>
+    </table>
+  </div>
+</div>
+@endif
 @endif
 
 {{-- Two columns --}}
