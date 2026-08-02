@@ -55,18 +55,52 @@
             <div><span class="section-kicker">PENGADAAN BARANG</span><h3>Daftar Pembelian Barang</h3></div>
             <button type="button" class="btn btn-primary" data-open-modal="createPembelianModal">+ Pembelian Barang</button>
         </div>
+        <form method="GET" action="{{ route('barang.index') }}" style="padding:14px 18px;border-bottom:1px solid #e5e7eb;background:#f9fafb;">
+            <input type="hidden" name="tab" value="pembelian">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;">
+                <select name="kategori" class="form-input" style="padding:6px 10px;height:36px;">
+                    <option value="">Semua Kategori</option>
+                    @foreach($kategoriBarangs as $kat)<option value="{{ $kat->id }}" @selected(request('kategori') == $kat->id)>{{ $kat->nama }}</option>@endforeach
+                </select>
+                <select name="jenis" class="form-input" style="padding:6px 10px;height:36px;">
+                    <option value="">Semua Peruntukan</option><option value="bantuan" @selected(request('jenis') === 'bantuan')>Bantuan</option><option value="operasional" @selected(request('jenis') === 'operasional')>Operasional</option><option value="aset" @selected(request('jenis') === 'aset')>Aset</option>
+                </select>
+                <select name="status" class="form-input" style="padding:6px 10px;height:36px;">
+                    <option value="">Semua Status</option><option value="rencana" @selected(request('status') === 'rencana')>Rencana</option><option value="dipesan" @selected(request('status') === 'dipesan')>Dipesan</option><option value="diterima" @selected(request('status') === 'diterima')>Diterima</option><option value="batal" @selected(request('status') === 'batal')>Batal</option>
+                </select>
+                <input type="text" name="q" placeholder="Cari barang, supplier, invoice..." class="form-input" style="padding:6px 10px;height:36px;" value="{{ request('q') }}">
+            </div>
+            <div style="margin-top:10px;text-align:right;"><button type="submit" class="btn btn-sm" style="padding:6px 14px;">Terapkan</button> <a href="{{ route('barang.index', ['tab' => 'pembelian']) }}" class="btn btn-sm btn-outline">Reset</a></div>
+        </form>
         <div style="padding:14px 18px;overflow-x:auto;">
             <table class="table-data">
-                <thead><tr><th>No</th><th>Nama Barang</th><th>Batch</th><th>Qty Renc</th><th>Qty Beli</th><th>Belum</th><th>Alokasi Kegiatan</th><th>Didistribusikan</th><th>Sisa Kegiatan</th><th>Stok Bebas</th><th>Harga</th><th>Anggaran</th><th>Realisasi</th><th>Sisa</th><th>%</th><th></th></tr></thead>
+                <thead><tr><th>No</th><th>Kategori</th><th>Peruntukan</th><th>Nama Barang</th><th>Batch</th><th>Qty Renc</th><th>Qty Beli</th><th>Belum</th><th>Satuan</th><th>Harga</th><th>Anggaran</th><th>Realisasi</th><th>Alokasi</th><th>Distribusi</th><th>Stok Bebas</th><th>Supplier</th><th>Invoice</th><th>Tanggal</th><th>Status</th><th>Bukti</th><th></th></tr></thead>
                 <tbody>
                     @forelse($pembelian as $i => $p)
-                    <tr><td>{{ $i+1 }}</td><td style="font-weight:500;font-size:13px;">{{ $p->nama_barang }}</td><td>{{ $p->batch ?? '-' }}</td><td>{{ number_format($p->qty_rencana) }}</td><td>{{ number_format($p->qty_terbeli) }}</td><td>{{ $p->qty_belum > 0 ? number_format($p->qty_belum) : '0' }}</td>
-                    <td style="color:#00034a;">{{ $p->qty_kegiatan > 0 ? number_format($p->qty_kegiatan) : '0' }}</td>
-                    <td style="color:#b07d14;">{{ $p->qty_distribusi > 0 ? number_format($p->qty_distribusi) : '0' }}</td>
-                    <td style="font-weight:700;color:{{ $p->sisa_kegiatan > 0 ? '#017723' : '#dc2626' }};">{{ number_format($p->sisa_kegiatan) }}</td>
-                    <td style="font-weight:600;">{{ number_format($p->stok_bebas) }}</td>
-                    <td>{{ number_format($p->harga_satuan) }}</td><td>{{ number_format($p->anggaran) }}</td><td>{{ number_format($p->realisasi) }}</td><td>{{ number_format($p->sisa) }}</td><td>{{ $p->persen_real }}%</td><td style="white-space:nowrap;"><button onclick="editPembelian({{ $p->id }})" class="icon-action">✏️</button><form method="POST" action="{{ route('barang.pembelian.destroy', $p) }}" style="display:inline;" onsubmit="return confirm('Hapus?')">@csrf @method('DELETE')<button class="icon-action icon-action--danger">🗑️</button></form></td></tr>
-                    @empty<tr><td colspan="16" class="empty-row">Belum ada item barang</td></tr>@endforelse
+                    <tr>
+                        <td>{{ $i+1 }}</td>
+                        <td>{{ $p->kategori->nama ?? '-' }}</td>
+                        <td style="font-size:12px;">{{ ucfirst($p->jenis_peruntukan ?? 'bantuan') }}</td>
+                        <td style="font-weight:500;font-size:13px;">{{ $p->nama_barang }}</td>
+                        <td>{{ $p->batch ?? '-' }}</td>
+                        <td>{{ number_format($p->qty_rencana) }}</td>
+                        <td>{{ number_format($p->qty_terbeli) }}</td>
+                        <td>{{ $p->qty_belum > 0 ? number_format($p->qty_belum) : '0' }}</td>
+                        <td>{{ $p->satuan ?? '-' }}</td>
+                        <td>{{ number_format($p->harga_satuan) }}</td>
+                        <td>{{ number_format($p->anggaran) }}</td>
+                        <td>{{ number_format($p->realisasi) }}</td>
+                        <td style="color:#00034a;">{{ $p->qty_kegiatan > 0 ? number_format($p->qty_kegiatan) : '0' }}</td>
+                        <td style="color:#b07d14;">{{ $p->qty_distribusi > 0 ? number_format($p->qty_distribusi) : '0' }}</td>
+                        <td style="font-weight:600;">{{ number_format($p->stok_bebas) }}</td>
+                        <td>{{ $p->supplier ?? '-' }}</td>
+                        <td>{{ $p->nomor_invoice ?? '-' }}</td>
+                        <td>{{ is_object($p->tanggal_pembelian) ? $p->tanggal_pembelian->format('d M Y') : ($p->tanggal_pembelian ?? '-') }}</td>
+                        <td style="font-weight:600;">{{ ucfirst($p->status ?? 'diterima') }}</td>
+                        <td>@if($p->bukti_pembelian)<a href="{{ asset('storage/'.$p->bukti_pembelian) }}" target="_blank" style="color:#00034a;">📎</a>@else-@endif</td>
+                        <td style="white-space:nowrap;"><button onclick="editPembelian({{ $p->id }})" class="icon-action">✏️</button><form method="POST" action="{{ route('barang.pembelian.destroy', $p) }}" style="display:inline;" onsubmit="return confirm('Hapus?')">@csrf @method('DELETE')<button class="icon-action icon-action--danger">🗑️</button></form></td>
+                    </tr>
+                    @empty<tr><td colspan="21" class="empty-row">Belum ada item barang</td></tr>@endforelse
                 </tbody>
             </table>
         </div>
@@ -140,6 +174,18 @@ function bindPurchaseCalculator(form) {
     ['harga_satuan', 'qty_rencana', 'qty_terbeli'].forEach(name => form.elements[name]?.addEventListener('input', () => calculatePurchaseTotals(form)));
     calculatePurchaseTotals(form);
 }
+
+// Auto-set jenis_peruntukan ketika kategori dipilih
+document.addEventListener('change', function (e) {
+    if (e.target.matches('#kategoriBarangCreate, #kategoriBarangEdit')) {
+        const sel = e.target;
+        const jenisId = sel.id === 'kategoriBarangCreate' ? 'jenisPeruntukanCreate' : 'jenisPeruntukanEdit';
+        const jenis = document.getElementById(jenisId);
+        if (jenis && sel.selectedOptions[0]?.dataset.jenis) {
+            jenis.value = sel.selectedOptions[0].dataset.jenis;
+        }
+    }
+});
 document.querySelectorAll('form[action$="/barang/pembelian"], form[data-purchase-calculator]').forEach(bindPurchaseCalculator);
 
 const availableItems = {!! json_encode($pembelian->map(function ($item) {

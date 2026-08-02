@@ -2,17 +2,40 @@
 namespace App\Http\Controllers;
 
 use App\Models\Anggaran;
+use App\Models\KategoriBarang;
 use App\Models\PembelianBarang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class BarangController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $anggarans = Anggaran::orderBy('id')->get();
-        $pembelian = PembelianBarang::orderBy('id')->get();
+        $kategoriBarangs = KategoriBarang::aktif()->get();
+
+        $pembelianQuery = PembelianBarang::with('kategori')->orderBy('id');
+        if ($request->filled('kategori')) {
+            $pembelianQuery->where('kategori_barang_id', $request->integer('kategori'));
+        }
+        if ($request->filled('jenis')) {
+            $pembelianQuery->where('jenis_peruntukan', $request->string('jenis'));
+        }
+        if ($request->filled('status')) {
+            $pembelianQuery->where('status', $request->string('status'));
+        }
+        if ($request->filled('q')) {
+            $search = trim((string) $request->input('q'));
+            $pembelianQuery->where(function ($query) use ($search) {
+                $query->where('nama_barang', 'like', "%{$search}%")
+                    ->orWhere('supplier', 'like', "%{$search}%")
+                    ->orWhere('nomor_invoice', 'like', "%{$search}%")
+                    ->orWhere('batch', 'like', "%{$search}%");
+            });
+        }
+        $pembelian = $pembelianQuery->get();
         $keKegiatan = DB::table('kegiatan_barang')
             ->selectRaw('pembelian_barang_id, SUM(jumlah) as total')
             ->groupBy('pembelian_barang_id')->pluck('total', 'pembelian_barang_id');
@@ -27,7 +50,7 @@ class BarangController extends Controller
             $item->stok_bebas = max(0, $item->qty_terbeli - $item->qty_kegiatan);
             $item->stok_tersedia = $item->sisa_kegiatan;
         });
-        return view('barang.index', compact('anggarans', 'pembelian', 'keKegiatan', 'keDistribusi'));
+        return view('barang.index', compact('anggarans', 'pembelian', 'keKegiatan', 'keDistribusi', 'kategoriBarangs'));
     }
 
     // === KEGIATAN ===
@@ -111,14 +134,34 @@ class BarangController extends Controller
     {
         $data = $request->validate([
             'nama_barang' => 'required',
+            'kategori_barang_id' => 'nullable|integer|exists:kategori_barangs,id',
+            'jenis_peruntukan' => 'nullable|in:bantuan,operasional,aset',
+            'satuan' => 'nullable|max:50',
             'batch' => 'nullable',
             'qty_rencana' => 'required|integer',
             'qty_terbeli' => 'nullable|integer',
             'harga_satuan' => 'required|numeric|min:0',
             'anggaran' => 'nullable|numeric|min:0',
             'realisasi' => 'nullable|numeric|min:0',
+            'tanggal_pembelian' => 'nullable|date',
+            'supplier' => 'nullable|max:255',
+            'nomor_invoice' => 'nullable|max:255',
+            'metode_pembayaran' => 'nullable|in:tunai,transfer,lainnya',
+            'status' => 'nullable|in:rencana,dipesan,diterima,batal',
+            'catatan' => 'nullable',
+            'bukti_pembelian' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
         $data['qty_terbeli'] = $data['qty_terbeli'] ?? 0;
+        if (!empty($data['kategori_barang_id'])) {
+            $default = KategoriBarang::whereKey($data['kategori_barang_id'])->value('jenis_default');
+            if (!empty($default)) {
+                $data['jenis_peruntukan'] = $data['jenis_peruntukan'] ?? $default;
+            }
+        }
+        $data['status'] = $data['status'] ?? 'diterima';
+        if ($request->hasFile('bukti_pembelian')) {
+            $data['bukti_pembelian'] = $request->file('bukti_pembelian')->store('bukti-pembelian', 'public');
+        }
         $data = $this->hitungPembelian($data);
         PembelianBarang::create($data);
         return redirect()->route('barang.index', ['tab' => 'pembelian'])->with('success', 'Item barang berhasil ditambahkan.');
@@ -128,13 +171,36 @@ class BarangController extends Controller
     {
         $data = $request->validate([
             'nama_barang' => 'required',
+            'kategori_barang_id' => 'nullable|integer|exists:kategori_barangs,id',
+            'jenis_peruntukan' => 'nullable|in:bantuan,operasional,aset',
+            'satuan' => 'nullable|max:50',
             'batch' => 'nullable',
             'qty_rencana' => 'required|integer',
             'qty_terbeli' => 'required|integer',
             'harga_satuan' => 'required|numeric|min:0',
             'anggaran' => 'nullable|numeric|min:0',
             'realisasi' => 'nullable|numeric|min:0',
+            'tanggal_pembelian' => 'nullable|date',
+            'supplier' => 'nullable|max:255',
+            'nomor_invoice' => 'nullable|max:255',
+            'metode_pembayaran' => 'nullable|in:tunai,transfer,lainnya',
+            'status' => 'nullable|in:rencana,dipesan,diterima,batal',
+            'catatan' => 'nullable',
+            'bukti_pembelian' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
+        if (!empty($data['kategori_barang_id'])) {
+            $default = KategoriBarang::whereKey($data['kategori_barang_id'])->value('jenis_default');
+            if (!empty($default)) {
+                $data['jenis_peruntukan'] = $data['jenis_peruntukan'] ?? $default;
+            }
+        }
+        $data['status'] = $data['status'] ?? 'diterima';
+        if ($request->hasFile('bukti_pembelian')) {
+            if ($pembelian->bukti_pembelian) {
+                Storage::disk('public')->delete($pembelian->bukti_pembelian);
+            }
+            $data['bukti_pembelian'] = $request->file('bukti_pembelian')->store('bukti-pembelian', 'public');
+        }
         $data = $this->hitungPembelian($data);
         $pembelian->update($data);
         return redirect()->route('barang.index', ['tab' => 'pembelian'])->with('success', 'Item barang diupdate.');

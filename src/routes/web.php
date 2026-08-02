@@ -197,7 +197,8 @@ Route::middleware('auth')->group(function () {
         Route::post('barang/pembelian', [\App\Http\Controllers\BarangController::class, 'storePembelian'])->name('barang.pembelian.store');
         Route::get('barang/pembelian/{pembelian}/edit', function (\App\Models\PembelianBarang $pembelian) {
             $p = $pembelian;
-            return view('barang.edit-pembelian', compact('p'));
+            $kategoriBarangs = \App\Models\KategoriBarang::aktif()->get();
+            return view('barang.edit-pembelian', compact('p', 'kategoriBarangs'));
         })->name('barang.pembelian.edit');
         Route::put('barang/pembelian/{pembelian}', [\App\Http\Controllers\BarangController::class, 'updatePembelian'])->name('barang.pembelian.update');
         Route::delete('barang/pembelian/{pembelian}', [\App\Http\Controllers\BarangController::class, 'destroyPembelian'])->name('barang.pembelian.destroy');
