@@ -9,6 +9,10 @@
 .legend{display:flex;gap:18px;margin-top:12px;flex-wrap:wrap}
 .legend-item{display:flex;align-items:center;gap:7px;font-size:13px;color:#4b5563}
 .legend-dot{width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.custom-marker{background:transparent!important;border:0!important;filter:drop-shadow(0 3px 4px rgba(0,3,74,.32));transition:transform .2s ease,filter .2s ease}
+.custom-marker:hover{transform:translateY(-3px) scale(1.12);filter:drop-shadow(0 6px 7px rgba(0,3,74,.38));z-index:1000!important}
+.custom-marker svg{display:block}
+@media(prefers-reduced-motion:reduce){.custom-marker{transition:none}.custom-marker:hover{transform:none}}
 .peta-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr);gap:20px}
 @media(max-width:900px){.peta-grid{grid-template-columns:1fr}#map{height:55dvh;min-height:360px}.legend{gap:10px 14px}}
 @media(max-width:480px){#map{min-height:340px}.leaflet-control-zoom a{width:36px!important;height:36px!important;line-height:36px!important}}
@@ -97,6 +101,45 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:18, a
 const data = @json($distribusi->values());
 const polygons = @json($polygons);
 const colors = {selesai:'#017723',berlangsung:'#e5a820',direncanakan:'#00034a',dibatalkan:'#dc2626'};
+
+const markerIcons = {
+    selesai: L.divIcon({
+        className: 'custom-marker',
+        html: `<svg width="28" height="36" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="${colors.selesai}"/><circle cx="12" cy="9.5" r="2.5" fill="white"/></svg>`,
+        iconSize: [28, 36],
+        iconAnchor: [14, 36],
+        popupAnchor: [0, -30]
+    }),
+    berlangsung: L.divIcon({
+        className: 'custom-marker',
+        html: `<svg width="28" height="36" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="${colors.berlangsung}"/><circle cx="12" cy="9.5" r="2.5" fill="white"/></svg>`,
+        iconSize: [28, 36],
+        iconAnchor: [14, 36],
+        popupAnchor: [0, -30]
+    }),
+    direncanakan: L.divIcon({
+        className: 'custom-marker',
+        html: `<svg width="28" height="36" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="${colors.direncanakan}"/><circle cx="12" cy="9.5" r="2.5" fill="white"/></svg>`,
+        iconSize: [28, 36],
+        iconAnchor: [14, 36],
+        popupAnchor: [0, -30]
+    }),
+    dibatalkan: L.divIcon({
+        className: 'custom-marker',
+        html: `<svg width="28" height="36" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="${colors.dibatalkan}"/><path d="M12 7.5v5M12 14.5v.01" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>`,
+        iconSize: [28, 36],
+        iconAnchor: [14, 36],
+        popupAnchor: [0, -30]
+    }),
+    default: L.divIcon({
+        className: 'custom-marker',
+        html: `<svg width="28" height="36" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#6b7280"/><circle cx="12" cy="9.5" r="2.5" fill="white"/></svg>`,
+        iconSize: [28, 36],
+        iconAnchor: [14, 36],
+        popupAnchor: [0, -30]
+    })
+};
+
 const layers = [];
 
 polygons.forEach(p => {
@@ -108,7 +151,7 @@ polygons.forEach(p => {
 
 data.forEach(d => {
     if (!Number.isFinite(d.lat) || !Number.isFinite(d.lng) || (!d.lat && !d.lng)) return;
-    const marker = L.circleMarker([d.lat,d.lng], {radius:9,color:'#fff',weight:2,fillColor:colors[d.status] || '#00034a',fillOpacity:1}).addTo(map);
+    const marker = L.marker([d.lat,d.lng], {icon: markerIcons[d.status] || markerIcons.default}).addTo(map);
     marker.bindPopup(`<div style="min-width:230px"><div style="font-size:15px;font-weight:700;color:#00034a;margin-bottom:8px">${d.name}</div><div style="font-size:13px;line-height:1.65"><b>Wilayah:</b> ${d.daerah} · ${d.kecamatan} · ${d.desa}<br><b>Lokasi:</b> ${d.lokasi}<br><b>Paket:</b> ${Number(d.paket).toLocaleString('id-ID')}<br><b>Nilai:</b> ${d.nilai}<br><b>Target:</b> ${Number(d.penerima).toLocaleString('id-ID')} penerima<br><b>Kelompok:</b> ${d.kelompok}<br><b>Ketua:</b> ${d.ketua}<br><b>Tanggal:</b> ${d.tgl}</div><a href="${d.url}" style="display:inline-block;margin-top:9px;color:#017723;font-weight:700">Lihat detail →</a></div>`);
     layers.push(marker);
 });
