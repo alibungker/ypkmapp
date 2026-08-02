@@ -17,7 +17,9 @@ class KeuanganController extends Controller
         $total_masuk = DanaDonatur::sum('jumlah');
         $total_biaya = BiayaOperasional::sum('jumlah');
         $total_bantuan = Distribusi::sum('estimasi_nilai_total');
-        $sisa = $total_masuk - $total_biaya - $total_bantuan;
+        // Nilai bantuan sudah termasuk dalam biaya operasional (belanja paket),
+        // sehingga tidak dikurangkan lagi dari sisa dana.
+        $sisa = $total_masuk - $total_biaya;
 
         $dana_masuk = DanaDonatur::with('pencatat')->orderBy('tanggal_masuk', 'desc')->get();
         $biaya = BiayaOperasional::with('distribusi', 'pencatat')->orderBy('tanggal', 'desc')->take(50)->get();

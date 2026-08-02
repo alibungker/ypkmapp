@@ -62,6 +62,7 @@ class DashboardController extends Controller
             $stats['total_nilai_bantuan'] = Distribusi::sum('estimasi_nilai_total');
             $stats['total_paket_target'] = Distribusi::sum('jumlah_paket');
             $stats['total_paket_terkirim'] = Distribusi::where('status', 'selesai')->sum('jumlah_paket');
+            $stats['sisa_dana'] = $stats['total_dana_masuk'] - $stats['total_biaya'];
             $stats['penerima_belum_terima'] = Penerima::where('terima_bantuan', false)->count();
             $stats['distribusi_rencana'] = Distribusi::where('status', 'direncanakan')->count();
             $stats['kabupaten_terjangkau'] = Penerima::whereNotNull('kabupaten')->distinct()->count('kabupaten');
