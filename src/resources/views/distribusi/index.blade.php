@@ -10,7 +10,7 @@
             <div style="width:40px;height:40px;background:#e8f5ec;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#017723;font-size:20px;">👥</div>
             <span style="font-size:13px;color:#6b7280;">Kelompok</span>
         </div>
-        <div class="stat-value" style="color:#017723;">{{ number_format($stats['kelompok']) }}</div>
+        <div class="stat-value" style="font-size:18px;color:#017723;">{{ number_format($stats['kelompok']) }}</div>
         <div style="font-size:12px;color:#6b7280;margin-top:4px;">Kelompok penerima distribusi</div>
     </div>
     <div class="stat-card">
@@ -18,7 +18,7 @@
             <div style="width:40px;height:40px;background:#e8e8f0;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#00034a;font-size:20px;">📍</div>
             <span style="font-size:13px;color:#6b7280;">Titik Distribusi</span>
         </div>
-        <div class="stat-value">{{ number_format($stats['titik']) }}</div>
+        <div class="stat-value" style="font-size:18px;">{{ number_format($stats['titik']) }}</div>
         <div style="font-size:12px;color:#6b7280;margin-top:4px;">Total lokasi distribusi</div>
     </div>
     <div class="stat-card">
@@ -26,7 +26,7 @@
             <div style="width:40px;height:40px;background:#fef7e6;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#b07d14;font-size:20px;">📦</div>
             <span style="font-size:13px;color:#6b7280;">Paket</span>
         </div>
-        <div class="stat-value" style="color:#b07d14;">{{ number_format($stats['paket']) }}</div>
+        <div class="stat-value" style="font-size:18px;color:#b07d14;">{{ number_format($stats['paket']) }}</div>
         <div style="font-size:12px;color:#6b7280;margin-top:4px;">Total paket distribusi</div>
     </div>
     <div class="stat-card">
@@ -34,7 +34,7 @@
             <div style="width:40px;height:40px;background:#fef2f2;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#b42318;font-size:20px;">💰</div>
             <span style="font-size:13px;color:#6b7280;">Anggaran</span>
         </div>
-        <div class="stat-value">Rp {{ number_format($stats['anggaran'],0,',','.') }}</div>
+        <div class="stat-value" style="font-size:18px;">Rp {{ number_format($stats['anggaran'],0,',','.') }}</div>
         <div style="font-size:12px;color:#6b7280;margin-top:4px;">Total estimasi nilai</div>
     </div>
 </div>
