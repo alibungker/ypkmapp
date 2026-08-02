@@ -58,7 +58,34 @@ class DistribusiController extends Controller
         ];
 
         if ($request->status) $query->where('status', $request->status);
-        $distribusi = $query->orderBy('tanggal', 'desc')->paginate(15)->withQueryString();
+
+        $sort = $request->string('sort')->toString();
+        $direction = $request->input('direction') === 'asc' ? 'asc' : 'desc';
+        $sortable = [
+            'kegiatan' => 'nama_kegiatan',
+            'target' => 'jumlah_paket',
+            'nilai' => 'estimasi_nilai_total',
+            'tanggal' => 'tanggal',
+            'status' => 'status',
+        ];
+
+        if ($sort === 'kelompok') {
+            $query->orderBy(
+                Kelompok::select('nama')->whereColumn('kelompoks.id', 'distribusis.kelompok_id'),
+                $direction
+            );
+        } elseif ($sort === 'penerima') {
+            $query->orderBy(
+                DB::table('penerimas')
+                    ->selectRaw('COUNT(*)')
+                    ->whereColumn('penerimas.kelompok_id', 'distribusis.kelompok_id'),
+                $direction
+            );
+        } else {
+            $query->orderBy($sortable[$sort] ?? 'tanggal', $direction);
+        }
+
+        $distribusi = $query->orderBy('id', 'desc')->paginate(15)->withQueryString();
         return view('distribusi.index', compact('distribusi', 'stats'));
     }
 

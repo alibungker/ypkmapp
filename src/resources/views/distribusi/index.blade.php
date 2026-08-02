@@ -59,8 +59,32 @@
     </div>
     <div class="card-body">
         <div class="table-wrap desktop-table">
+        @php
+            $sortLink = function (string $column) {
+                $active = request('sort') === $column;
+                $nextDirection = $active && request('direction', 'desc') === 'asc' ? 'desc' : 'asc';
+                return request()->fullUrlWithQuery(['sort' => $column, 'direction' => $nextDirection, 'page' => null]);
+            };
+            $sortIcon = function (string $column) {
+                if (request('sort') !== $column) return '↕';
+                return request('direction', 'desc') === 'asc' ? '↑' : '↓';
+            };
+        @endphp
+        <style>
+            .sort-link{display:flex;align-items:center;gap:6px;color:inherit;text-decoration:none;white-space:nowrap}
+            .sort-link:hover{color:#017723}.sort-icon{font-size:12px;opacity:.75}
+        </style>
         <table class="table-data">
-            <thead><tr><th>Kegiatan</th><th>Kelompok</th><th>Target Paket</th><th>Penerima</th><th>Nilai</th><th>Tanggal</th><th>Status</th><th></th></tr></thead>
+            <thead><tr>
+                <th><a class="sort-link" href="{{ $sortLink('kegiatan') }}">Kegiatan <span class="sort-icon">{{ $sortIcon('kegiatan') }}</span></a></th>
+                <th><a class="sort-link" href="{{ $sortLink('kelompok') }}">Kelompok <span class="sort-icon">{{ $sortIcon('kelompok') }}</span></a></th>
+                <th><a class="sort-link" href="{{ $sortLink('target') }}">Target Paket <span class="sort-icon">{{ $sortIcon('target') }}</span></a></th>
+                <th><a class="sort-link" href="{{ $sortLink('penerima') }}">Penerima <span class="sort-icon">{{ $sortIcon('penerima') }}</span></a></th>
+                <th><a class="sort-link" href="{{ $sortLink('nilai') }}">Nilai <span class="sort-icon">{{ $sortIcon('nilai') }}</span></a></th>
+                <th><a class="sort-link" href="{{ $sortLink('tanggal') }}">Tanggal <span class="sort-icon">{{ $sortIcon('tanggal') }}</span></a></th>
+                <th><a class="sort-link" href="{{ $sortLink('status') }}">Status <span class="sort-icon">{{ $sortIcon('status') }}</span></a></th>
+                <th></th>
+            </tr></thead>
             <tbody>
                 @forelse($distribusi ?? [] as $d)
                 <tr>
