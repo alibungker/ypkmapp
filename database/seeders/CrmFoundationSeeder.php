@@ -27,9 +27,10 @@ class CrmFoundationSeeder extends Seeder
             ['name'=>'Nadia Safitri','nip'=>'YPKM-2026-004','jabatan'=>'Staf Data & Dokumentasi','email'=>'data@ypkm.info','phone'=>'081360001005','role'=>'relawan'],
         ];
         foreach ($staff as $s) {
+            $existingPassword = User::where('email', $s['email'])->value('password');
             User::updateOrCreate(['email'=>$s['email']], [
                 ...$s,
-                'password'=>Hash::make(Str::random(32)),
+                'password'=>$existingPassword ?: Hash::make(Str::random(32)),
                 'is_active'=>true,
                 'status_aktif'=>true,
                 'wilayah_kabupaten'=>'Aceh',
@@ -63,9 +64,10 @@ class CrmFoundationSeeder extends Seeder
             ['nama_lengkap'=>'Iqbal Maulana','nik'=>'1171080808980008','tempat_tanggal_lahir'=>'Meulaboh, 8 Agustus 1998','jenis_kelamin'=>'L','phone'=>'081370020008','email'=>'iqbal.dokumentasi@relawan.ypkm.info','keahlian_utama'=>'IT/Dokumentasi','status_ketersediaan'=>'siap_tanggap_bencana','jam_kontribusi'=>200,'domisili_kota'=>'Aceh Barat'],
         ];
         foreach ($relawan as $r) {
+            $existingPassword = User::where('email', $r['email'])->value('password');
             $user = User::updateOrCreate(['email'=>$r['email']], [
                 'name'=>$r['nama_lengkap'], 'nik'=>$r['nik'], 'email'=>$r['email'], 'phone'=>$r['phone'],
-                'password'=>Hash::make(Str::random(32)), 'role'=>'relawan', 'is_active'=>true, 'status_aktif'=>true,
+                'password'=>$existingPassword ?: Hash::make(Str::random(32)), 'role'=>'relawan', 'is_active'=>true, 'status_aktif'=>true,
                 'wilayah_kabupaten'=>$r['domisili_kota'],
             ]);
             DB::table('relawans')->updateOrInsert(['user_id'=>$user->id], [
