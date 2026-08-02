@@ -333,8 +333,12 @@ class DistribusiController extends Controller
             'lampiran.*.max' => 'Ukuran setiap lampiran maksimal 5 MB.',
         ]);
 
-        // Hindari NULL eksplisit pada kolom database yang mempunyai default.
-        $data['estimasi_nilai_total'] = 0;
+        // Nilai distribusi selalu dihitung ulang dari barang yang benar-benar keluar.
+        // Jangan reset ke 0 saat edit karena field estimasi tidak diinput manual.
+        $data['estimasi_nilai_total'] = collect($data['pembelian_barang'] ?? [])->sum(function ($baris) {
+            $harga = (float) PembelianBarang::whereKey($baris['pembelian_barang_id'])->value('harga_satuan');
+            return $harga * (int) $baris['jumlah'];
+        });
         $data['sumber_dana'] = $data['sumber_dana'] ?? '';
 
         return $data;
