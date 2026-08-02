@@ -75,6 +75,7 @@
         <div style="margin:14px 8px 5px;font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;">Administrasi</div>
         <a href="{{ route('barang.index') }}" class="nav-item {{ request()->routeIs('barang*') ? 'active' : '' }}"><x-icon name="box"/><span>Barang & Kegiatan</span></a>
         <a href="{{ route('users.index') }}" class="nav-item {{ request()->routeIs('users*') ? 'active' : '' }}"><x-icon name="users"/><span>Pengguna</span></a>
+        <a href="{{ route('crm.index') }}" class="nav-item {{ request()->routeIs('crm*') ? 'active' : '' }}"><x-icon name="group"/><span>CRM Yayasan</span></a>
         <a href="{{ route('keuangan.index') }}" class="nav-item {{ request()->routeIs('keuangan*') ? 'active' : '' }}"><x-icon name="wallet"/><span>Keuangan</span></a>
         <a href="{{ route('laporan.index') }}" class="nav-item {{ request()->routeIs('laporan*') ? 'active' : '' }}"><x-icon name="report"/><span>Laporan</span></a>
         @endif

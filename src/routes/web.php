@@ -2,6 +2,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CrmController;
 use App\Http\Controllers\PenerimaController;
 use App\Http\Controllers\KelompokController;
 use App\Http\Controllers\DistribusiController;
@@ -217,5 +218,7 @@ Route::middleware('auth')->group(function () {
 
         Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index');
         Route::get('laporan/export-csv', [LaporanController::class, 'exportCsv'])->name('laporan.export-csv');
+
+        Route::get('crm', [CrmController::class, 'index'])->name('crm.index');
     });
 });
