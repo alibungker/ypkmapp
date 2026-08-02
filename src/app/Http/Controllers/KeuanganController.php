@@ -20,15 +20,21 @@ class KeuanganController extends Controller
         $sisa = $total_masuk - $total_biaya - $total_bantuan;
 
         $dana_masuk = DanaDonatur::with('pencatat')->orderBy('tanggal_masuk', 'desc')->get();
-        $biaya = BiayaOperasional::with('distribusi', 'pencatat')->orderBy('tanggal', 'desc')->take(20)->get();
+        $biaya = BiayaOperasional::with('distribusi', 'pencatat')->orderBy('tanggal', 'desc')->take(50)->get();
         $anggarans = Anggaran::with('distribusi')->get();
         $pembelian = PembelianBarang::orderBy('id')->get();
         $total_anggaran_all = $anggarans->sum('anggaran') + $pembelian->sum('anggaran');
         $total_realisasi_all = $anggarans->sum('realisasi') + $pembelian->sum('realisasi');
 
-        $distribusi_list = Distribusi::whereIn('status', ['direncanakan', 'berlangsung'])->orderBy('tanggal', 'desc')->get();
+        // Rekap biaya per batch
+        $biayaBatch = BiayaOperasional::selectRaw('COALESCE(batch_kegiatan, "-") as batch, SUM(jumlah) as total, COUNT(*) as jumlah_transaksi')
+            ->groupBy('batch')
+            ->orderByDesc('total')
+            ->get();
 
-        return view('keuangan.index', compact('total_masuk', 'total_biaya', 'total_bantuan', 'sisa', 'dana_masuk', 'biaya', 'anggarans', 'distribusi_list', 'pembelian', 'total_anggaran_all', 'total_realisasi_all'));
+        $distribusi_list = Distribusi::orderBy('tanggal', 'desc')->get();
+
+        return view('keuangan.index', compact('total_masuk', 'total_biaya', 'total_bantuan', 'sisa', 'dana_masuk', 'biaya', 'anggarans', 'distribusi_list', 'pembelian', 'total_anggaran_all', 'total_realisasi_all', 'biayaBatch'));
     }
 
     public function storeDana(Request $request)
@@ -69,11 +75,13 @@ class KeuanganController extends Controller
     public function storeBiaya(Request $request)
     {
         $data = $request->validate([
-            'kategori' => 'required',
+            'kategori' => 'required|string|max:100',
             'deskripsi' => 'required',
             'jumlah' => 'required|numeric',
             'tanggal' => 'required|date',
             'distribusi_id' => 'nullable|exists:distribusis,id',
+            'batch_kegiatan' => 'nullable|string|max:100',
+            'pihak_penerima' => 'nullable|string|max:150',
         ]);
         $data['dicatat_oleh'] = auth()->id();
         BiayaOperasional::create($data);
@@ -104,6 +112,19 @@ class KeuanganController extends Controller
             ->groupBy('kelompoks.daerah')
             ->get();
 
-        return response()->json(compact('dana_masuk', 'total_biaya', 'total_bantuan', 'sisa', 'per_daerah'));
+        $per_batch = BiayaOperasional::selectRaw('COALESCE(batch_kegiatan, "-") as batch, SUM(jumlah) as total, COUNT(*) as count')
+            ->groupBy('batch')
+            ->orderByDesc('total')
+            ->get();
+
+        return response()->json(compact('dana_masuk', 'total_biaya', 'total_bantuan', 'sisa', 'per_daerah', 'per_batch'));
+    }
+
+    public function rekapDistribusi($id)
+    {
+        $distribusi = Distribusi::findOrFail($id);
+        $biaya = BiayaOperasional::where('distribusi_id', $id)->take(100)->get();
+        $total = $biaya->sum('jumlah');
+        return response()->json(compact('distribusi', 'biaya', 'total'));
     }
 }
