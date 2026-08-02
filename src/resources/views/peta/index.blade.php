@@ -152,7 +152,29 @@ polygons.forEach(p => {
 data.forEach(d => {
     if (!Number.isFinite(d.lat) || !Number.isFinite(d.lng) || (!d.lat && !d.lng)) return;
     const marker = L.marker([d.lat,d.lng], {icon: markerIcons[d.status] || markerIcons.default}).addTo(map);
-    marker.bindPopup(`<div style="min-width:230px"><div style="font-size:15px;font-weight:700;color:#00034a;margin-bottom:8px">${d.name}</div><div style="font-size:13px;line-height:1.65"><b>Wilayah:</b> ${d.daerah} · ${d.kecamatan} · ${d.desa}<br><b>Lokasi:</b> ${d.lokasi}<br><b>Paket:</b> ${Number(d.paket).toLocaleString('id-ID')}<br><b>Nilai:</b> ${d.nilai}<br><b>Target:</b> ${Number(d.penerima).toLocaleString('id-ID')} penerima<br><b>Kelompok:</b> ${d.kelompok}<br><b>Ketua:</b> ${d.ketua}<br><b>Tanggal:</b> ${d.tgl}</div><a href="${d.url}" style="display:inline-block;margin-top:9px;color:#017723;font-weight:700">Lihat detail →</a></div>`);
+    const statusBadge = {
+        selesai: '<span style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600">✅ Selesai</span>',
+        berlangsung: '<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600">⏳ Berlangsung</span>',
+        direncanakan: '<span style="background:#dbeafe;color:#1e40af;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600">📋 Direncanakan</span>',
+        dibatalkan: '<span style="background:#fee2e2;color:#b91c1c;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600">❌ Dibatalkan</span>'
+    }[d.status] || '<span style="background:#f3f4f6;color:#374151;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600">—</span>';
+    const icon = (svg, color='#00034a') => `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;flex-shrink:0">${svg}</svg>`;
+    const popHtml = `<div style="min-width:280px;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif">
+        <div style="font-size:16px;font-weight:700;color:#00034a;margin-bottom:4px;display:flex;align-items:center;gap:8px">${icon('<path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>')}${d.name}</div>
+        <div style="font-size:12px;color:#6b7280;margin-bottom:10px">${statusBadge}</div>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;line-height:1.5;color:#1f2937">
+            <div style="display:flex;align-items:flex-start;gap:8px">${icon('<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>','#017723')}<span><b>Wilayah:</b> ${d.daerah} · ${d.kecamatan} · ${d.desa}</span></div>
+            <div style="display:flex;align-items:flex-start;gap:8px">${icon('<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>','#00034a')}<span><b>Lokasi:</b> ${d.lokasi}</span></div>
+            <div style="display:flex;align-items:center;gap:8px">${icon('<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>','#017723')}<span><b>Paket:</b> ${Number(d.paket).toLocaleString('id-ID')}</span></div>
+            <div style="display:flex;align-items:center;gap:8px">${icon('<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>','#e5a820')}<span><b>Nilai:</b> ${d.nilai}</span></div>
+            <div style="display:flex;align-items:center;gap:8px">${icon('<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>','#00034a')}<span><b>Target:</b> ${Number(d.penerima).toLocaleString('id-ID')} penerima</span></div>
+            <div style="display:flex;align-items:center;gap:8px">${icon('<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>','#6b7280')}<span><b>Kelompok:</b> ${d.kelompok}</span></div>
+            <div style="display:flex;align-items:center;gap:8px">${icon('<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>','#6b7280')}<span><b>Ketua:</b> ${d.ketua}</span></div>
+            <div style="display:flex;align-items:center;gap:8px">${icon('<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>','#00034a')}<span><b>Tanggal:</b> ${d.tgl}</span></div>
+        </div>
+        <a href="${d.url}" style="display:inline-block;margin-top:12px;padding:8px 14px;background:#017723;color:white;text-decoration:none;border-radius:8px;font-weight:600;font-size:13px;transition:background .15s" onmouseover="this.style.background='#005a1a'" onmouseout="this.style.background='#017723'">Lihat Detail →</a>
+    </div>`;
+    marker.bindPopup(popHtml);
     layers.push(marker);
 });
 
