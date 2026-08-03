@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Kartu Anggota YPKM')
-@section('headers')
+@section('styles')
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
