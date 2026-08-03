@@ -49,7 +49,6 @@ class DistribusiController extends Controller
             });
         }
 
-        // Stats dashboard
         $stats = [
             'kelompok' => (clone $query)->distinct('kelompok_id')->count('kelompok_id'),
             'titik' => (clone $query)->whereNotNull('titik_koordinat')->count(),
@@ -57,7 +56,19 @@ class DistribusiController extends Controller
             'anggaran' => (clone $query)->sum('estimasi_nilai_total'),
         ];
 
-        if ($request->status) $query->where('status', $request->status);
+        // Filters
+        $query->when($request->filled('q'), function ($q) use ($request) {
+            $term = trim($request->q);
+            $q->where(function ($sub) use ($term) {
+                $sub->where('nama_kegiatan', 'like', "%{$term}%")
+                    ->orWhere('lokasi', 'like', "%{$term}%")
+                    ->orWhereHas('kelompok', fn ($k) => $k->where('nama', 'like', "%{$term}%"));
+            });
+        });
+        $query->when($request->filled('status'), fn ($q) => $q->where('status', $request->status));
+        $query->when($request->filled('daerah'), fn ($q) => $q->whereHas('kelompok', fn ($k) => $k->where('daerah', $request->daerah)));
+        $query->when($request->filled('tanggal_mulai'), fn ($q) => $q->whereDate('tanggal', '>=', $request->tanggal_mulai));
+        $query->when($request->filled('tanggal_selesai'), fn ($q) => $q->whereDate('tanggal', '<=', $request->tanggal_selesai));
 
         $sort = $request->string('sort')->toString();
         $direction = $request->input('direction') === 'asc' ? 'asc' : 'desc';
@@ -86,7 +97,13 @@ class DistribusiController extends Controller
         }
 
         $distribusi = $query->orderBy('id', 'desc')->paginate(15)->withQueryString();
-        return view('distribusi.index', compact('distribusi', 'stats'));
+
+        $kabupatens = DB::table('wilayah_boundaries')
+            ->where('kode', 'LIKE', '11.%')
+            ->orderBy('nama')
+            ->pluck('nama', 'kode');
+
+        return view('distribusi.index', compact('distribusi', 'stats', 'kabupatens'));
     }
 
     public function create()

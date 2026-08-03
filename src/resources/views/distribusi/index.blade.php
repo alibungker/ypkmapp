@@ -1,5 +1,12 @@
 @extends('layouts.app')
 @section('title', 'Distribusi')
+@section('styles')
+<style>
+.dist-filter{padding:14px 20px;background:#f8fafc;border-bottom:1px solid #e5e7eb;display:grid;grid-template-columns:minmax(180px,2fr) repeat(2,minmax(140px,1fr)) repeat(2,minmax(120px,1fr)) auto auto;gap:10px;align-items:end}
+@media(max-width:900px){.dist-filter{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.dist-filter{grid-template-columns:1fr;padding:12px}}
+</style>
+@endsection
 @section('content')
 @if(session('success'))<div class="alert alert-success">✅ {{ session('success') }}</div>@endif
 
@@ -43,20 +50,47 @@
     <div class="card-header">
         <h3 style="font-size:15px;font-weight:600;">Distribusi bantuan</h3>
         <div style="display:flex;gap:8px;align-items:center;">
-            <form method="GET" style="display:inline;">
-                <select name="status" class="form-input" style="width:170px;font-size:13px;" onchange="this.form.submit()">
-                    <option value="">Semua status</option>
-                    <option value="direncanakan" {{ request('status')=='direncanakan' ? 'selected' : '' }}>📋 Direncanakan</option>
-                    <option value="berlangsung" {{ request('status')=='berlangsung' ? 'selected' : '' }}>⏳ Berlangsung</option>
-                    <option value="selesai" {{ request('status')=='selesai' ? 'selected' : '' }}>✅ Selesai</option>
-                    <option value="dibatalkan" {{ request('status')=='dibatalkan' ? 'selected' : '' }}>❌ Dibatalkan</option>
-                </select>
-            </form>
             @if(auth()->user()->isAdmin())
             <a href="{{ route('distribusi.create') }}" class="btn btn-primary btn-sm">+ Buat Distribusi</a>
             @endif
         </div>
     </div>
+    <form method="GET" action="{{ route('distribusi.index') }}" class="dist-filter">
+        <div>
+            <label class="form-label">Cari</label>
+            <input type="search" name="q" value="{{ request('q') }}" class="form-input" placeholder="Kegiatan, lokasi, atau kelompok">
+        </div>
+        <div>
+            <label class="form-label">Status</label>
+            <select name="status" class="form-input">
+                <option value="">Semua status</option>
+                <option value="direncanakan" {{ request('status')=='direncanakan' ? 'selected' : '' }}>📋 Direncanakan</option>
+                <option value="berlangsung" {{ request('status')=='berlangsung' ? 'selected' : '' }}>⏳ Berlangsung</option>
+                <option value="selesai" {{ request('status')=='selesai' ? 'selected' : '' }}>✅ Selesai</option>
+                <option value="dibatalkan" {{ request('status')=='dibatalkan' ? 'selected' : '' }}>❌ Dibatalkan</option>
+            </select>
+        </div>
+        <div>
+            <label class="form-label">Kabupaten/Kota</label>
+            <select name="daerah" class="form-input">
+                <option value="">Semua daerah</option>
+                @foreach($kabupatens ?? [] as $kode => $nama)
+                <option value="{{ preg_replace('/^(Kabupaten|Kota)\s/', '', $nama) }}" {{ request('daerah') == preg_replace('/^(Kabupaten|Kota)\s/', '', $nama) ? 'selected' : '' }}>{{ $nama }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div>
+            <label class="form-label">Dari tgl</label>
+            <input type="date" name="tanggal_mulai" value="{{ request('tanggal_mulai') }}" class="form-input">
+        </div>
+        <div>
+            <label class="form-label">Sampai tgl</label>
+            <input type="date" name="tanggal_selesai" value="{{ request('tanggal_selesai') }}" class="form-input">
+        </div>
+        <button type="submit" class="btn btn-primary">🔍 Filter</button>
+        <a href="{{ route('distribusi.index') }}" class="btn btn-outline" style="text-align:center;">Reset</a>
+    </form>
+    <div style="padding:10px 20px 0;color:#6b7280;font-size:12px;">Menampilkan <strong>{{ $distribusi->total() ?? 0 }}</strong> distribusi</div>
     <div class="card-body">
         <div class="table-wrap desktop-table">
         @php
