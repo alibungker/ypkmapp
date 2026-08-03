@@ -8,9 +8,9 @@ use Illuminate\Support\Facades\DB;
 
 class KelompokController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $query = Kelompok::withCount('penerima')->with('ketuaUser')->orderBy('daerah');
+        $query = Kelompok::withCount('penerima')->with('ketuaUser');
         $user = auth()->user();
 
         if ($user->isKetuaKelompok()) {
@@ -21,12 +21,30 @@ class KelompokController extends Controller
             if ($user->wilayah_desa) $query->where('desa', $user->wilayah_desa);
         }
 
-        $kelompoks = $query->get();
+        $daerahOptions = (clone $query)->whereNotNull('daerah')->distinct()->orderBy('daerah')->pluck('daerah');
+        $kecamatanOptions = (clone $query)->whereNotNull('kecamatan')->where('kecamatan', '!=', '')
+            ->when($request->filled('daerah'), fn ($q) => $q->where('daerah', $request->daerah))
+            ->distinct()->orderBy('kecamatan')->pluck('kecamatan');
+
+        $query->when($request->filled('q'), function ($q) use ($request) {
+            $term = trim($request->q);
+            $q->where(function ($sub) use ($term) {
+                $sub->where('nama', 'like', "%{$term}%")
+                    ->orWhere('kode', 'like', "%{$term}%")
+                    ->orWhereHas('ketuaUser', fn ($u) => $u->where('name', 'like', "%{$term}%"));
+            });
+        });
+        $query->when($request->filled('daerah'), fn ($q) => $q->where('daerah', $request->daerah));
+        $query->when($request->filled('kecamatan'), fn ($q) => $q->where('kecamatan', $request->kecamatan));
+        $query->when($request->status_anggota === 'ada', fn ($q) => $q->has('penerima'));
+        $query->when($request->status_anggota === 'kosong', fn ($q) => $q->doesntHave('penerima'));
+
+        $kelompoks = $query->orderBy('daerah')->orderBy('nama')->get();
         $kabupatens = DB::table('wilayah_boundaries')
             ->where('kode', 'LIKE', '11.%')
             ->orderBy('nama')
             ->pluck('nama', 'kode');
-        return view('kelompok.index', compact('kelompoks', 'kabupatens'));
+        return view('kelompok.index', compact('kelompoks', 'kabupatens', 'daerahOptions', 'kecamatanOptions'));
     }
 
     public function store(Request $request)

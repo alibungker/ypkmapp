@@ -1,5 +1,12 @@
 @extends('layouts.app')
 @section('title', 'Data Kelompok')
+@section('styles')
+<style>
+.kelompok-filter{padding:14px 20px;background:#f8fafc;border-bottom:1px solid #e5e7eb;display:grid;grid-template-columns:minmax(180px,2fr) repeat(3,minmax(140px,1fr)) auto auto;gap:10px;align-items:end}
+@media(max-width:900px){.kelompok-filter{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.kelompok-filter{grid-template-columns:1fr;padding:12px}}
+</style>
+@endsection
 @section('content')
 @if(session('success'))<div class="alert alert-success">✅ {{ session('success') }}</div>@endif
 @if(session('error'))<div class="alert" style="background:#fce8e6;border:1px solid #f5c6c0;color:#dc2626;">❌ {{ session('error') }}</div>@endif
@@ -12,7 +19,42 @@
         <button onclick="document.getElementById('tambahModal').style.display='flex'" class="btn btn-primary btn-sm">➕ Tambah Kelompok</button>
         @endif
     </div>
-    <div style="padding:16px 20px;overflow-x:auto;">
+    <form method="GET" action="{{ route('kelompok.index') }}" class="kelompok-filter">
+        <div>
+            <label class="form-label">Cari</label>
+            <input type="search" name="q" value="{{ request('q') }}" class="form-input" placeholder="Nama, kode, atau ketua">
+        </div>
+        <div>
+            <label class="form-label">Kabupaten/Kota</label>
+            <select name="daerah" class="form-input" onchange="this.form.submit()">
+                <option value="">Semua daerah</option>
+                @foreach($daerahOptions ?? [] as $daerah)
+                <option value="{{ $daerah }}" {{ request('daerah') === $daerah ? 'selected' : '' }}>{{ $daerah }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div>
+            <label class="form-label">Kecamatan</label>
+            <select name="kecamatan" class="form-input">
+                <option value="">Semua kecamatan</option>
+                @foreach($kecamatanOptions ?? [] as $kecamatan)
+                <option value="{{ $kecamatan }}" {{ request('kecamatan') === $kecamatan ? 'selected' : '' }}>{{ $kecamatan }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div>
+            <label class="form-label">Anggota</label>
+            <select name="status_anggota" class="form-input">
+                <option value="">Semua</option>
+                <option value="ada" {{ request('status_anggota') === 'ada' ? 'selected' : '' }}>Ada anggota</option>
+                <option value="kosong" {{ request('status_anggota') === 'kosong' ? 'selected' : '' }}>Belum ada anggota</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">🔍 Filter</button>
+        <a href="{{ route('kelompok.index') }}" class="btn btn-outline" style="text-align:center;">Reset</a>
+    </form>
+    <div style="padding:10px 20px 0;color:#6b7280;font-size:12px;">Menampilkan <strong>{{ count($kelompoks ?? []) }}</strong> kelompok</div>
+    <div style="padding:12px 20px 16px;overflow-x:auto;">
         <table class="table-data">
                 <thead><tr><th>Kode</th><th>Nama</th><th>Daerah</th><th>Kecamatan</th><th>Anggota</th><th>Ketua</th><th></th></tr></thead>
                 <tbody>
