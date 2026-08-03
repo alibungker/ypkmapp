@@ -5,6 +5,8 @@
 .dist-filter{padding:14px 20px;background:#f8fafc;border-bottom:1px solid #e5e7eb;display:grid;grid-template-columns:minmax(180px,2fr) repeat(2,minmax(140px,1fr)) auto auto;gap:10px;align-items:end}
 @media(max-width:900px){.dist-filter{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.dist-filter{grid-template-columns:1fr;padding:12px}}
+.dist-items{display:flex;gap:4px;flex-wrap:wrap;max-width:280px}
+.dist-items .badge{white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;display:inline-flex}
 </style>
 @endsection
 @section('content')
@@ -118,15 +120,15 @@
                     <td style="font-weight:500;">{{ $d->nama_kegiatan }}</td>
                     <td>{{ $d->kelompok->nama ?? '-' }}</td>
                     <td style="font-weight:700;color:#b07d14;">{{ number_format($d->jumlah_paket) }} paket</td>
-                    <td style="min-width:180px;max-width:260px;">
+                    <td style="min-width:180px;max-width:280px;">
                         @if($d->items->isNotEmpty())
-                            <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                            <div class="dist-items">
                             @foreach($d->items as $item)
                                 <span class="badge badge-navy" title="{{ $item->barang->nama ?? 'Barang' }}">{{ $item->barang->nama ?? 'Barang' }}: {{ rtrim(rtrim(number_format($item->jumlah_per_paket, 2, ',', '.'), '0'), ',') }}/paket</span>
                             @endforeach
                             </div>
                         @elseif($d->pembelianBarang->isNotEmpty())
-                            <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                            <div class="dist-items">
                             @foreach($d->pembelianBarang as $barang)
                                 <span class="badge badge-navy">{{ $barang->nama_barang ?? $barang->nama ?? 'Barang' }}: {{ number_format($barang->pivot->jumlah ?? 0) }}</span>
                             @endforeach
