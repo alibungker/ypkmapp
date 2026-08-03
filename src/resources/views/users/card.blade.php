@@ -71,23 +71,26 @@
 .id-back-ftr p{font-size:6px;margin:0;font-weight:600;line-height:1.4}
 .id-back-ftr p:first-child{font-size:7px;font-weight:800;color:#e5a820;margin-bottom:2px}
 
-/* ===== Business Card: Front ===== */
-.biz-hdr{padding:12px 16px;display:flex;align-items:center;gap:10px;position:relative;z-index:10;background:linear-gradient(135deg,#00034a 0%,#1a1a5e 100%);color:#fff}
-.biz-photo{width:44px;height:50px;border-radius:10px;padding:2px;background:linear-gradient(135deg,#e5a820,#D32F2F);flex-shrink:0;box-shadow:0 3px 8px rgba(0,0,0,.25)}
-.biz-photo img{width:100%;height:100%;object-fit:cover;border-radius:8px}
-.biz-photo .photo-ph{width:100%;height:100%;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;background:#1a1a5e}
-.biz-hdr-info{flex:1;min-width:0}
-.biz-hdr-info h3{font-size:11px;font-weight:800;color:#fff;margin:0;letter-spacing:.2px}
-.biz-hdr-info p{font-size:7.5px;color:#e5a820;font-weight:700;margin:1px 0;letter-spacing:.3px;text-transform:uppercase}
-.biz-hdr-info small{font-family:'JetBrains Mono',monospace;font-size:7px;color:#94a3b8;font-weight:500;display:block;margin-top:1px}
-.biz-badge{background:#e5a820;color:#00034a;font-size:7px;font-weight:800;letter-spacing:.5px;padding:4px 9px;border-radius:6px;position:relative;z-index:10;flex-shrink:0}
-.biz-body{padding:10px 16px;flex:1;display:flex;flex-direction:column;gap:4px;position:relative;z-index:10;justify-content:center}
-.biz-contact-row{display:flex;align-items:center;gap:6px;font-size:7.5px;color:#475569}
-.biz-contact-row svg{width:11px!important;height:11px!important;flex-shrink:0;color:#D32F2F}
+/* ===== Business Card: Front (International 90x55) ===== */
+.biz-card{width:400px;height:244px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 24px 54px rgba(18,35,58,.18);position:relative;display:grid;grid-template-columns:1.15fr .85fr;border:1px solid #e2e8f0;flex-shrink:0}
+.biz-left{padding:20px 22px;display:flex;flex-direction:column;position:relative;z-index:10}
+.biz-brand{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.ypkm-logo{width:44px;height:44px;border-radius:8px;object-fit:cover;background:#fff;flex-shrink:0;border:1px solid #e2e8f0}
+.biz-brand-title{font-size:20px;font-weight:900;letter-spacing:1px;line-height:.95;color:#00034a}
+.biz-brand-sub{font-size:7px;line-height:1.25;font-weight:800;color:#00034a;letter-spacing:.4px;margin-top:4px}
+.biz-rule{width:44px;height:3px;background:linear-gradient(90deg,#D32F2F,#e65100);margin-bottom:10px}
+.biz-name{font-size:19px;font-weight:900;letter-spacing:.2px;line-height:1.1;color:#00034a;margin:0}
+.biz-role{font-size:9px;color:#D32F2F;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;margin:4px 0 0}
+.biz-code{font-family:'JetBrains Mono',monospace;font-size:7.5px;color:#94a3b8;font-weight:500;margin-top:2px}
+.biz-contact{margin-top:14px;display:flex;flex-direction:column;gap:6px}
+.biz-contact-row{display:grid;grid-template-columns:16px 1fr;align-items:center;gap:6px;font-size:9px;color:#475569;font-weight:650}
+.biz-contact-row svg{width:11px!important;height:11px!important;color:#D32F2F}
 .biz-contact-row span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.biz-addr-row{display:flex;align-items:flex-start;gap:6px;font-size:7.5px;line-height:1.35;color:#475569}
-.biz-addr-row svg{width:11px!important;height:11px!important;flex-shrink:0;color:#D32F2F;margin-top:1px}
-.biz-status-row{display:flex;align-items:center;gap:6px;margin-top:2px}
+.biz-badge{position:absolute;top:12px;right:12px;background:linear-gradient(135deg,#00034a,#1a1a5e);color:#e5a820;font-size:8px;font-weight:800;letter-spacing:.8px;padding:4px 10px;border-radius:6px;z-index:12}
+.biz-right{position:relative;overflow:hidden}
+.biz-watermark{position:absolute;inset:8% 5% 8% 4%;opacity:.07;filter:grayscale(1);background-size:contain;background-repeat:no-repeat;background-position:center;background-image:url('{{ asset("img/logo-ypkm-card.jpg") }}')}
+.biz-red-edge{position:absolute;top:0;right:0;width:7%;height:100%;background:linear-gradient(180deg,#D32F2F,#9f111c)}
+.biz-red-edge:after{content:"";position:absolute;right:0;top:68%;width:190%;height:24%;background:#fff;clip-path:polygon(0 0,100% 0,100% 100%,55% 100%)}
 
 /* ===== Business Card: Back ===== */
 .biz-back-hdr{padding:10px 18px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f1f5f9;position:relative;z-index:10}
@@ -114,6 +117,8 @@
   .id-card,.biz-card{box-shadow:none!important;border:1px solid #e5e7eb!important;page-break-inside:avoid}
   .card-stack{gap:0!important}
   .card-label{display:none!important}
+  .biz-card{width:90mm!important;height:55mm!important;aspect-ratio:auto}
+  .id-card{width:90mm!important;height:55mm!important;aspect-ratio:auto}
 }
 </style>
 @endsection
@@ -230,43 +235,39 @@
             <div class="accent-bar"></div>
             <div class="holo"></div>
 
-            <div class="biz-hdr">
-                <div class="biz-photo">
-                    @if($fotoUrl)
-                        <img src="{{ $fotoUrl }}" alt="{{ $u->name }}">
-                    @else
-                        <div class="photo-ph">{{ strtoupper(substr($u->name,0,1)) }}</div>
-                    @endif
+            <div class="biz-left">
+                <div class="biz-brand">
+                    <img src="{{ $logoUrl }}" alt="YPKM" class="ypkm-logo">
+                    <div>
+                        <div class="biz-brand-title">YPKM</div>
+                        <div class="biz-brand-sub">YAYASAN PELANGI<br>KESEJAHTERAAN MASYARAKAT</div>
+                    </div>
                 </div>
-                <div class="biz-hdr-info">
-                    <h3>{{ $u->name }}</h3>
-                    <p>{{ $u->jabatan ?? $roleLabel }}</p>
-                    <small>{{ $u->kode_keanggotaan ?? '-' }}</small>
-                </div>
-                <span class="biz-badge">YPKM</span>
-            </div>
+                <div class="biz-rule"></div>
+                <div class="biz-name">{{ $u->name }}</div>
+                <div class="biz-role">{{ strtoupper($u->jabatan ?? $roleLabel) }}</div>
+                <div class="biz-code">{{ $u->kode_keanggotaan ?? '-' }}</div>
 
-            <div class="biz-body">
-                <div class="biz-contact-row">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                    <span>{{ $u->phone ?: '-' }}</span>
-                </div>
-                <div class="biz-contact-row">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>
-                    <span>{{ $u->email }}</span>
-                </div>
-                <div class="biz-addr-row">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 0 1-2.827 0l-4.244-4.243a8 8 0 1 1 11.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
-                    <span>{{ $alamatAnggota }}</span>
-                </div>
-                <div class="biz-status-row">
-                    <span class="id-status-badge {{ $u->is_active ? 'id-status-active' : 'id-status-inactive' }}">
-                        <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><circle cx="12" cy="12" r="10" fill="currentColor"/></svg>
-                        {{ $u->is_active ? 'AKTIF' : 'NONAKTIF' }}
-                    </span>
-                    <span style="font-size:7px;color:#94a3b8">Berlaku s/d {{ $validThru }}</span>
+                <div class="biz-contact">
+                    <div class="biz-contact-row">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                        <span>{{ $u->phone ?: '-' }}</span>
+                    </div>
+                    <div class="biz-contact-row">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg>
+                        <span>{{ $u->email }}</span>
+                    </div>
+                    <div class="biz-contact-row">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 0 1-2.827 0l-4.244-4.243a8 8 0 1 1 11.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+                        <span>{{ $alamatAnggota }}</span>
+                    </div>
                 </div>
             </div>
+            <div class="biz-right">
+                <div class="biz-watermark"></div>
+                <div class="biz-red-edge"></div>
+            </div>
+            <span class="biz-badge">YPKM</span>
         </div>
 
         {{-- ===== BUSINESS CARD: BACK ===== --}}
