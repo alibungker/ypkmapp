@@ -123,7 +123,7 @@
     $u = auth()->user();
     $logoUrl = asset('img/logo-ypkm-card.jpg');
     $fotoUrl = $u->foto ? asset('storage/'.$u->foto) : '';
-    $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=120x120&data='.urlencode('https://peduli.ypkm.info/verify/'.$u->kode_keanggotaan);
+    $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=120x120&data='.urlencode(url('/verify/'.$u->kode_keanggotaan));
     $validThru = \Carbon\Carbon::now()->addYear()->locale('id')->translatedFormat('d M Y');
     $roleLabel = match($u->role) {
         'super_admin' => 'Super Admin', 'pengurus' => 'Pengurus',

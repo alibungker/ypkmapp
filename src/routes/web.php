@@ -17,6 +17,9 @@ use App\Models\Distribusi;
 // ============================================================
 Route::get('daftar', [PenerimaController::class, 'formDaftar'])->name('penerima.daftar.form');
 Route::post('daftar', [PenerimaController::class, 'daftarMandiri'])->name('penerima.daftar');
+Route::get('verify/{kode}', [UserController::class, 'verifyCard'])
+    ->where('kode', 'YPKM-[A-Z]{3}-[0-9]{2}-[0-9]{3,4}')
+    ->name('users.verify');
 
 // API Wilayah (publik — dipakai form registrasi mandiri juga)
 Route::get('api/wilayah', function () {

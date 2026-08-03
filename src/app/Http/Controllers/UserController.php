@@ -138,6 +138,12 @@ class UserController extends Controller
         return view('users.card', compact('user'));
     }
 
+    public function verifyCard(string $kode)
+    {
+        $user = User::where('kode_keanggotaan', $kode)->firstOrFail();
+        return view('users.verify-card', compact('user'));
+    }
+
     public function updateProfile(Request $request)
     {
         $user = auth()->user();
