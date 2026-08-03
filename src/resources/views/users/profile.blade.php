@@ -21,7 +21,7 @@
   <div style="font-size:20px;font-weight:700;color:#00034a">{{ $user->name }}</div>
   <div style="margin-top:4px"><span class="role-badge">{{ $user->role }}</span></div>
   @if($user->jabatan)<div style="margin-top:6px;color:#6b7280;font-size:13px">{{ $user->jabatan }}</div>@endif
-  @if($user->nip)<div style="color:#6b7280;font-size:12px">NIP: {{ $user->nip }}</div>@endif
+  @if($user->kode_keanggotaan)<div style="margin-top:6px;color:#00034a;font-size:12px;font-weight:600">Kode: {{ $user->kode_keanggotaan }}</div>@endif
   <div style="margin-top:6px;color:#6b7280;font-size:12px">{{ $user->wilayahLabel() }}</div>
  </div>
 </div>

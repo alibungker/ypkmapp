@@ -8,8 +8,34 @@ class User extends Authenticatable
 {
     use Notifiable;
 
-    protected $fillable = ['name','email','password','role','kelompok_id','phone','foto','is_active','wilayah_kabupaten','wilayah_kecamatan','wilayah_desa','nik','nip','jabatan','status_aktif','tempat_lahir','tanggal_lahir','jenis_kelamin','alamat_lengkap'];
+    protected $fillable = ['name','email','password','role','kelompok_id','phone','foto','is_active','wilayah_kabupaten','wilayah_kecamatan','wilayah_desa','nik','nip','jabatan','status_aktif','tempat_lahir','tanggal_lahir','jenis_kelamin','alamat_lengkap','kode_keanggotaan'];
     protected $hidden = ['password','remember_token'];
+
+    protected static function booted(): void
+    {
+        static::created(function (self $u) {
+            if (!$u->kode_keanggotaan) {
+                $u->kode_keanggotaan = $u->generateKodeKeanggotaan();
+                $u->saveQuietly();
+            }
+        });
+    }
+
+    public function generateKodeKeanggotaan(): string
+    {
+        $prefix = match ($this->role) {
+            'super_admin', 'pengurus' => 'PGR',
+            'bendahara', 'staff', 'staff_keuangan' => 'STF',
+            default => 'RLW',
+        };
+        $yy = date('y');
+        $digits = $prefix === 'RLW' ? 4 : 3;
+        $base = "YPKM-{$prefix}-{$yy}-";
+        $last = static::where('kode_keanggotaan', 'like', $base.'%')
+            ->orderByDesc('kode_keanggotaan')->value('kode_keanggotaan');
+        $next = $last ? ((int) substr($last, -$digits)) + 1 : 1;
+        return $base.str_pad((string) $next, $digits, '0', STR_PAD_LEFT);
+    }
 
     public function isSuperAdmin(): bool { return $this->role === 'super_admin'; }
     public function isAdmin(): bool { return in_array($this->role, ['super_admin','pengurus']); }
