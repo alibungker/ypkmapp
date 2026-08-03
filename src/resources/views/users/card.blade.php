@@ -40,7 +40,7 @@
 
 /* ===== ID Card: Body ===== */
 .id-body{padding:16px 16px 8px;flex:1;display:flex;flex-direction:column;align-items:center;position:relative;z-index:10}
-.photo-frame{width:90px;height:104px;border-radius:14px;padding:3px;background:linear-gradient(135deg,#00034a,#e5a820);margin-bottom:10px;box-shadow:0 4px 12px rgba(0,3,74,.15)}
+.photo-frame{width:84px;height:96px;border-radius:13px;padding:3px;background:linear-gradient(135deg,#00034a,#e5a820);margin-bottom:8px;box-shadow:0 4px 12px rgba(0,3,74,.15)}
 .photo-frame img{width:100%;height:100%;object-fit:cover;border-radius:12px}
 .photo-ph{width:100%;height:100%;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;color:#00034a;background:#e5e7eb}
 .id-name{font-size:13px;font-weight:800;text-transform:uppercase;color:#00034a;letter-spacing:.3px;margin:0}
@@ -52,12 +52,12 @@
 .id-dot{width:2px;height:2px;border-radius:50%;background:#cbd5e1}
 
 /* ===== ID Card: Footer / QR ===== */
-.id-ftr{padding:8px 16px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#f8fafc,#f1f5f9);border-top:1px solid #e2e8f0;position:relative;z-index:10}
-.id-ftr-left{display:flex;flex-direction:column;gap:1px}
+.id-ftr{padding:8px 16px 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:linear-gradient(135deg,#f8fafc,#f1f5f9);border-top:1px solid #e2e8f0;position:relative;z-index:10;text-align:center}
+.id-ftr-left{display:flex;flex-direction:column;align-items:center;gap:1px;order:2}
 .id-ftr-left small{font-size:5.5px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
 .id-ftr-left b{font-size:6.5px;color:#00034a;font-weight:800}
-.qr-box{width:34px;height:34px;border:1.5px solid #e2e8f0;border-radius:5px;overflow:hidden;flex-shrink:0}
-.qr-box img{width:100%;height:100%}
+.qr-box{width:68px;height:68px;border:2px solid #cbd5e1;border-radius:8px;overflow:hidden;flex-shrink:0;background:#fff;padding:3px;box-shadow:0 3px 10px rgba(0,3,74,.1);order:1}
+.qr-box img{width:100%;height:100%;display:block}
 
 /* ===== ID Card: Back ===== */
 .id-back-hdr{padding:12px 16px;display:flex;align-items:center;gap:8px;position:relative;z-index:10;background:linear-gradient(135deg,#00034a,#1a1a5e);color:#fff}
