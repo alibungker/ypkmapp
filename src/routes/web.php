@@ -234,6 +234,8 @@ Route::middleware('auth')->group(function () {
         Route::get('laporan/export-csv', [LaporanController::class, 'exportCsv'])->name('laporan.export-csv')->middleware(\App\Http\Middleware\FinanceAccess::class);
 
     Route::middleware(\App\Http\Middleware\AdminOnly::class)->group(function () {
+        // Super Admin: cetak kartu user lain
+        Route::get('users/{user}/kartu', [UserController::class, 'card'])->name('users.card-by-id');
         Route::get('crm', [CrmController::class, 'index'])->name('crm.index');
         Route::get('crm/{type}/create', [CrmController::class, 'create'])->name('crm.create');
         Route::post('crm/{type}', [CrmController::class, 'store'])->name('crm.store');

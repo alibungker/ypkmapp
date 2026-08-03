@@ -128,7 +128,6 @@
 
 @section('content')
 @php
-    $u = auth()->user();
     $logoUrl = asset('img/logo-ypkm-transparent.png');
     $fotoUrl = $u->foto ? asset('storage/'.$u->foto) : '';
     $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=120x120&data='.urlencode(url('/verify/'.$u->kode_keanggotaan));

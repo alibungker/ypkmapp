@@ -44,6 +44,11 @@
                                 data-wilayah-kecamatan="{{ $u->wilayah_kecamatan }}"
                                 data-wilayah-desa="{{ $u->wilayah_desa }}"
                                 style="color:#00034a;border:none;background:none;cursor:pointer;font-size:13px;padding:4px 8px;">✏️ Edit</button>
+                            @if(auth()->user()->isSuperAdmin() && $u->id !== auth()->id())
+                            <a href="{{ route('users.card-by-id', $u) }}" target="_blank"
+                               style="color:#017723;border:none;background:none;cursor:pointer;font-size:13px;padding:4px 8px;"
+                               title="Cetak Kartu Anggota">🖨️ Kartu</a>
+                            @endif
                             @if($u->id !== auth()->id())
                             <form method="POST" action="{{ route('users.destroy', $u) }}" style="display:inline;" onsubmit="return confirm('Hapus user ini?')">
                                 @csrf @method('DELETE')

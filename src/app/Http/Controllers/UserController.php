@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
@@ -132,10 +133,10 @@ class UserController extends Controller
         return view('users.profile', compact('user'));
     }
 
-    public function card()
+    public function card(?User $user = null)
     {
-        $user = auth()->user();
-        return view('users.card', compact('user'));
+        $u = $user ?? Auth::user();
+        return view('users.card', compact('u'));
     }
 
     public function verifyCard(string $kode)
