@@ -1,5 +1,5 @@
 @php
-    $logoUrl = asset('img/logo-ypkm-card.jpg');
+    $logoUrl = asset('img/logo-ypkm-transparent.png');
     $fotoUrl = $user->foto ? asset('storage/'.$user->foto) : '';
     $roleLabel = match($user->role) {
         'super_admin' => 'Super Admin', 'pengurus' => 'Pengurus',

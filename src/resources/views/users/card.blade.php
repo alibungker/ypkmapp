@@ -91,7 +91,7 @@
 .biz-contact-row span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .biz-badge{position:absolute;top:12px;right:12px;background:linear-gradient(135deg,#00034a,#1a1a5e);color:#e5a820;font-size:8px;font-weight:800;letter-spacing:.8px;padding:4px 10px;border-radius:6px;z-index:12}
 .biz-right{position:relative;overflow:hidden}
-.biz-watermark{position:absolute;inset:8% 5% 8% 4%;opacity:.07;filter:grayscale(1);background-size:contain;background-repeat:no-repeat;background-position:center;background-image:url('{{ asset("img/logo-ypkm-card.jpg") }}')}
+.biz-watermark{position:absolute;inset:8% 5% 8% 4%;opacity:.07;filter:grayscale(1);background-size:contain;background-repeat:no-repeat;background-position:center;background-image:url('{{ asset("img/logo-ypkm-transparent.png") }}')}
 .biz-red-edge{position:absolute;top:0;right:0;width:7%;height:100%;background:linear-gradient(180deg,#D32F2F,#9f111c)}
 .biz-red-edge:after{content:"";position:absolute;right:0;top:68%;width:190%;height:24%;background:#fff;clip-path:polygon(0 0,100% 0,100% 100%,55% 100%)}
 
@@ -129,7 +129,7 @@
 @section('content')
 @php
     $u = auth()->user();
-    $logoUrl = asset('img/logo-ypkm-card.jpg');
+    $logoUrl = asset('img/logo-ypkm-transparent.png');
     $fotoUrl = $u->foto ? asset('storage/'.$u->foto) : '';
     $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=120x120&data='.urlencode(url('/verify/'.$u->kode_keanggotaan));
     $validThru = \Carbon\Carbon::now()->addYear()->locale('id')->translatedFormat('d M Y');
