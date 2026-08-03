@@ -16,16 +16,19 @@
         body{font-family:'Inter',sans-serif;background:var(--canvas);color:#151728;margin:0;overflow-x:hidden}
         .skip-link{position:fixed;left:16px;top:-80px;z-index:100;background:white;color:var(--navy);padding:10px 14px;border-radius:8px;font-weight:700;box-shadow:0 8px 24px rgba(0,3,74,.18)}
         .skip-link:focus{top:16px}
-        .sidebar{background:var(--navy);position:fixed;inset:0 auto 0 0;width:var(--sidebar-width);z-index:60;overflow-y:auto;transition:transform .24s ease;box-shadow:8px 0 28px rgba(0,3,74,.08)}
-        .sidebar::-webkit-scrollbar{width:4px}.sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+        .sidebar{background:var(--navy);position:fixed;inset:0 auto 0 0;width:var(--sidebar-width);height:100vh;height:100dvh;z-index:60;display:flex;flex-direction:column;overflow:hidden;transition:transform .24s ease;box-shadow:8px 0 28px rgba(0,3,74,.08)}
+        .sidebar-brand{flex:0 0 auto;padding:20px;border-bottom:1px solid rgba(255,255,255,.1)}
+        .sidebar-nav{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:12px 12px 20px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.14) transparent}
+        .sidebar-nav::-webkit-scrollbar{width:4px}.sidebar-nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:2px}
+        .sidebar-footer{flex:0 0 auto;padding:14px 16px calc(14px + env(safe-area-inset-bottom));border-top:1px solid rgba(255,255,255,.08);background:var(--navy);box-shadow:0 -10px 24px rgba(0,3,74,.2)}
         .sidebar-close{display:none;position:absolute;right:12px;top:14px;width:40px;height:40px;border:0;border-radius:9px;background:rgba(255,255,255,.08);color:white;font-size:22px;cursor:pointer}
         .main-content{margin-left:var(--sidebar-width);min-height:100vh;transition:margin-left .24s ease}
         .content-shell{padding:24px;max-width:1600px;margin:0 auto}
         .topbar{background:white;border-bottom:1px solid var(--line);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40;min-height:82px}
         .topbar-leading,.topbar-user{display:flex;align-items:center;gap:12px;min-width:0}
         .mobile-menu-button{display:none;width:44px;height:44px;flex:0 0 44px;border:1px solid var(--line);border-radius:10px;background:white;color:var(--navy);font-size:21px;cursor:pointer}
-        .sidebar-overlay{position:fixed;inset:0;background:rgba(0,3,74,.48);z-index:55;opacity:0;visibility:hidden;transition:opacity .2s ease,visibility .2s ease}
-        .nav-item{display:flex;align-items:center;gap:10px;min-height:42px;padding:10px 16px;margin:2px 8px;border-radius:8px;color:rgba(255,255,255,.68);font-size:14px;font-weight:500;transition:background .15s,color .15s,transform .15s}
+        .sidebar-overlay{position:fixed;inset:0;background:rgba(0,3,74,.52);backdrop-filter:blur(2px);z-index:55;opacity:0;visibility:hidden;transition:opacity .2s ease,visibility .2s ease}
+        .nav-item{display:flex;align-items:center;gap:11px;min-height:44px;padding:10px 12px;margin:2px 0;border-radius:9px;color:rgba(255,255,255,.72);font-size:14px;font-weight:500;transition:background .15s,color .15s,transform .15s}
         .ui-icon{display:inline-block;vertical-align:middle;flex:0 0 auto}
         .nav-item:hover{color:white;background:rgba(255,255,255,.07);transform:translateX(2px)}
         .nav-item.active{color:var(--gold);background:rgba(255,255,255,.1);font-weight:600}
@@ -44,7 +47,7 @@
         .progress-bar{height:8px;background:#f0f0f0;border-radius:4px;overflow:hidden}.progress-fill{height:100%;border-radius:4px;transition:width .3s}.alert{padding:12px 16px;border-radius:8px;font-size:14px;margin-bottom:16px}.alert-success{background:#e8f5ec;border:1px solid #c6e6d0;color:var(--green)}
         .mobile-card-list{display:none}.desktop-table{display:block}.filter-grid{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.filter-grid .form-input{width:auto;min-width:145px}.filter-advanced summary{list-style:none;display:inline-flex;align-items:center;min-height:40px;padding:8px 14px;border:1.5px solid var(--line);border-radius:8px;background:white;color:#1a1a2e;font-size:13px;font-weight:600;cursor:pointer}.filter-advanced summary::-webkit-details-marker{display:none}.filter-advanced summary::after{content:'+';margin-left:8px;color:var(--muted)}.filter-advanced[open]{flex-basis:100%}.filter-advanced[open] summary::after{content:'−'}.filter-advanced__grid{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;padding:12px;background:#f8f9fc;border:1px solid var(--line);border-radius:10px}.button-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.mobile-only{display:none}
         @media (max-width: 1023px){
-            .sidebar{transform:translateX(-105%)}body.sidebar-open .sidebar{transform:translateX(0)}body.sidebar-open .sidebar-overlay{opacity:1;visibility:visible}body.sidebar-open{overflow:hidden}
+            .sidebar{width:min(300px,88vw);transform:translateX(-105%);box-shadow:18px 0 48px rgba(0,3,74,.3)}body.sidebar-open .sidebar{transform:translateX(0)}body.sidebar-open .sidebar-overlay{opacity:1;visibility:visible}body.sidebar-open{overflow:hidden;touch-action:none}
             .sidebar-close,.mobile-menu-button{display:inline-flex;align-items:center;justify-content:center}.main-content{margin-left:0}.desktop-user-name{display:none}.content-shell{padding:18px}.topbar{padding:12px 18px;min-height:70px}
         }
         @media (max-width: 767px){
@@ -60,8 +63,8 @@
 <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
 <aside id="app-sidebar" class="sidebar" aria-label="Navigasi utama" aria-hidden="true" inert>
     <button id="sidebar-close" class="sidebar-close" type="button" aria-label="Tutup navigasi">×</button>
-    <div class="p-5 border-b border-white/10"><div class="flex items-center gap-3"><img src="{{ asset('img/logo-ypkm.jpg') }}" alt="Logo YPKM" class="w-10 h-10 rounded-lg" style="object-fit:cover;background:white;"><div><div class="font-bold text-lg text-white">PEDULI</div><div class="text-xs text-white/50">YPKM</div></div></div></div>
-    <nav class="p-3" style="padding-bottom:96px;">
+    <div class="sidebar-brand"><div class="flex items-center gap-3"><img src="{{ asset('img/logo-ypkm-transparent.png') }}" alt="Logo YPKM" class="w-10 h-10" style="object-fit:contain;"><div><div class="font-bold text-lg text-white">PEDULI</div><div class="text-xs text-white/50">YPKM</div></div></div></div>
+    <nav class="sidebar-nav">
         @if(auth()->check() && auth()->user()->isRelawan())
         <a href="{{ route('relawan.verifikasi') }}" class="nav-item {{ request()->routeIs('relawan*') ? 'active' : '' }}" @if(request()->routeIs('relawan*')) aria-current="page" @endif><x-icon name="users"/><span>Data & Validasi Penerima</span></a>
         <a href="{{ route('peta.index') }}" class="nav-item {{ request()->routeIs('peta*') ? 'active' : '' }}" @if(request()->routeIs('peta*')) aria-current="page" @endif><x-icon name="map"/><span>Peta Distribusi</span></a>
@@ -86,7 +89,7 @@
         <a href="{{ route('users.profile') }}" class="nav-item {{ request()->routeIs('users.profile*') ? 'active' : '' }}"><x-icon name="users"/><span>Profil Saya</span></a>
         @endif
     </nav>
-    <div style="position:absolute;bottom:0;left:0;right:0;padding:16px;border-top:1px solid rgba(255,255,255,.08);background:var(--navy);">
+    <div class="sidebar-footer">
         @auth<div style="padding:0 8px 10px;display:flex;align-items:center;gap:8px;"><div style="width:30px;height:30px;background:rgba(255,255,255,.1);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;color:white;">{{ strtoupper(substr(auth()->user()->name,0,1)) }}</div><div style="min-width:0;"><div style="font-size:13px;color:white;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ auth()->user()->name }}</div><div style="font-size:11px;color:var(--gold);">{{ ['super_admin'=>'Super Admin','admin'=>'Admin','pengurus'=>'Pengurus','bendahara'=>'Bendahara','staff'=>'Staff','staff_keuangan'=>'Staf Keuangan','relawan'=>'Relawan','ketua_kelompok'=>'Ketua Kelompok'][auth()->user()->role] ?? auth()->user()->role }}</div></div></div>@endauth
         <form method="POST" action="{{ route('logout') }}">@csrf<button class="flex items-center gap-3 text-white/60 hover:text-white w-full" style="padding:8px;border-radius:8px;font-size:14px;" type="submit"><x-icon name="logout"/><span>Keluar</span></button></form>
     </div>
