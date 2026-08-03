@@ -73,7 +73,10 @@
 
 /* ===== Business Card: Front (International 90x55) ===== */
 .biz-card{width:400px;height:244px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 24px 54px rgba(18,35,58,.18);position:relative;display:grid;grid-template-columns:1.15fr .85fr;border:1px solid #e2e8f0;flex-shrink:0}
-.biz-left{padding:20px 22px;display:flex;flex-direction:column;position:relative;z-index:10}
+.biz-card>.accent-bar{position:absolute;top:0;left:0;right:0;width:100%;z-index:20}
+.biz-card>.holo{position:absolute;inset:0;z-index:5}
+.biz-left{grid-column:1;padding:24px 22px 18px;display:flex;flex-direction:column;position:relative;z-index:10;min-width:0}
+.biz-right{grid-column:2;position:relative;overflow:hidden;min-width:0}
 .biz-brand{display:flex;align-items:center;gap:12px;margin-bottom:16px}
 .ypkm-logo{width:44px;height:44px;border-radius:8px;object-fit:cover;background:#fff;flex-shrink:0;border:1px solid #e2e8f0}
 .biz-brand-title{font-size:20px;font-weight:900;letter-spacing:1px;line-height:.95;color:#00034a}
