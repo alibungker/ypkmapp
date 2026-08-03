@@ -132,6 +132,12 @@ class UserController extends Controller
         return view('users.profile', compact('user'));
     }
 
+    public function card()
+    {
+        $user = auth()->user();
+        return view('users.card', compact('user'));
+    }
+
     public function updateProfile(Request $request)
     {
         $user = auth()->user();

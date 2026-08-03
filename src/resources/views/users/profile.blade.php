@@ -1,6 +1,8 @@
 @extends('layouts.app')
 @section('title', 'Profil Saya')
 @section('content')
+<div style="max-width:640px;margin:0 auto;padding:20px">
+<a href="{{ route('users.card') }}" class="mb-4 inline-flex items-center gap-2 px-4 py-2 bg-slate-800 text-white rounded-lg font-medium">🖨️ Cetak Kartu Anggota & Kartu Nama</a>
 <style>
 .profile-card{max-width:640px;margin:0 auto}
 .profile-avatar{width:80px;height:80px;border-radius:50%;background:#e5e7eb;display:flex;align-items:center;justify-content:center;font-size:28px;color:#00034a;margin-bottom:12px;border:2px solid #d1d5db}

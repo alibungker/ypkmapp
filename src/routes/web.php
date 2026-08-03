@@ -225,6 +225,7 @@ Route::middleware('auth')->group(function () {
         // Profil mandiri (semua role)
         Route::get('profil', [UserController::class, 'profile'])->name('users.profile');
         Route::put('profil', [UserController::class, 'updateProfile'])->name('users.profile.update');
+        Route::get('profil/kartu', [UserController::class, 'card'])->name('users.card');
 
         Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index')->middleware(\App\Http\Middleware\FinanceAccess::class);
         Route::get('laporan/export-csv', [LaporanController::class, 'exportCsv'])->name('laporan.export-csv')->middleware(\App\Http\Middleware\FinanceAccess::class);
