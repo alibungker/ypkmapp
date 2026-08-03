@@ -180,37 +180,37 @@
         </div>
         <div class="info-grid">
           <div class="info-item">
-            {@php echo $icon('<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>', '#00034a') @endphp}
+            {!! $icon('<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>', '#00034a') !!}
             <div><div class="info-label">Kode</div><div class="info-value mono">{{ $d->kode_distribusi }}</div></div>
           </div>
           <div class="info-item">
-            {@php echo $icon('<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>', '#00034a') @endphp}
+            {!! $icon('<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>', '#00034a') !!}
             <div><div class="info-label">Tanggal</div><div class="info-value">{{ is_object($d->tanggal) ? $d->tanggal->format('d M Y') : date('d M Y', strtotime($d->tanggal)) }}</div></div>
           </div>
           <div class="info-item full">
-            {@php echo $icon('<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>', '#017723') @endphp}
+            {!! $icon('<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>', '#017723') !!}
             <div><div class="info-label">Lokasi</div><div class="info-value">{{ $d->lokasi }}</div></div>
           </div>
           <div class="info-item">
-            {@php echo $icon('<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>', '#00034a') @endphp}
+            {!! $icon('<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>', '#00034a') !!}
             <div><div class="info-label">Kelompok</div><div class="info-value">{{ $kelompok->nama ?? '-' }}</div></div>
           </div>
           <div class="info-item">
-            {@php echo $icon('<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>', '#6b7280') @endphp}
+            {!! $icon('<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>', '#6b7280') !!}
             <div><div class="info-label">Ketua</div><div class="info-value">{{ optional(optional($kelompok)->ketuaUser)->name ?? '-' }}</div></div>
           </div>
           <div class="info-item">
-            {@php echo $icon('<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>', '#6b7280') @endphp}
+            {!! $icon('<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>', '#6b7280') !!}
             <div><div class="info-label">Penerima</div><div class="info-value">{{ number_format($kelompok->penerima_count ?? 0) }} orang</div></div>
           </div>
           <div class="info-item">
-            {@php echo $icon('<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>', '#017723') @endphp}
+            {!! $icon('<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>', '#017723') !!}
             <div><div class="info-label">Paket</div><div class="info-value">{{ number_format($d->jumlah_paket) }} paket
               @if($selisih !== 0) <span style="font-size:11px;font-weight:600;color:{{ $selisih > 0 ? '#b07d14' : '#dc2626' }};margin-left:4px">({{ $selisih > 0 ? '+' : '' }}{{ number_format($selisih) }})</span>@endif
             </div></div>
           </div>
           <div class="info-item">
-            {@php echo $icon('<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>', '#6b7280') @endphp}
+            {!! $icon('<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>', '#6b7280') !!}
             <div><div class="info-label">Sumber Dana</div><div class="info-value">{{ $d->sumber_dana ?? '-' }}</div></div>
           </div>
         </div>
