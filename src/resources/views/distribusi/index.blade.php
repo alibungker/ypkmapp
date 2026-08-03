@@ -2,7 +2,7 @@
 @section('title', 'Distribusi')
 @section('styles')
 <style>
-.dist-filter{padding:14px 20px;background:#f8fafc;border-bottom:1px solid #e5e7eb;display:grid;grid-template-columns:minmax(180px,2fr) repeat(2,minmax(140px,1fr)) repeat(2,minmax(120px,1fr)) auto auto;gap:10px;align-items:end}
+.dist-filter{padding:14px 20px;background:#f8fafc;border-bottom:1px solid #e5e7eb;display:grid;grid-template-columns:minmax(180px,2fr) repeat(2,minmax(140px,1fr)) auto auto;gap:10px;align-items:end}
 @media(max-width:900px){.dist-filter{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.dist-filter{grid-template-columns:1fr;padding:12px}}
 </style>
@@ -79,16 +79,8 @@
                 @endforeach
             </select>
         </div>
-        <div>
-            <label class="form-label">Dari tgl</label>
-            <input type="date" name="tanggal_mulai" value="{{ request('tanggal_mulai') }}" class="form-input">
-        </div>
-        <div>
-            <label class="form-label">Sampai tgl</label>
-            <input type="date" name="tanggal_selesai" value="{{ request('tanggal_selesai') }}" class="form-input">
-        </div>
-        <button type="submit" class="btn btn-primary">🔍 Filter</button>
-        <a href="{{ route('distribusi.index') }}" class="btn btn-outline" style="text-align:center;">Reset</a>
+        <button type="submit" class="btn btn-primary btn-sm" style="min-height:36px;">🔍 Filter</button>
+        <a href="{{ route('distribusi.index') }}" class="btn btn-outline btn-sm" style="text-align:center;min-height:36px;">Reset</a>
     </form>
     <div style="padding:10px 20px 0;color:#6b7280;font-size:12px;">Menampilkan <strong>{{ $distribusi->total() ?? 0 }}</strong> distribusi</div>
     <div class="card-body">
@@ -113,6 +105,7 @@
                 <th><a class="sort-link" href="{{ $sortLink('kegiatan') }}">Kegiatan <span class="sort-icon">{{ $sortIcon('kegiatan') }}</span></a></th>
                 <th><a class="sort-link" href="{{ $sortLink('kelompok') }}">Kelompok <span class="sort-icon">{{ $sortIcon('kelompok') }}</span></a></th>
                 <th><a class="sort-link" href="{{ $sortLink('target') }}">Target Paket <span class="sort-icon">{{ $sortIcon('target') }}</span></a></th>
+                <th>Isi Paket/Kegiatan</th>
                 <th><a class="sort-link" href="{{ $sortLink('penerima') }}">Penerima <span class="sort-icon">{{ $sortIcon('penerima') }}</span></a></th>
                 <th><a class="sort-link" href="{{ $sortLink('nilai') }}">Nilai <span class="sort-icon">{{ $sortIcon('nilai') }}</span></a></th>
                 <th><a class="sort-link" href="{{ $sortLink('tanggal') }}">Tanggal <span class="sort-icon">{{ $sortIcon('tanggal') }}</span></a></th>
@@ -125,6 +118,23 @@
                     <td style="font-weight:500;">{{ $d->nama_kegiatan }}</td>
                     <td>{{ $d->kelompok->nama ?? '-' }}</td>
                     <td style="font-weight:700;color:#b07d14;">{{ number_format($d->jumlah_paket) }} paket</td>
+                    <td style="min-width:180px;max-width:260px;">
+                        @if($d->items->isNotEmpty())
+                            <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                            @foreach($d->items as $item)
+                                <span class="badge badge-navy" title="{{ $item->barang->nama ?? 'Barang' }}">{{ $item->barang->nama ?? 'Barang' }}: {{ rtrim(rtrim(number_format($item->jumlah_per_paket, 2, ',', '.'), '0'), ',') }}/paket</span>
+                            @endforeach
+                            </div>
+                        @elseif($d->pembelianBarang->isNotEmpty())
+                            <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                            @foreach($d->pembelianBarang as $barang)
+                                <span class="badge badge-navy">{{ $barang->nama_barang ?? $barang->nama ?? 'Barang' }}: {{ number_format($barang->pivot->jumlah ?? 0) }}</span>
+                            @endforeach
+                            </div>
+                        @else
+                            <span style="font-size:12px;color:#9ca3af;">Belum ada rincian</span>
+                        @endif
+                    </td>
                     <td>👥 {{ number_format($d->kelompok->penerima_count ?? 0) }}</td>
                     <td>Rp {{ number_format($d->estimasi_nilai_total,0,',','.') }}</td>
                     <td style="color:#6b7280;">{{ is_object($d->tanggal) ? $d->tanggal->format('d M Y') : date('d M Y', strtotime($d->tanggal)) }}</td>
@@ -147,7 +157,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="8" style="padding:32px;text-align:center;color:#9ca3af;">Belum ada distribusi</td></tr>
+                <tr><td colspan="9" style="padding:32px;text-align:center;color:#9ca3af;">Belum ada distribusi</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -159,6 +169,13 @@
                 <div class="mobile-data-card__meta">
                     {{ $d->kelompok->nama ?? '-' }} · {{ is_object($d->tanggal) ? $d->tanggal->format('d/m/Y') : date('d/m/Y', strtotime($d->tanggal)) }}<br>
                     {{ number_format($d->jumlah_paket) }} paket · Rp {{ number_format($d->estimasi_nilai_total,0,',','.') }}
+                    @if($d->items->isNotEmpty()||$d->pembelianBarang->isNotEmpty())
+                    <br><span style="color:#00034a;font-weight:600;">Isi paket:</span>
+                    @foreach(($d->items->isNotEmpty()?$d->items:$d->pembelianBarang) as $item)
+                        @php $n = $d->items->isNotEmpty()?($item->barang->nama??'Barang').': '.(rtrim(rtrim(number_format($item->jumlah_per_paket,2,',','.'),'0'),',').'/pk') : (($item->nama_barang??$item->nama??'Barang').': '.number_format($item->pivot->jumlah??0)); @endphp
+                        {{ $n }}{{ !$loop->last ? ', ' : '' }}
+                    @endforeach
+                    @endif
                 </div>
                 <div style="margin-top:10px;">
                     @if($d->status == 'selesai') <span class="badge badge-green">Selesai</span>

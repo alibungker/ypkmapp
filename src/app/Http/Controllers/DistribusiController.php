@@ -37,6 +37,7 @@ class DistribusiController extends Controller
             'kelompok' => fn ($q) => $q->withCount('penerima')->with('ketuaUser'),
             'creator',
             'pembelianBarang',
+            'items.barang',
         ]);
         $user = auth()->user();
         if ($user->isKetuaKelompok()) {
