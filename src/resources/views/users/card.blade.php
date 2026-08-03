@@ -9,7 +9,8 @@ body{background:#0f172a;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
 .print-area{width:320px;height:500px;background:white;color:#0f172a;border-radius:20px;overflow:hidden;box-shadow:0 25px 50px -12px rgba(0,0,0,.35);position:relative;display:flex;flex-direction:column;border:1px solid #e2e8f0;flex-shrink:0}
 .rainbow-bar{height:8px;background:linear-gradient(90deg,#B71C1C 0%,#D32F2F 35%,#E65100 50%,#2E7D32 65%,#1565C0 85%,#5E35B1 100%);flex-shrink:0}
 .holo{position:absolute;inset:0;z-index:5;pointer-events:none;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.22) 48%,rgba(255,255,255,.05) 52%,transparent 60%)}
-.logo-7petal{width:34px;height:34px;flex-shrink:0}
+.logo-7petal{width:34px;height:34px;flex-shrink:0;overflow:hidden}
+.logo-7petal svg{width:100%!important;height:100%!important;max-width:34px;max-height:34px;display:block}
 /* ID Front */
 .id-header{padding:10px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #f1f5f9;position:relative;z-index:10}
 .id-header h2{font-size:7.5px;font-weight:800;text-transform:uppercase;color:#0f172a;line-height:1.15;margin:0}
@@ -44,7 +45,7 @@ body{background:#0f172a;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
 .biz-badge{background:#b91c1c;color:white;font-size:7px;font-weight:800;letter-spacing:.3px;padding:3px 8px;border-radius:4px;position:relative;z-index:10;flex-shrink:0}
 .biz-body{padding:0 16px;flex:1;display:flex;flex-direction:column;gap:3px;position:relative;z-index:10}
 .biz-row{display:flex;align-items:center;gap:6px;font-size:7.5px;color:#475569}
-.biz-row svg{width:12px;height:12px;flex-shrink:0;color:#b91c1c}
+.biz-row svg{width:12px!important;height:12px!important;flex-shrink:0;color:#b91c1c}
 .biz-footer{padding:8px 16px;border-top:1px solid #f1f5f9;display:flex;align-items:center;gap:6px;position:relative;z-index:10}
 .biz-footer small{font-size:6px;color:#94a3b8;font-weight:600}
 /* Biz Back */
