@@ -97,8 +97,8 @@ body{background:#0f172a;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
         <div class="holo"></div>
 
         <div class="id-header">
-            <div class="logo-7petal">
-                <svg viewBox="0 0 100 100" class="w-full h-full">
+            <div class="logo-7petal" style="width:34px;height:34px;flex-shrink:0;overflow:hidden">
+                <svg viewBox="0 0 100 100" style="width:100%;height:100%;max-width:34px;max-height:34px;display:block">
                     <g transform="translate(50,50)">
                         <path d="M 0,-7 C 8,-20 22,-36 34,-28 C 40,-24 35,-14 30,-10 C 36,-6 32,2 24,6 C 14,10 6,2 0,-7 Z" fill="#D32F2F"/>
                         <path d="M 0,-7 C 8,-20 22,-36 34,-28 C 40,-24 35,-14 30,-10 C 36,-6 32,2 24,6 C 14,10 6,2 0,-7 Z" fill="#1565C0" transform="rotate(51.43)"/>
@@ -156,8 +156,8 @@ body{background:#0f172a;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
         <div class="holo"></div>
 
         <div class="id-back-header" style="justify-content:center">
-            <div class="logo-7petal">
-                <svg viewBox="0 0 100 100" class="w-full h-full">
+            <div class="logo-7petal" style="width:34px;height:34px;flex-shrink:0;overflow:hidden">
+                <svg viewBox="0 0 100 100" style="width:100%;height:100%;max-width:34px;max-height:34px;display:block">
                     <g transform="translate(50,50)">
                         <path d="M 0,-7 C 8,-20 22,-36 34,-28 C 40,-24 35,-14 30,-10 C 36,-6 32,2 24,6 C 14,10 6,2 0,-7 Z" fill="#D32F2F"/>
                         <path d="M 0,-7 C 8,-20 22,-36 34,-28 C 40,-24 35,-14 30,-10 C 36,-6 32,2 24,6 C 14,10 6,2 0,-7 Z" fill="#1565C0" transform="rotate(51.43)"/>
@@ -192,8 +192,8 @@ body{background:#0f172a;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
         <div class="rainbow-bar"></div>
         <div class="holo"></div>
         <div class="biz-header">
-            <div class="logo-7petal">
-                <svg viewBox="0 0 100 100" class="w-full h-full">
+            <div class="logo-7petal" style="width:34px;height:34px;flex-shrink:0;overflow:hidden">
+                <svg viewBox="0 0 100 100" style="width:100%;height:100%;max-width:34px;max-height:34px;display:block">
                     <g transform="translate(50,50)">
                         <path d="M 0,-7 C 8,-20 22,-36 34,-28 C 40,-24 35,-14 30,-10 C 36,-6 32,2 24,6 C 14,10 6,2 0,-7 Z" fill="#D32F2F"/>
                         <path d="M 0,-7 C 8,-20 22,-36 34,-28 C 40,-24 35,-14 30,-10 C 36,-6 32,2 24,6 C 14,10 6,2 0,-7 Z" fill="#1565C0" transform="rotate(51.43)"/>
@@ -235,8 +235,8 @@ body{background:#0f172a;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
         <div class="rainbow-bar"></div>
         <div class="holo"></div>
         <div class="biz-back-header">
-            <div class="logo-7petal">
-                <svg viewBox="0 0 100 100" class="w-full h-full">
+            <div class="logo-7petal" style="width:34px;height:34px;flex-shrink:0;overflow:hidden">
+                <svg viewBox="0 0 100 100" style="width:100%;height:100%;max-width:34px;max-height:34px;display:block">
                     <g transform="translate(50,50)">
                         <path d="M 0,-7 C 8,-20 22,-36 34,-28 C 40,-24 35,-14 30,-10 C 36,-6 32,2 24,6 C 14,10 6,2 0,-7 Z" fill="#D32F2F"/>
                         <path d="M 0,-7 C 8,-20 22,-36 34,-28 C 40,-24 35,-14 30,-10 C 36,-6 32,2 24,6 C 14,10 6,2 0,-7 Z" fill="#1565C0" transform="rotate(51.43)"/>
@@ -257,8 +257,8 @@ body{background:#0f172a;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
             <p>Kunjungi portal resmi untuk laporan kegiatan & donasi: <b>peduli.ypkm.info</b></p>
         </div>
         <div class="biz-footer">
-            <div class="logo-7petal" style="width:20px;height:20px">
-                <svg viewBox="0 0 100 100" class="w-full h-full">
+            <div class="logo-7petal" style="width:20px;height:20px;flex-shrink:0;overflow:hidden">
+                <svg viewBox="0 0 100 100" style="width:100%;height:100%;max-width:34px;max-height:34px;display:block">
                     <g transform="translate(50,50)">
                         <path d="M 0,-7 C 8,-20 22,-36 34,-28 C 40,-24 35,-14 30,-10 C 36,-6 32,2 24,6 C 14,10 6,2 0,-7 Z" fill="#D32F2F"/>
                         <path d="M 0,-7 C 8,-20 22,-36 34,-28 C 40,-24 35,-14 30,-10 C 36,-6 32,2 24,6 C 14,10 6,2 0,-7 Z" fill="#1565C0" transform="rotate(51.43)"/>
