@@ -38,6 +38,7 @@
                                 data-email="{{ $u->email }}"
                                 data-role="{{ $u->role }}"
                                 data-phone="{{ $u->phone }}"
+                                data-foto="{{ $u->foto ? asset('storage/'.$u->foto) : '' }}"
                                 data-kelompok-id="{{ $u->kelompok_id }}"
                                 data-wilayah-kabupaten="{{ $u->wilayah_kabupaten }}"
                                 data-wilayah-kecamatan="{{ $u->wilayah_kecamatan }}"
@@ -65,8 +66,18 @@
 <div id="editModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:999;align-items:center;justify-content:center;" onclick="if(event.target===this)closeEdit()">
     <div style="background:white;border-radius:12px;padding:24px;width:90%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);" onclick="event.stopPropagation()">
         <h3 style="font-size:16px;font-weight:600;margin-bottom:16px;">✏️ Edit User</h3>
-        <form id="editForm" method="POST">
+        <form id="editForm" method="POST" enctype="multipart/form-data">
             @csrf @method('PUT')
+            <div style="display:flex;gap:16px;margin-bottom:12px;align-items:flex-start;">
+                <div style="flex:0 0 72px;">
+                    <img id="e_foto_preview" src="" alt="Foto" style="width:72px;height:84px;object-fit:cover;border-radius:10px;border:2px solid #e5e7eb;background:#f8f9fa;display:block;">
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <label class="form-label">Foto</label>
+                    <input type="file" name="foto" id="e_foto" class="form-input" accept="image/*" onchange="previewFoto(event)">
+                    <div style="font-size:11px;color:#9ca3af;margin-top:4px;">Kosongkan untuk mempertahankan foto lama.</div>
+                </div>
+            </div>
             <div style="margin-bottom:12px;">
                 <label class="form-label">Nama</label>
                 <input id="e_name" name="name" class="form-input" required>
@@ -144,6 +155,8 @@ function editUser(u) {
     document.getElementById('e_role').value = u.role;
     document.getElementById('e_phone').value = u.phone || '';
     document.getElementById('e_kelompok').value = u.kelompokId || '';
+    document.getElementById('e_foto').value = '';
+    document.getElementById('e_foto_preview').src = u.foto || '';
     // Toggle kelompok field
     const eBox = document.getElementById('e_kelompok_box');
     eBox.style.display = u.role === 'ketua_kelompok' ? 'block' : 'none';
@@ -154,6 +167,14 @@ function editUser(u) {
         document.getElementById('e_desa'),
         u.wilayahKabupaten, u.wilayahKecamatan, u.wilayahDesa
     );
+}
+function previewFoto(ev) {
+    const f = ev.target.files[0];
+    if (f) {
+        const r = new FileReader();
+        r.onload = e => { document.getElementById('e_foto_preview').src = e.target.result; };
+        r.readAsDataURL(f);
+    }
 }
 function closeEdit() { document.getElementById('editModal').style.display = 'none'; }
 
