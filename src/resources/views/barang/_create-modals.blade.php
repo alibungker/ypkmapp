@@ -9,18 +9,15 @@
         <form method="POST" action="{{ route('barang.kegiatan.store') }}" class="create-modal__form">
             @csrf <input type="hidden" name="form_type" value="kegiatan">
             <div class="form-field form-field--full"><label class="form-label">Nama Kegiatan <span>*</span></label><input type="text" name="nama_anggaran" class="form-input" required value="{{ old('form_type') === 'kegiatan' ? old('nama_anggaran') : '' }}" placeholder="Contoh: Distribusi Sembako Batch 4"></div>
-            <div class="form-field"><label class="form-label">Kategori <span>*</span></label><select name="kategori" class="form-input" required>@foreach(['barang_bantuan'=>'Barang Bantuan','transportasi'=>'Transportasi','konsumsi'=>'Konsumsi','sewa'=>'Sewa','atk'=>'ATK','cadangan'=>'Cadangan'] as $value=>$label)<option value="{{ $value }}" @selected(old('form_type') === 'kegiatan' && old('kategori') === $value)>{{ $label }}</option>@endforeach</select></div>
-            <div class="form-field"><label class="form-label">Target Paket</label><input type="number" min="0" name="target_paket" class="form-input" value="{{ old('form_type') === 'kegiatan' ? old('target_paket') : '' }}" placeholder="5000"></div>
-            <div class="form-field"><label class="form-label">Satuan</label><input type="text" name="satuan" class="form-input" value="{{ old('form_type') === 'kegiatan' ? old('satuan') : '' }}" placeholder="paket"></div>
+            <div class="form-field"><label class="form-label">Kategori <span>*</span></label><select name="kategori" class="form-input" required id="kegiatanKategori"><option value="">— Pilih Kategori —</option>@foreach(['barang_bantuan'=>'Barang Bantuan','transportasi'=>'Transportasi','konsumsi'=>'Konsumsi','sewa'=>'Sewa','atk'=>'ATK','cadangan'=>'Cadangan'] as $value=>$label)<option value="{{ $value }}" @selected(old('form_type') === 'kegiatan' && old('kategori') === $value)>{{ $label }}</option>@endforeach</select></div>
+            <div class="form-field" id="kegTargetPaketField"><label class="form-label">Target Paket</label><input type="number" min="0" name="target_paket" class="form-input" value="{{ old('form_type') === 'kegiatan' ? old('target_paket') : '' }}" placeholder="5000"></div>
+            <div class="form-field" id="kegSatuanField"><label class="form-label">Satuan</label><input type="text" name="satuan" class="form-input" value="{{ old('form_type') === 'kegiatan' ? old('satuan') : '' }}" placeholder="paket"></div>
             <div class="form-field"><label class="form-label">Anggaran Otomatis (Rp)</label><input type="number" min="0" step="0.01" name="anggaran" id="kegAnggaran" class="form-input auto-total" readonly value="{{ old('form_type') === 'kegiatan' ? old('anggaran', 0) : 0 }}"><small class="form-hint">Σ (harga satuan × jumlah barang)</small></div>
             <div class="form-field"><label class="form-label">Realisasi Otomatis (Rp)</label><input type="number" min="0" step="0.01" name="realisasi" id="kegRealisasi" class="form-input auto-total" readonly value="{{ old('form_type') === 'kegiatan' ? old('realisasi', 0) : 0 }}"><small class="form-hint">Σ (harga satuan × jumlah barang)</small></div>
             <div class="form-field form-field--full"><label class="form-label">Catatan/Status</label><input type="text" name="catatan" class="form-input" value="{{ old('form_type') === 'kegiatan' ? old('catatan') : '' }}" placeholder="Contoh: Direncanakan"></div>
-            <div class="form-field form-field--full">
-                <label class="form-label">Barang yang Disalurkan <span>*</span></label>
-                <div id="kegiatanBarangRows" class="allocation-list"></div>
-                <button type="button" class="btn btn-outline btn-sm" id="addKegiatanBarang">+ Tambah Jenis Barang</button>
-                <small class="form-hint">Pilih barang dari stok pembelian. Anggaran & realisasi terhitung otomatis dari harga satuan × jumlah.</small>
-            </div>
+            <div class="form-field form-field--full" id="kegBarangSection"><label class="form-label">Barang yang Disalurkan <span id="kegBarangReq">*</span></label><div id="kegiatanBarangRows" class="allocation-list"></div><button type="button" class="btn btn-outline btn-sm" id="addKegiatanBarang">+ Tambah Jenis Barang</button><small class="form-hint">Pilih barang dari stok pembelian. Anggaran & realisasi terhitung otomatis dari harga satuan × jumlah.</small></div>
+<div class="form-field form-field--full" id="kegRincianField" style="display:none"><label class="form-label">Rincian Biaya</label><textarea name="rincian_biaya" rows="4" class="form-input" placeholder="Contoh: 1. Sewa mobil Rp 500.000&#10;2. Driver Rp 200.000&#10;3. BBM Rp 100.000&#10;Total: Rp 800.000"></textarea><small class="form-hint">Input rincian manual untuk transportasi, konsumsi, sewa, ATK, atau cadangan.</small></div>
+<div class="form-field form-field--full" id="kegEstimasiField" style="display:none"><label class="form-label">Estimasi Biaya (Rp) <span style="color:#dc2626">*</span></label><input type="number" min="0" step="0.01" name="estimasi_biaya" class="form-input" placeholder="0"><small class="form-hint">Masukkan total estimasi biaya kegiatan ini.</small></div>
             <div class="create-modal__actions"><button type="button" class="btn btn-secondary" data-close-modal>Batal</button><button type="submit" class="btn btn-primary">Simpan Kegiatan</button></div>
         </form>
     </div>
@@ -81,3 +78,20 @@
         </form>
     </div>
 </div>
+
+<script>
+(function(){
+ const kategori=document.getElementById('kegiatanKategori'); if(!kategori)return;
+ const barang=document.getElementById('kegBarangSection'), target=document.getElementById('kegTargetPaketField'), satuan=document.getElementById('kegSatuanField'), rincian=document.getElementById('kegRincianField'), estimasiWrap=document.getElementById('kegEstimasiField'), anggaran=document.getElementById('kegAnggaran'), realisasi=document.getElementById('kegRealisasi'), estimasi=document.querySelector('input[name="estimasi_biaya"]');
+ function applyKategori(){
+  const isBarang=kategori.value==='barang_bantuan', belum=!kategori.value;
+  barang.style.display=(isBarang||belum)?'':'none'; target.style.display=(isBarang||belum)?'':'none'; satuan.style.display=(isBarang||belum)?'':'none';
+  rincian.style.display=(!isBarang&&!belum)?'':'none'; estimasiWrap.style.display=(!isBarang&&!belum)?'':'none';
+  anggaran.closest('.form-field').style.display=(isBarang||belum)?'':'none'; realisasi.closest('.form-field').style.display=(isBarang||belum)?'':'none';
+  estimasi.required=!isBarang&&!belum;
+ }
+ kategori.addEventListener('change',applyKategori);
+ estimasi.addEventListener('input',function(){anggaran.value=this.value||0;realisasi.value=0;});
+ applyKategori();
+})();
+</script>

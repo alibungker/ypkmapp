@@ -66,20 +66,31 @@ class BarangController extends Controller
             'anggaran' => 'required|numeric',
             'realisasi' => 'required|numeric',
             'catatan' => 'nullable',
+            'rincian_biaya' => 'nullable|string|max:2000',
+            'estimasi_biaya' => 'nullable|numeric|min:0',
             'barang' => 'nullable|array',
             'barang.*.pembelian_barang_id' => 'required_with:barang|integer|distinct|exists:pembelian_barang,id',
             'barang.*.jumlah' => 'required_with:barang|integer|min:1',
         ]);
         $alokasi = $data['barang'] ?? [];
         unset($data['barang']);
+        $rincian = $data['rincian_biaya'] ?? null;
+        $estimasi = $data['estimasi_biaya'] ?? null;
+        unset($data['rincian_biaya'], $data['estimasi_biaya']);
 
         // Nilai kegiatan wajib bersumber dari harga pembelian, bukan input browser.
-        $totalOtomatis = collect($alokasi)->sum(function ($baris) {
-            $harga = (float) PembelianBarang::whereKey($baris['pembelian_barang_id'])->value('harga_satuan');
-            return $harga * (int) $baris['jumlah'];
-        });
-        $data['anggaran'] = $totalOtomatis;
-        $data['realisasi'] = $totalOtomatis;
+        if ($data['kategori'] === 'barang_bantuan') {
+            $totalOtomatis = collect($alokasi)->sum(function ($baris) {
+                $harga = (float) PembelianBarang::whereKey($baris['pembelian_barang_id'])->value('harga_satuan');
+                return $harga * (int) $baris['jumlah'];
+            });
+            $data['anggaran'] = $totalOtomatis;
+            $data['realisasi'] = $totalOtomatis;
+        } else {
+            $data['anggaran'] = (float) ($estimasi ?? 0);
+            $data['realisasi'] = (float) ($estimasi ?? 0);
+            $data['catatan'] = trim(($data['catatan'] ?? '') . ($rincian ? "\n\nRincian:\n" . $rincian : ''));
+        }
 
         DB::transaction(function () use ($data, $alokasi) {
             $kegiatan = Anggaran::create($data);
