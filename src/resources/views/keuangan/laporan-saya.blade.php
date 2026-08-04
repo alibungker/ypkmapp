@@ -1,5 +1,8 @@
 @extends('layouts.app')
 @section('title', 'Laporan Keuangan Saya')
+@section('styles')
+<link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.dataTables.min.css">
+@endsection
 @section('content')
 <style>
 .ls-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:20px}
@@ -17,6 +20,7 @@
 .bukti-link:hover{text-decoration:underline}
 .card{background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);border:1px solid #eef0f3}
 .card-header{padding:16px 20px;border-bottom:1px solid #eef0f3}
+.dt-container{padding:14px 16px}.dt-container .dt-search input,.dt-container .dt-length select{border:1px solid #d0d5dd;border-radius:8px;padding:7px 10px;background:#fff}.dt-container .dt-search input:focus{outline:none;border-color:#00034a;box-shadow:0 0 0 3px rgba(0,3,74,.08)}.dt-container .dt-paging .dt-paging-button.current{background:#00034a!important;color:#fff!important;border-color:#00034a!important;border-radius:7px}.column-filter{width:100%;min-width:90px;border:1px solid #d0d5dd;border-radius:6px;padding:6px 8px;font-size:12px;background:#fff}.filter-row th{padding:7px 6px!important;background:#fff!important}.dt-info{color:#667085;font-size:12px}
 @media(max-width:640px){.ls-grid{grid-template-columns:1fr}}
 </style>
 
@@ -76,8 +80,11 @@
 <div class="card" style="margin-bottom:20px">
     <div class="card-header"><h3 style="font-size:15px;font-weight:700;color:#00034a;">💳 Riwayat Top-up Saya</h3></div>
     <div style="overflow-x:auto">
-    <table class="ls-table">
-        <thead><tr><th>Tanggal</th><th>Kegiatan</th><th style="text-align:right">Nominal</th><th>Status</th></tr></thead>
+    <table id="topupTable" class="ls-table display">
+        <thead>
+        <tr><th>Tanggal</th><th>Kegiatan</th><th style="text-align:right">Nominal</th><th>Status</th></tr>
+        <tr class="filter-row"><th><input class="column-filter" placeholder="Cari tanggal"></th><th><input class="column-filter" placeholder="Cari kegiatan"></th><th><input class="column-filter" placeholder="Cari nominal"></th><th><input class="column-filter" placeholder="Cari status"></th></tr>
+        </thead>
         <tbody>
         @forelse($topups as $t)
         <tr>
@@ -104,8 +111,11 @@
 <div class="card">
     <div class="card-header"><h3 style="font-size:15px;font-weight:700;color:#00034a;">📋 Riwayat Pengeluaran Saya</h3></div>
     <div style="overflow-x:auto">
-    <table class="ls-table">
-        <thead><tr><th>Tanggal</th><th>Deskripsi</th><th>Kategori</th><th>Kegiatan</th><th style="text-align:right">Jumlah</th><th>Bukti</th><th>Aksi</th></tr></thead>
+    <table id="pengeluaranTable" class="ls-table display">
+        <thead>
+        <tr><th>Tanggal</th><th>Deskripsi</th><th>Kategori</th><th>Kegiatan</th><th style="text-align:right">Jumlah</th><th>Bukti</th><th>Aksi</th></tr>
+        <tr class="filter-row"><th><input class="column-filter" placeholder="Cari tanggal"></th><th><input class="column-filter" placeholder="Cari deskripsi"></th><th><input class="column-filter" placeholder="Cari kategori"></th><th><input class="column-filter" placeholder="Cari kegiatan"></th><th><input class="column-filter" placeholder="Cari jumlah"></th><th><input class="column-filter" placeholder="Cari bukti"></th><th></th></tr>
+        </thead>
         <tbody>
         @forelse($biaya as $b)
         <tr>
@@ -137,9 +147,7 @@
         @endforelse
         </tbody>
     </table>
-    <div style="margin-top:14px;display:flex;justify-content:center;gap:4px">
-        {{ $biaya->links() }}
-    </div>
+
     </div>
 </div>
 
@@ -164,7 +172,39 @@
 </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/2.3.2/js/dataTables.min.js"></script>
 <script>
+document.addEventListener('DOMContentLoaded', function () {
+    function initDataTable(selector, noOrderTargets) {
+        var table = new DataTable(selector, {
+            pageLength: 20,
+            lengthMenu: [[10,20,50,-1],[10,20,50,'Semua']],
+            orderCellsTop: true,
+            order: [[0, 'desc']],
+            columnDefs: [{ targets: noOrderTargets, orderable: false, searchable: false }],
+            language: {
+                search: 'Cari semua:',
+                lengthMenu: 'Tampilkan _MENU_ data',
+                info: 'Menampilkan _START_–_END_ dari _TOTAL_ data',
+                infoEmpty: 'Tidak ada data',
+                infoFiltered: '(disaring dari _MAX_ data)',
+                zeroRecords: 'Data tidak ditemukan',
+                emptyTable: 'Belum ada data',
+                paginate: { first: 'Pertama', last: 'Terakhir', next: 'Berikutnya', previous: 'Sebelumnya' }
+            }
+        });
+        document.querySelectorAll(selector + ' thead .filter-row th').forEach(function(th, index) {
+            var input = th.querySelector('input');
+            if (!input) return;
+            input.addEventListener('click', function(e) { e.stopPropagation(); });
+            input.addEventListener('input', function() { table.column(index).search(this.value).draw(); });
+        });
+        return table;
+    }
+    initDataTable('#topupTable', []);
+    initDataTable('#pengeluaranTable', [6]);
+});
 function openCreateModal() {
     var html = '';
     html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">';

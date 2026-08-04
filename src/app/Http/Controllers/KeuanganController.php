@@ -102,7 +102,7 @@ class KeuanganController extends Controller
             ->orderBy('tanggal', 'desc');
         $total = (clone $biayaQuery)->sum('jumlah');
         $jumlahPengeluaran = (clone $biayaQuery)->count();
-        $biaya = $biayaQuery->paginate(20);
+        $biaya = $biayaQuery->get();
         $kegiatanList = Anggaran::orderBy('nama_anggaran')->get();
 
         // Topup data for this user
