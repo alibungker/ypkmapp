@@ -47,7 +47,7 @@
             <div><label class="form-label">Kategori <span style="color:#dc2626">*</span></label>
                 <select name="kategori" class="form-input" required>
                     <option value="">— Pilih —</option>
-                    @foreach(['barang_bantuan'=>'Barang Bantuan','transportasi'=>'Transportasi','konsumsi'=>'Konsumsi','sewa'=>'Sewa','atk'=>'ATK','cadangan'=>'Cadangan','lainnya'=>'Lainnya'] as $v=>$l)
+                    @foreach(['barang_bantuan'=>'Barang Bantuan','transportasi'=>'Transportasi','konsumsi'=>'Konsumsi','hotel'=>'Hotel','sewa'=>'Sewa','atk'=>'ATK','cadangan'=>'Cadangan','lainnya'=>'Lainnya'] as $v=>$l)
                     <option value="{{ $v }}" @selected(old('kategori')===$v)>{{ $l }}</option>
                     @endforeach
                 </select>
@@ -186,7 +186,7 @@ function openEdit(id) {
         html+='<div style="margin-bottom:10px"><label class="form-label">Tanggal</label><input type="date" name="tanggal" class="form-input" value="'+d.tanggal+'" required></div>';
         html+='<div style="margin-bottom:10px"><label class="form-label">Deskripsi</label><textarea name="deskripsi" rows="2" class="form-input" required>'+d.deskripsi+'</textarea></div>';
         html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px"><div><label class="form-label">Kategori</label><select name="kategori" class="form-input">';
-        ['barang_bantuan','transportasi','konsumsi','sewa','atk','cadangan','lainnya'].forEach(k=>{
+        ['barang_bantuan','transportasi','konsumsi','hotel','sewa','atk','cadangan','lainnya'].forEach(k=>{
             html+='<option value="'+k+'" '+(d.kategori===k?'selected':'')+'>'+k+'</option>';
         });
         html+='</select></div><div><label class="form-label">Jumlah (Rp)</label><input type="number" step="0.01" min="1" name="jumlah" class="form-input" value="'+d.jumlah+'" required></div></div>';
