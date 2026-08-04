@@ -97,12 +97,12 @@ class KeuanganController extends Controller
     public function laporanSaya()
     {
         $userId = auth()->id();
-        $biaya = BiayaOperasional::where('dicatat_oleh', $userId)
+        $biayaQuery = BiayaOperasional::where('dicatat_oleh', $userId)
             ->with('pencatat', 'distribusi', 'anggaran', 'buktis')
-            ->orderBy('tanggal', 'desc')
-            ->paginate(20);
-        $total = $biaya->sum('jumlah');
-        $jumlahPengeluaran = $biaya->total();
+            ->orderBy('tanggal', 'desc');
+        $total = (clone $biayaQuery)->sum('jumlah');
+        $jumlahPengeluaran = (clone $biayaQuery)->count();
+        $biaya = $biayaQuery->paginate(20);
         $kegiatanList = Anggaran::orderBy('nama_anggaran')->get();
 
         // Topup data for this user
