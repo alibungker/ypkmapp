@@ -1,5 +1,16 @@
 @extends('layouts.app')
 @section('title', 'Data Penerima')
+@section('styles')
+<link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.dataTables.min.css">
+<style>
+#penerimaTable thead tr:first-child th{background:#00034a;color:#fff;font-weight:600;text-transform:uppercase;letter-spacing:.5px;border-bottom:3px solid #e5a820}
+#penerimaTable tbody tr:nth-child(even){background:#f4f6fb}
+#penerimaTable tbody tr:hover{background:#fff7e6}
+#penerimaTable .dt-column-order:before,#penerimaTable .dt-column-order:after{color:#e5a820}
+.dt-container{padding:14px 16px}.dt-container .dt-search input,.dt-container .dt-length select{border:1.5px solid #cbd5e1;border-radius:8px;padding:7px 11px;background:#fff;font-size:13px}.dt-container .dt-search input:focus{outline:none;border-color:#00034a;box-shadow:0 0 0 3px rgba(0,3,74,.1)}.dt-container .dt-paging .dt-paging-button{border-radius:7px}.dt-container .dt-paging .dt-paging-button.current{background:#00034a!important;color:#fff!important;border-color:#00034a!important}.dt-container .dt-info{color:#667085;font-size:12px}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap}
+</style>
+@endsection
 @section('content')
 <div class="card">
     <div class="card-header">
@@ -66,10 +77,12 @@
             </div>
             <p style="font-size:12px;color:#667085;margin:8px 0 0;">Format: CSV (kolom sesuai template). Data valid langsung ditampilkan untuk dikonfirmasi sebelum disimpan. NIK duplikat & data tidak lengkap otomatis ditolak.</p>
         </details>
-        <p style="font-size:13px;color:#667085;margin:0 0 12px;">Menampilkan {{ number_format($penerima->total()) }} penerima</p>
+        <p style="font-size:13px;color:#667085;margin:0 0 12px;">Menampilkan {{ number_format(count($penerima)) }} penerima</p>
         <div class="table-wrap desktop-table">
-            <table class="table-data">
-                <thead><tr><th>Nama lengkap</th><th>NIK</th><th>Pekerjaan</th><th>Kecamatan</th><th>Desa</th><th>Status</th><th>Aksi</th></tr></thead>
+            <table id="penerimaTable" class="table-data display">
+                <thead>
+                    <tr><th>Nama Lengkap</th><th>NIK</th><th>Pekerjaan</th><th>Kecamatan</th><th>Desa</th><th>Status</th><th>Aksi</th></tr>
+                </thead>
                 <tbody>
                     @forelse($penerima as $p)
                     <tr>
@@ -132,12 +145,35 @@
             <div class="mobile-data-card" style="text-align:center;color:#667085;">Tidak ada penerima sesuai filter.</div>
             @endforelse
         </div>
-        <div style="margin-top:16px;">{{ $penerima->links() }}</div>
     </div>
 </div>
 @endsection
 
 @section('scripts')
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/2.3.2/js/dataTables.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    if (document.getElementById('penerimaTable')) {
+        new DataTable('#penerimaTable', {
+            pageLength: 20,
+            lengthMenu: [[10,20,50,-1],[10,20,50,'Semua']],
+            order: [[0,'asc']],
+            columnDefs: [{targets: 6, orderable: false, searchable: false}],
+            language: {
+                search: 'Cari semua:',
+                lengthMenu: 'Tampilkan _MENU_ data',
+                info: 'Menampilkan _START_–_END_ dari _TOTAL_ data',
+                infoEmpty: 'Tidak ada data',
+                infoFiltered: '(disaring dari _MAX_ data)',
+                zeroRecords: 'Data tidak ditemukan',
+                emptyTable: 'Belum ada data',
+                paginate: { first: 'Pertama', last: 'Terakhir', next: 'Berikutnya', previous: 'Sebelumnya' }
+            }
+        });
+    }
+});
+</script>
 <script>
 const fKab = document.getElementById('f_kab');
 const fKec = document.getElementById('f_kec');

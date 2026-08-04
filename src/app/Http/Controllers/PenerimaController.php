@@ -94,7 +94,7 @@ class PenerimaController extends Controller
             $query->where('terima_bantuan', (bool) $request->integer('status_terima'));
         }
 
-        $penerima = $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
+        $penerima = $query->orderBy('created_at', 'desc')->get();
 
         $kelompokQuery = Kelompok::query()->orderBy('nama');
         $user = auth()->user();
