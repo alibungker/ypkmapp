@@ -14,6 +14,10 @@ class KeuanganController extends Controller
 {
     public function index()
     {
+        if (auth()->user()->isBendahara()) {
+            return redirect()->route('keuangan.laporan-saya');
+        }
+
         $total_masuk = DanaDonatur::sum('jumlah');
         $total_biaya = BiayaOperasional::sum('jumlah');
         $total_bantuan = Distribusi::sum('estimasi_nilai_total');
@@ -88,6 +92,38 @@ class KeuanganController extends Controller
         $data['dicatat_oleh'] = auth()->id();
         BiayaOperasional::create($data);
         return back()->with('success', 'Biaya operasional dicatat.');
+    }
+
+    public function laporanSaya()
+    {
+        $userId = auth()->id();
+        $biaya = BiayaOperasional::where('dicatat_oleh', $userId)
+            ->with('pencatat', 'distribusi')
+            ->orderBy('tanggal', 'desc')
+            ->get();
+        $total = $biaya->sum('jumlah');
+        $jumlahPengeluaran = $biaya->count();
+        $distribusi_list = Distribusi::orderBy('tanggal', 'desc')->get();
+        return view('keuangan.laporan-saya', compact('biaya', 'total', 'jumlahPengeluaran', 'distribusi_list'));
+    }
+
+    public function storeBiayaSaya(Request $request)
+    {
+        $data = $request->validate([
+            'kategori' => 'required|string|max:100',
+            'deskripsi' => 'required|string|max:500',
+            'jumlah' => 'required|numeric|min:1',
+            'tanggal' => 'required|date',
+            'distribusi_id' => 'nullable|exists:distribusis,id',
+            'bukti_foto' => 'nullable|image|mimes:jpg,jpeg,png,pdf|max:5120',
+        ]);
+        $data['dicatat_oleh'] = auth()->id();
+        if ($request->hasFile('bukti_foto')) {
+            $path = $request->file('bukti_foto')->store('bukti_pengeluaran', 'public');
+            $data['bukti_foto'] = $path;
+        }
+        BiayaOperasional::create($data);
+        return back()->with('success', 'Pengeluaran berhasil dilaporkan.');
     }
 
     public function storeAnggaran(Request $request)

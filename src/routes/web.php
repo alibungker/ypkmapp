@@ -213,6 +213,8 @@ Route::middleware('auth')->group(function () {
 
     Route::prefix('keuangan')->name('keuangan.')->middleware(\App\Http\Middleware\FinanceAccess::class)->group(function () {
             Route::get('/', [KeuanganController::class, 'index'])->name('index')->middleware(\App\Http\Middleware\FinanceAccess::class);
+            Route::get('laporan-saya', [KeuanganController::class, 'laporanSaya'])->name('laporan-saya')->middleware(\App\Http\Middleware\FinanceAccess::class);
+            Route::post('laporan-saya/biaya', [KeuanganController::class, 'storeBiayaSaya'])->name('laporan-saya.biaya')->middleware(\App\Http\Middleware\FinanceAccess::class);
             Route::post('dana', [KeuanganController::class, 'storeDana'])->name('dana.store')->middleware(\App\Http\Middleware\FinanceAccess::class);
             Route::post('dana/{id}/update', [KeuanganController::class, 'updateDana'])->name('dana.update')->middleware(\App\Http\Middleware\FinanceAccess::class);
             Route::post('dana/{id}/delete', [KeuanganController::class, 'destroyDana'])->name('dana.delete')->middleware(\App\Http\Middleware\FinanceAccess::class);
