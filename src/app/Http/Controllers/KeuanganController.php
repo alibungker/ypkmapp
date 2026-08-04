@@ -183,7 +183,9 @@ class KeuanganController extends Controller
     {
         $topups = \DB::table('topup_anggarans')->orderByDesc('created_at')->get();
         $anggarans = Anggaran::orderBy('kategori')->get();
-        $users = \App\Models\User::orderBy('name')->get();
+        $users = auth()->user()->isAdmin()
+            ? \App\Models\User::orderBy('name')->get()
+            : \App\Models\User::whereKey(auth()->id())->get();
         return view('keuangan.topup', compact('topups', 'anggarans', 'users'));
     }
 
@@ -199,8 +201,10 @@ class KeuanganController extends Controller
             'keterangan' => 'nullable|max:500',
             'user_id' => 'nullable|exists:users,id',
         ]);
-        // Admin can select user; bendahara defaults to self
-        $data['user_id'] = $data['user_id'] ?? auth()->id();
+        // Only admin may select another user. Non-admin is always scoped to self.
+        $data['user_id'] = auth()->user()->isAdmin()
+            ? ($data['user_id'] ?? auth()->id())
+            : auth()->id();
         $data['diajukan_oleh'] = auth()->id();
         $data['status'] = 'diajukan';
         \DB::table('topup_anggarans')->insert($data + ['created_at' => now(), 'updated_at' => now()]);
