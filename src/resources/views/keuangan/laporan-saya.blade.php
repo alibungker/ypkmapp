@@ -63,7 +63,7 @@
             <button onclick="closeModal('createModal')" style="background:none;border:none;font-size:22px;cursor:pointer;color:#667085;padding:4px 8px" aria-label="Tutup">&times;</button>
         </div>
         <div style="padding:20px 22px;">
-            <form method="POST" action="{{ route('keuangan.laporan-saya.biaya') }}" enctype="multipart/form-data" onsubmit="return validateCreateForm()">
+            <form method="POST" action="{{ route('laporan-saya.biaya') }}" enctype="multipart/form-data" onsubmit="return validateCreateForm()">
                 @csrf
                 <div id="createFormContent"></div>
                 <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid #e5e7eb">
@@ -121,7 +121,7 @@
             <td>{{ is_object($b->tanggal) ? $b->tanggal->format('d M Y') : date('d M Y', strtotime($b->tanggal)) }}</td>
             <td style="max-width:260px">{{ $b->deskripsi }}</td>
             <td><span class="transaction-type">{{ ucfirst(str_replace('_',' ',$b->kategori)) }}</span></td>
-            <td>{{ $b->anggaran->nama_anggaran ?: ($b->anggaran->kategori ?? '-') }}</td>
+            <td>{{ $b->anggaran?->nama_anggaran ?: ($b->anggaran?->kategori ?? '-') }}</td>
             <td style="text-align:right;font-weight:700;color:#00034a">Rp {{ number_format($b->jumlah,0,',','.') }}</td>
             <td>
                 @if($b->bukti_foto)
@@ -135,7 +135,7 @@
             <td style="white-space:nowrap">
                 <button class="btn btn-outline btn-sm" style="padding:2px 8px;font-size:11px" onclick="openDetail({{ $b->id }})">👁️ Detail</button>
                 <button class="btn btn-outline btn-sm" style="padding:2px 8px;font-size:11px;color:#00034a" onclick="openEdit({{ $b->id }})">✏️</button>
-                <form method="POST" action="{{ route('keuangan.laporan-saya.destroy', $b->id) }}" style="display:inline" onsubmit="return confirm('Hapus pengeluaran ini?')">
+                <form method="POST" action="{{ route('laporan-saya.destroy', $b->id) }}" style="display:inline" onsubmit="return confirm('Hapus pengeluaran ini?')">
                     @csrf @method('DELETE')
                     <button class="btn btn-outline btn-sm" style="padding:2px 8px;font-size:11px;color:#dc2626">🗑️</button>
                 </form>
