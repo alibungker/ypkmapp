@@ -123,15 +123,25 @@ class BarangController extends Controller
             'target_paket' => 'nullable|integer',
             'satuan' => 'nullable',
             'catatan' => 'nullable',
+            'rincian_biaya' => 'nullable|string|max:2000',
+            'estimasi_biaya' => 'nullable|numeric|min:0',
         ]);
+        $rincian = $data['rincian_biaya'] ?? null;
+        $estimasi = $data['estimasi_biaya'] ?? null;
+        unset($data['rincian_biaya'], $data['estimasi_biaya']);
 
-        // Harga tetap bersumber dari pembelian dan alokasi barang kegiatan.
-        $totalOtomatis = (float) DB::table('kegiatan_barang as kb')
-            ->join('pembelian_barang as pb', 'pb.id', '=', 'kb.pembelian_barang_id')
-            ->where('kb.anggaran_id', $anggaran->id)
-            ->sum(DB::raw('kb.jumlah * pb.harga_satuan'));
-        $data['anggaran'] = $totalOtomatis;
-        $data['realisasi'] = $totalOtomatis;
+        if ($data['kategori'] === 'barang_bantuan') {
+            $totalOtomatis = (float) DB::table('kegiatan_barang as kb')
+                ->join('pembelian_barang as pb', 'pb.id', '=', 'kb.pembelian_barang_id')
+                ->where('kb.anggaran_id', $anggaran->id)
+                ->sum(DB::raw('kb.jumlah * pb.harga_satuan'));
+            $data['anggaran'] = $totalOtomatis;
+            $data['realisasi'] = $totalOtomatis;
+        } else {
+            $data['anggaran'] = (float) ($estimasi ?? 0);
+            $data['realisasi'] = (float) ($estimasi ?? 0);
+            $data['catatan'] = trim(($data['catatan'] ?? '') . ($rincian ? "\n\nRincian:\n" . $rincian : ''));
+        }
         $anggaran->update($data);
         return redirect()->route('barang.index')->with('success', 'Kegiatan diupdate.');
     }
