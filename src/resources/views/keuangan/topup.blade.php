@@ -11,8 +11,9 @@
 <div class="profile-section" style="background:#fff;border-radius:12px;padding:20px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.06)">
 <h3 style="font-size:14px;font-weight:700;color:#00034a;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid #e5e7eb">📝 Ajukan Top-up Baru</h3>
 <form method="POST" action="{{ route('keuangan.topup.store') }}">@csrf
-<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px" class="mobile-stack">
-<div><label class="form-label">Anggaran Target <span style="color:#dc2626">*</span></label><select name="anggaran_id" class="form-input" required><option value="">— Pilih Anggaran Kegiatan —</option>@foreach($anggarans as $a)<option value="{{ $a->id }}">{{ $a->nama_anggaran ?: $a->kategori }}{{ $a->target_paket ? ' — '.$a->target_paket.' '.($a->satuan?:'paket') : '' }} (Rp {{ number_format($a->anggaran,0,',','.') }})</option>@endforeach</select><small class="form-hint" style="display:block;margin-top:4px;color:#6b7280;">Sumber: menu <strong>Barang &amp; Kegiatan → tab Kegiatan</strong>. Buat anggaran kegiatan di sana terlebih dahulu agar muncul di daftar ini.</small></div>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px" class="mobile-stack">
+<div><label class="form-label">User Penerima Top-up <span style="color:#dc2626">*</span></label><select name="user_id" class="form-input" required><option value="">— Pilih User —</option>@foreach($users as $u)<option value="{{ $u->id }}" {{ old('user_id')==$u->id?'selected':'' }}>{{ $u->name }} — {{ $u->email }} ({{ ucfirst(str_replace('_',' ',$u->role)) }})</option>@endforeach</select><small class="form-hint" style="display:block;margin-top:4px;color:#6b7280;">Saldo top-up akan muncul di halaman laporan pribadi user terpilih.</small></div>
+<div><label class="form-label">Anggaran Target <span style="color:#dc2626">*</span></label><select name="anggaran_id" class="form-input" required><option value="">— Pilih Anggaran Kegiatan —</option>@foreach($anggarans as $a)<option value="{{ $a->id }}">{{ $a->nama_anggaran ?: $a->kategori }}{{ $a->target_paket ? ' — '.$a->target_paket.' '.($a->satuan?:'paket') : '' }} (Rp {{ number_format($a->anggaran,0,',','.') }})</option>@endforeach</select><small class="form-hint" style="display:block;margin-top:4px;color:#6b7280;">Sumber: menu <strong>Barang &amp; Kegiatan → tab Kegiatan</strong>.</small></div>
 <div><label class="form-label">Nominal <span style="color:#dc2626">*</span></label><input type="number" step="0.01" min="1" name="nominal" class="form-input" required placeholder="0"></div>
 <div><label class="form-label">Tanggal <span style="color:#dc2626">*</span></label><input type="date" name="tanggal" class="form-input" required value="{{ now()->format('Y-m-d') }}"></div>
 </div>
@@ -29,12 +30,13 @@
 <h3 style="font-size:14px;font-weight:700;color:#00034a;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid #e5e7eb">📋 Riwayat Top-up</h3>
 <div class="table-wrap" style="overflow-x:auto">
 <table class="topup-table">
-<thead><tr><th>Tanggal</th><th>Anggaran</th><th>Nominal</th><th>Sumber Dana</th><th>Status</th><th>Diajukan Oleh</th><th>Disetujui Oleh</th><th>Aksi</th></tr></thead>
+<thead><tr><th>Tanggal</th><th>User Penerima</th><th>Anggaran</th><th>Nominal</th><th>Sumber Dana</th><th>Status</th><th>Diajukan Oleh</th><th>Disetujui Oleh</th><th>Aksi</th></tr></thead>
 <tbody>
 @forelse($topups as $t)
 <tr>
 <td>{{ \Carbon\Carbon::parse($t->created_at)->format('d M Y H:i') }}</td>
-<td>{{ $t->anggaran_id ? \App\Models\Anggaran::find($t->anggaran_id)->kategori ?? '-' : 'Umum' }}</td>
+<td><strong>{{ $t->user_id ? (\App\Models\User::find($t->user_id)->name ?? '-') : '-' }}</strong><br><small style="color:#6b7280">{{ $t->user_id ? (\App\Models\User::find($t->user_id)->email ?? '') : '' }}</small></td>
+<td>{{ $t->anggaran_id ? (\App\Models\Anggaran::find($t->anggaran_id)->nama_anggaran ?? \App\Models\Anggaran::find($t->anggaran_id)->kategori ?? '-') : 'Umum' }}</td>
 <td>Rp {{ number_format($t->nominal,0,',','.') }}</td>
 <td>{{ $t->sumber_dana ?: '-' }}</td>
 <td><span class="badge {{ $t->status==='disetujui'?'bg-green':($t->status==='diajukan'?'bg-amber':($t->status==='ditolak'?'bg-red':'bg-gray')) }}">{{ $t->status }}</span></td>
@@ -48,7 +50,7 @@
 </td>
 </tr>
 @empty
-<tr><td colspan="8" style="text-align:center;color:#9ca3af;padding:30px">Belum ada pengajuan top-up</td></tr>
+<tr><td colspan="9" style="text-align:center;color:#9ca3af;padding:30px">Belum ada pengajuan top-up</td></tr>
 @endforelse
 </tbody>
 </table>

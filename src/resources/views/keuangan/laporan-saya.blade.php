@@ -34,9 +34,9 @@
 @endif
 
 <div class="ls-grid">
+    <div class="ls-card" style="background:linear-gradient(135deg,#00034a,#01266b);border:none;"><h4 style="color:rgba(255,255,255,.7)">Saldo Top-up Saya</h4><div class="val" style="color:#ffd966">{{ $totalTopup ? 'Rp '.number_format($sisaSaldo,0,',','.') : 'Rp 0' }}</div><div style="color:rgba(255,255,255,.55);font-size:11px;margin-top:4px">Dari Rp {{ number_format($totalTopup,0,',','.') }} disetujui</div></div>
     <div class="ls-card"><h4>Total Pengeluaran Saya</h4><div class="val">Rp {{ number_format($total,0,',','.') }}</div></div>
     <div class="ls-card"><h4>Jumlah Transaksi</h4><div class="val gold">{{ $jumlahPengeluaran }}</div></div>
-    <div class="ls-card"><h4>Bukti Terlampir</h4><div class="val green">{{ $biaya->whereNotNull('bukti_foto')->count() }}</div></div>
 </div>
 
 <div class="ls-form">
@@ -70,6 +70,33 @@
         </div>
         <div style="display:flex;justify-content:flex-end;margin-top:18px"><button type="submit" class="btn btn-primary">📤 Simpan Pengeluaran</button></div>
     </form>
+</div>
+
+<div class="card" style="margin-bottom:20px">
+    <div class="card-header"><h3 style="font-size:15px;font-weight:700;color:#00034a;">💳 Riwayat Top-up Saya</h3></div>
+    <div style="overflow-x:auto">
+    <table class="ls-table">
+        <thead><tr><th>Tanggal</th><th>Kegiatan</th><th style="text-align:right">Nominal</th><th>Status</th></tr></thead>
+        <tbody>
+        @forelse($topups as $t)
+        <tr>
+            <td>{{ \Carbon\Carbon::parse($t->created_at)->format('d M Y H:i') }}</td>
+            <td>{{ $t->anggaran_id ? (\App\Models\Anggaran::find($t->anggaran_id)->nama_anggaran ?? \App\Models\Anggaran::find($t->anggaran_id)->kategori ?? '-') : 'Umum' }}</td>
+            <td style="text-align:right;font-weight:700;color:#00034a">Rp {{ number_format($t->nominal,0,',','.') }}</td>
+            <td>
+                @if($t->status==='disetujui') <span class="badge-bukti bg-green">✅ Disetujui</span>
+                @elseif($t->status==='diajukan') <span class="badge-bukti" style="background:#fef3c7;color:#92400e">⏳ Diajukan</span>
+                @elseif($t->status==='ditolak') <span class="badge-bukti bg-red">❌ Ditolak</span>
+                @else <span class="badge-bukti" style="background:#e5e7eb;color:#374151">{{ $t->status }}</span>
+                @endif
+            </td>
+        </tr>
+        @empty
+        <tr><td colspan="4" style="text-align:center;color:#9ca3af;padding:28px">Belum ada top-up untuk Anda</td></tr>
+        @endforelse
+        </tbody>
+    </table>
+    </div>
 </div>
 
 <div class="card">

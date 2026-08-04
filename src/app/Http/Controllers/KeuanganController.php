@@ -104,7 +104,20 @@ class KeuanganController extends Controller
         $total = $biaya->sum('jumlah');
         $jumlahPengeluaran = $biaya->count();
         $kegiatanList = Anggaran::orderBy('nama_anggaran')->get();
-        return view('keuangan.laporan-saya', compact('biaya', 'total', 'jumlahPengeluaran', 'kegiatanList'));
+
+        // Topup data for this user
+        $topups = \DB::table('topup_anggarans')
+            ->where('user_id', $userId)
+            ->orderByDesc('created_at')
+            ->get();
+        $totalTopup = $topups->where('status', 'disetujui')->sum('nominal');
+        $totalTopupDiajukan = $topups->whereIn('status', ['diajukan', 'disetujui'])->sum('nominal');
+        $sisaSaldo = $totalTopup - $total;
+
+        return view('keuangan.laporan-saya', compact(
+            'biaya', 'total', 'jumlahPengeluaran', 'kegiatanList',
+            'topups', 'totalTopup', 'totalTopupDiajukan', 'sisaSaldo'
+        ));
     }
 
     public function storeBiayaSaya(Request $request)
@@ -170,7 +183,8 @@ class KeuanganController extends Controller
     {
         $topups = \DB::table('topup_anggarans')->orderByDesc('created_at')->get();
         $anggarans = Anggaran::orderBy('kategori')->get();
-        return view('keuangan.topup', compact('topups', 'anggarans'));
+        $users = \App\Models\User::orderBy('name')->get();
+        return view('keuangan.topup', compact('topups', 'anggarans', 'users'));
     }
 
     public function topupStore(Request $request)
@@ -183,7 +197,10 @@ class KeuanganController extends Controller
             'sumber_dana' => 'nullable|max:150',
             'nomor_referensi' => 'nullable|max:100',
             'keterangan' => 'nullable|max:500',
+            'user_id' => 'nullable|exists:users,id',
         ]);
+        // Admin can select user; bendahara defaults to self
+        $data['user_id'] = $data['user_id'] ?? auth()->id();
         $data['diajukan_oleh'] = auth()->id();
         $data['status'] = 'diajukan';
         \DB::table('topup_anggarans')->insert($data + ['created_at' => now(), 'updated_at' => now()]);
@@ -203,9 +220,12 @@ class KeuanganController extends Controller
                 Anggaran::where('id', $topup->anggaran_id)->increment('anggaran', $topup->nominal);
             }
             \DB::table('dana_donaturs')->insert(['donatur' => $topup->sumber_dana ?: 'Top-up Anggaran', 'tanggal_masuk' => $topup->tanggal, 'jumlah' => $topup->nominal, 'jenis' => 'transfer', 'keterangan' => 'Top-up: ' . $topup->keterangan, 'dicatat_oleh' => auth()->id(), 'created_at' => now(), 'updated_at' => now()]);
+            if ($topup->user_id) {
+                \DB::table('users')->where('id', $topup->user_id)->increment('saldo_topup', $topup->nominal);
+            }
         });
         \DB::table('audit_logs')->insert(['user_id' => auth()->id(), 'aksi' => 'topup.approve', 'model' => 'TopupAnggaran', 'model_id' => $id, 'detail' => json_encode(['nominal' => $topup->nominal, 'old_anggaran' => $oldAnggaran, 'new_anggaran' => $oldAnggaran + $topup->nominal]), 'ip' => $request->ip(), 'created_at' => now(), 'updated_at' => now()]);
-        return back()->with('success', 'Top-up disetujui. Anggaran dan dana masuk diperbarui.');
+        return back()->with('success', 'Top-up disetujui. Anggaran dan saldo user diperbarui.');
     }
 
     public function topupReject(Request $request, $id)

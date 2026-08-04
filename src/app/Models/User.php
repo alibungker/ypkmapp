@@ -8,7 +8,7 @@ class User extends Authenticatable
 {
     use Notifiable;
 
-    protected $fillable = ['name','email','password','role','kelompok_id','phone','foto','is_active','wilayah_kabupaten','wilayah_kecamatan','wilayah_desa','nik','nip','jabatan','status_aktif','tempat_lahir','tanggal_lahir','jenis_kelamin','alamat_lengkap','kode_keanggotaan','nama_bank','nomor_rekening','atas_nama_rekening'];
+    protected $fillable = ['name','email','password','role','saldo_topup','kelompok_id','phone','foto','is_active','wilayah_kabupaten','wilayah_kecamatan','wilayah_desa','nik','nip','jabatan','status_aktif','tempat_lahir','tanggal_lahir','jenis_kelamin','alamat_lengkap','kode_keanggotaan','nama_bank','nomor_rekening','atas_nama_rekening'];
     protected $hidden = ['password','remember_token'];
 
     protected static function booted(): void
