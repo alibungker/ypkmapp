@@ -100,9 +100,9 @@ class KeuanganController extends Controller
         $biaya = BiayaOperasional::where('dicatat_oleh', $userId)
             ->with('pencatat', 'distribusi', 'anggaran', 'buktis')
             ->orderBy('tanggal', 'desc')
-            ->get();
+            ->paginate(20);
         $total = $biaya->sum('jumlah');
-        $jumlahPengeluaran = $biaya->count();
+        $jumlahPengeluaran = $biaya->total();
         $kegiatanList = Anggaran::orderBy('nama_anggaran')->get();
 
         // Topup data for this user

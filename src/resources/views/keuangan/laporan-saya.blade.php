@@ -137,6 +137,9 @@
         @endforelse
         </tbody>
     </table>
+    <div style="margin-top:14px;display:flex;justify-content:center;gap:4px">
+        {{ $biaya->links() }}
+    </div>
     </div>
 </div>
 
