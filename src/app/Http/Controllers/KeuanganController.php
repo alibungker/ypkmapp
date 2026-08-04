@@ -98,13 +98,13 @@ class KeuanganController extends Controller
     {
         $userId = auth()->id();
         $biaya = BiayaOperasional::where('dicatat_oleh', $userId)
-            ->with('pencatat', 'distribusi')
+            ->with('pencatat', 'distribusi', 'anggaran')
             ->orderBy('tanggal', 'desc')
             ->get();
         $total = $biaya->sum('jumlah');
         $jumlahPengeluaran = $biaya->count();
-        $distribusi_list = Distribusi::orderBy('tanggal', 'desc')->get();
-        return view('keuangan.laporan-saya', compact('biaya', 'total', 'jumlahPengeluaran', 'distribusi_list'));
+        $kegiatanList = Anggaran::orderBy('nama_anggaran')->get();
+        return view('keuangan.laporan-saya', compact('biaya', 'total', 'jumlahPengeluaran', 'kegiatanList'));
     }
 
     public function storeBiayaSaya(Request $request)
@@ -114,7 +114,7 @@ class KeuanganController extends Controller
             'deskripsi' => 'required|string|max:500',
             'jumlah' => 'required|numeric|min:1',
             'tanggal' => 'required|date',
-            'distribusi_id' => 'nullable|exists:distribusis,id',
+            'anggaran_id' => 'nullable|exists:anggarans,id',
             'bukti_foto' => 'nullable|image|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
         $data['dicatat_oleh'] = auth()->id();

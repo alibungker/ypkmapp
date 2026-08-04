@@ -76,8 +76,9 @@ class DanaDonatur extends Model
 class BiayaOperasional extends Model
 {
     protected $table = 'biaya_operasionals';
-    protected $fillable = ['distribusi_id', 'batch_kegiatan', 'pihak_penerima', 'kategori', 'deskripsi', 'jumlah', 'tanggal', 'bukti_foto', 'dicatat_oleh'];
+    protected $fillable = ['distribusi_id', 'anggaran_id', 'batch_kegiatan', 'pihak_penerima', 'kategori', 'deskripsi', 'jumlah', 'tanggal', 'bukti_foto', 'dicatat_oleh'];
     public function distribusi() { return $this->belongsTo(Distribusi::class); }
+    public function anggaran() { return $this->belongsTo(Anggaran::class); }
     public function pencatat() { return $this->belongsTo(User::class, 'dicatat_oleh'); }
 
     public function scopeBatch($q, $batch) { return $q->where('batch_kegiatan', $batch); }

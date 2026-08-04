@@ -58,12 +58,13 @@
         <div style="margin-top:14px"><label class="form-label">Deskripsi Pengeluaran <span style="color:#dc2626">*</span></label><textarea name="deskripsi" rows="2" class="form-input" required placeholder="Contoh: Pembelian bahan pokok batch 4">{{ old('deskripsi') }}</textarea></div>
         <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
             <div><label class="form-label">Kegiatan Terkait</label>
-                <select name="distribusi_id" class="form-input">
+                <select name="anggaran_id" class="form-input">
                     <option value="">— Tidak terkait kegiatan —</option>
-                    @foreach($distribusi_list as $d)
-                    <option value="{{ $d->id }}" @selected(old('distribusi_id')==$d->id)>{{ $d->nama_kegiatan }} ({{ $d->daerah ?? '-' }})</option>
+                    @foreach($kegiatanList as $k)
+                    <option value="{{ $k->id }}" @selected(old('anggaran_id')==$k->id)>{{ $k->nama_anggaran ?: $k->kategori }} (Rp {{ number_format($k->anggaran,0,',','.') }})</option>
                     @endforeach
                 </select>
+                <small class="form-hint" style="color:#667085">Daftar dari Barang &amp; Kegiatan → tab Kegiatan</small>
             </div>
             <div><label class="form-label">Bukti Pengeluaran</label><input type="file" name="bukti_foto" class="form-input" accept=".jpg,.jpeg,.png,.pdf"><small class="form-hint" style="color:#667085">Foto nota/kwitansi (JPG/PNG/PDF, maks 5MB)</small></div>
         </div>
@@ -82,7 +83,7 @@
             <td>{{ is_object($b->tanggal) ? $b->tanggal->format('d M Y') : date('d M Y', strtotime($b->tanggal)) }}</td>
             <td style="max-width:260px">{{ $b->deskripsi }}</td>
             <td><span class="transaction-type">{{ ucfirst(str_replace('_',' ',$b->kategori)) }}</span></td>
-            <td>{{ $b->distribusi->nama_kegiatan ?? '-' }}</td>
+            <td>{{ $b->anggaran->nama_anggaran ?: ($b->anggaran->kategori ?? '-') }}</td>
             <td style="text-align:right;font-weight:700;color:#00034a">Rp {{ number_format($b->jumlah,0,',','.') }}</td>
             <td>
                 @if($b->bukti_foto)
