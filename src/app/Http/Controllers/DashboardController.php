@@ -52,8 +52,12 @@ class DashboardController extends Controller
 
             if ($role === 'keuangan') {
                 $biayaSaya = BiayaOperasional::where('dicatat_oleh', $user->id);
-                $stats['saldo_topup_saya'] = (float) ($user->saldo_topup ?? 0);
+                $stats['total_topup_saya'] = (float) DB::table('topup_anggarans')
+                    ->where('user_id', $user->id)
+                    ->where('status', 'disetujui')
+                    ->sum('nominal');
                 $stats['total_biaya_saya'] = (clone $biayaSaya)->sum('jumlah');
+                $stats['saldo_topup_saya'] = $stats['total_topup_saya'] - $stats['total_biaya_saya'];
                 $stats['transaksi_saya'] = (clone $biayaSaya)->count();
                 $stats['tanpa_bukti_saya'] = (clone $biayaSaya)
                     ->whereNull('bukti_foto')

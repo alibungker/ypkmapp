@@ -112,7 +112,7 @@ class KeuanganController extends Controller
             ->get();
         $totalTopup = $topups->where('status', 'disetujui')->sum('nominal');
         $totalTopupDiajukan = $topups->whereIn('status', ['diajukan', 'disetujui'])->sum('nominal');
-        $sisaSaldo = $totalTopup - $total;
+        $sisaSaldo = max(0, $totalTopup - $total);
 
         return view('keuangan.laporan-saya', compact(
             'biaya', 'total', 'jumlahPengeluaran', 'kegiatanList',
