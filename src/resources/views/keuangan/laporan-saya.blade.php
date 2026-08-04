@@ -15,8 +15,9 @@
 .bg-green{background:#dcfce7;color:#065f46}.bg-red{background:#fee2e2;color:#991b1b}
 .bukti-link{display:inline-flex;align-items:center;gap:5px;color:#00034a;font-weight:600;text-decoration:none}
 .bukti-link:hover{text-decoration:underline}
-.ls-form{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.06);border:1px solid #eef0f3;margin-bottom:20px}
-@media(max-width:640px){.ls-grid{grid-template-columns:1fr}.ls-form .row{grid-template-columns:1fr!important}}
+.card{background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.06);border:1px solid #eef0f3}
+.card-header{padding:16px 20px;border-bottom:1px solid #eef0f3}
+@media(max-width:640px){.ls-grid{grid-template-columns:1fr}}
 </style>
 
 <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px">
@@ -33,46 +34,45 @@
 <div style="background:#fee2e2;border:1px solid #fecaca;color:#991b1b;padding:12px 16px;border-radius:10px;margin-bottom:16px;font-size:13px;">{{ $errors->first() }}</div>
 @endif
 
+{{-- Card Summary --}}
 <div class="ls-grid">
-    <div class="ls-card" style="background:linear-gradient(135deg,#00034a,#01266b);border:none;"><h4 style="color:rgba(255,255,255,.7)">Saldo Top-up Saya</h4><div class="val" style="color:#ffd966">{{ $totalTopup ? 'Rp '.number_format($sisaSaldo,0,',','.') : 'Rp 0' }}</div><div style="color:rgba(255,255,255,.55);font-size:11px;margin-top:4px">Dari Rp {{ number_format($totalTopup,0,',','.') }} disetujui</div></div>
+    <div class="ls-card" style="background:linear-gradient(135deg,#00034a,#01266b);border:none;">
+        <h4 style="color:rgba(255,255,255,.7)">Saldo Top-up Saya</h4>
+        <div class="val" style="color:#ffd966">{{ $totalTopup ? 'Rp '.number_format($sisaSaldo,0,',','.') : 'Rp 0' }}</div>
+        <div style="color:rgba(255,255,255,.55);font-size:11px;margin-top:4px">Dari Rp {{ number_format($totalTopup,0,',','.') }} disetujui</div>
+    </div>
     <div class="ls-card"><h4>Total Pengeluaran Saya</h4><div class="val">Rp {{ number_format($total,0,',','.') }}</div></div>
     <div class="ls-card"><h4>Jumlah Transaksi</h4><div class="val gold">{{ $jumlahPengeluaran }}</div></div>
 </div>
 
-<div class="ls-form">
-    <h3 style="font-size:15px;font-weight:700;color:#00034a;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid #eef0f3;">➕ Lapor Pengeluaran Baru</h3>
-    <form method="POST" action="{{ route('keuangan.laporan-saya.biaya') }}" enctype="multipart/form-data">
-        @csrf
-        <div class="row" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px">
-            <div><label class="form-label">Kategori <span style="color:#dc2626">*</span></label>
-                <select name="kategori" class="form-input" required>
-                    <option value="">— Pilih —</option>
-                    @foreach(['barang_bantuan'=>'Barang Bantuan','transportasi'=>'Transportasi','konsumsi'=>'Konsumsi','hotel'=>'Hotel','sewa'=>'Sewa','atk'=>'ATK','cadangan'=>'Cadangan','lainnya'=>'Lainnya'] as $v=>$l)
-                    <option value="{{ $v }}" @selected(old('kategori')===$v)>{{ $l }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div><label class="form-label">Jumlah (Rp) <span style="color:#dc2626">*</span></label><input type="number" min="1" step="0.01" name="jumlah" class="form-input" required value="{{ old('jumlah') }}" placeholder="0"></div>
-            <div><label class="form-label">Tanggal <span style="color:#dc2626">*</span></label><input type="date" name="tanggal" class="form-input" required value="{{ old('tanggal', now()->format('Y-m-d')) }}"></div>
-        </div>
-        <div style="margin-top:14px"><label class="form-label">Deskripsi Pengeluaran <span style="color:#dc2626">*</span></label><textarea name="deskripsi" rows="2" class="form-input" required placeholder="Contoh: Pembelian bahan pokok batch 4">{{ old('deskripsi') }}</textarea></div>
-        <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
-            <div><label class="form-label">Kegiatan Terkait</label>
-                <select name="anggaran_id" class="form-input">
-                    <option value="">— Tidak terkait kegiatan —</option>
-                    @foreach($kegiatanList as $k)
-                    <option value="{{ $k->id }}" @selected(old('anggaran_id')==$k->id)>{{ $k->nama_anggaran ?: $k->kategori }} (Rp {{ number_format($k->anggaran,0,',','.') }})</option>
-                    @endforeach
-                </select>
-                <small class="form-hint" style="display:block;margin-top:4px;color:#6b7280">Daftar dari Barang &amp; Kegiatan → tab Kegiatan</small></div>
-            <div><label class="form-label">Bukti Pengeluaran</label><input type="file" name="bukti_foto" class="form-input" accept=".jpg,.jpeg,.png,.pdf"><small class="form-hint" style="display:block;margin-top:4px;color:#6b7280">Foto nota/kwitansi (JPG/PNG/PDF, maks 5MB)</small></div>
-        </div>
-        <div style="margin-top:12px"><label class="form-label">Bukti Tambahan (Opsional)</label><input type="file" name="bukti_files[]" class="form-input" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx" multiple><small class="form-hint" style="display:block;margin-top:4px;color:#6b7280">Gambar atau dokumen (JPG/PNG/PDF/DOC, maks 5MB per file)</small></div>
-        </div>
-        <div style="display:flex;justify-content:flex-end;margin-top:18px"><button type="submit" class="btn btn-primary">📤 Simpan Pengeluaran</button></div>
-    </form>
+{{-- Tombol pemicu modal --}}
+<div style="margin-bottom:20px;display:flex;gap:10px;align-items:center">
+    <button onclick="openCreateModal()" class="btn btn-primary" style="font-size:14px;padding:10px 20px">
+        ➕ Lapor Pengeluaran Baru
+    </button>
 </div>
 
+{{-- Modal Form Pengeluaran --}}
+<div id="createModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:1050;align-items:center;justify-content:center;" onclick="if(event.target===this)closeModal('createModal')">
+    <div style="background:white;border-radius:12px;width:90%;max-width:700px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);">
+        <div style="padding:18px 22px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center">
+            <h3 style="font-size:16px;font-weight:700;margin:0">📝 Lapor Pengeluaran Baru</h3>
+            <button onclick="closeModal('createModal')" style="background:none;border:none;font-size:22px;cursor:pointer;color:#667085;padding:4px 8px" aria-label="Tutup">&times;</button>
+        </div>
+        <div style="padding:20px 22px;">
+            <form method="POST" action="{{ route('laporan-saya.biaya') }}" enctype="multipart/form-data" onsubmit="return validateCreateForm()">
+                @csrf
+                <div id="createFormContent"></div>
+                <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid #e5e7eb">
+                    <button type="button" onclick="closeModal('createModal')" class="btn btn-outline">Batal</button>
+                    <button type="submit" class="btn btn-primary">💾 Simpan Pengeluaran</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{{-- Riwayat Top-up --}}
 <div class="card" style="margin-bottom:20px">
     <div class="card-header"><h3 style="font-size:15px;font-weight:700;color:#00034a;">💳 Riwayat Top-up Saya</h3></div>
     <div style="overflow-x:auto">
@@ -100,6 +100,7 @@
     </div>
 </div>
 
+{{-- Riwayat Pengeluaran --}}
 <div class="card">
     <div class="card-header"><h3 style="font-size:15px;font-weight:700;color:#00034a;">📋 Riwayat Pengeluaran Saya</h3></div>
     <div style="overflow-x:auto">
@@ -161,44 +162,83 @@
 </div>
 
 <script>
+function openCreateModal() {
+    var html = '';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">';
+    html += '<div><label class="form-label">Kategori <span style="color:#dc2626">*</span></label><select name="kategori" class="form-input" required><option value="">— Pilih —</option>';
+    @foreach(['barang_bantuan'=>'Barang Bantuan','transportasi'=>'Transportasi','konsumsi'=>'Konsumsi','hotel'=>'Hotel','sewa'=>'Sewa','atk'=>'ATK','cadangan'=>'Cadangan','lainnya'=>'Lainnya'] as $v=>$l)
+    html += '<option value="{{ $v }}">{{ $l }}</option>';
+    @endforeach
+    html += '</select></div>';
+    html += '<div><label class="form-label">Jumlah (Rp) *</label><input type="number" step="0.01" min="1" name="jumlah" class="form-input" required></div>';
+    html += '</div>';
+    html += '<div style="margin-bottom:14px"><label class="form-label">Tanggal *</label><input type="date" name="tanggal" class="form-input" required value="{{ date('Y-m-d') }}"></div>';
+    html += '<div style="margin-bottom:14px"><label class="form-label">Deskripsi Pengeluaran *</label><textarea name="deskripsi" rows="2" class="form-input" required placeholder="Contoh: Pembelian bahan pokok batch 4"></textarea></div>';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px"><div><label class="form-label">Kegiatan Terkait</label><select name="anggaran_id" class="form-input"><option value="">— Tidak terkait kegiatan —</option>';
+    @foreach($kegiatanList as $k)
+    html += '<option value="{{ $k->id }}">{{ $k->nama_anggaran ?: $k->kategori }} (Rp {{ number_format($k->anggaran,0,',','.') }})</option>';
+    @endforeach
+    html += '</select></div>';
+    html += '<div><label class="form-label">Bukti Utama (Opsional)</label><input type="file" name="bukti_foto" class="form-input" accept="image/*,.pdf"></div>';
+    html += '</div>';
+    html += '<div style="margin-bottom:14px"><label class="form-label">Unggah Bukti Tambahan (Opsional)</label><input type="file" name="bukti_files[]" class="form-input" multiple accept="image/*,.pdf,.doc,.docx"><div style="font-size:12px;color:#667085;margin-top:4px">Max 5 MB per file. Format: JPG, PNG, PDF, DOC, DOCX.</div></div>';
+    document.getElementById('createFormContent').innerHTML=html;
+    document.getElementById('createModal').style.display='flex';
+}
+function validateCreateForm() {
+    var kat = document.querySelector('#createFormContent select[name="kategori"]');
+    var jum = document.querySelector('#createFormContent input[name="jumlah"]');
+    var tgl = document.querySelector('#createFormContent input[name="tanggal"]');
+    var desc = document.querySelector('#createFormContent textarea[name="deskripsi"]');
+    if (!kat || !kat.value) { alert('Kategori wajib dipilih.'); return false; }
+    if (!jum || !jum.value || parseFloat(jum.value) <= 0) { alert('Jumlah harus lebih dari 0.'); return false; }
+    if (!tgl || !tgl.value) { alert('Tanggal wajib diisi.'); return false; }
+    if (!desc || !desc.value.trim()) { alert('Deskripsi wajib diisi.'); return false; }
+    return true;
+}
 function openDetail(id) {
-    fetch('/keuangan/laporan-saya/'+id+'/detail')
-    .then(r=>r.json()).then(d=>{
-        let html='<p><strong>Tanggal:</strong> '+d.tanggal+'</p>';
-        html+='<p><strong>Deskripsi:</strong> '+d.deskripsi+'</p>';
-        html+='<p><strong>Kategori:</strong> '+d.kategori+'</p>';
-        html+='<p><strong>Kegiatan:</strong> '+(d.anggaran_nama||'-')+'</p>';
-        html+='<p><strong>Jumlah:</strong> Rp '+number_format(d.jumlah)+'</p>';
-        if(d.bukti_foto) html+='<p><strong>Bukti Utama:</strong> <a href="'+d.bukti_foto+'" target="_blank">📎 Lihat</a></p>';
-        if(d.buktis.length){
-            html+='<p><strong>Bukti Tambahan ('+d.buktis.length+'):</strong></p><ul style="font-size:12px">';
-            d.buktis.forEach(b=>{html+='<li><a href="'+b.url+'" target="_blank">'+b.name+' ('+b.tipe+')</a></li>'});
-            html+='</ul>';
-        }
+    fetch('/keuangan/laporan-saya/'+id+'/detail').then(function(r){return r.json()}).then(function(d){
+        var html='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">';
+        html+='<div><strong>Tanggal</strong><br>'+(d.tanggal||'-')+'</div>';
+        html+='<div><strong>Kategori</strong><br>'+(d.kategori||'-')+'</div>';
+        html+='</div>';
+        html+='<div style="margin-bottom:10px"><strong>Deskripsi</strong><p>'+(d.deskripsi||'-')+'</p></div>';
+        html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px"><div><strong>Kegiatan</strong><br>'+(d.anggaran_nama||'— Tidak terkait —')+'</div><div><strong>Jumlah</strong><br style="color:#00034a;font-size:18px">Rp '+number_format(d.jumlah)+'</div></div>';
+        if(d.bukti_foto){html+='<div style="margin-bottom:10px"><strong>Bukti Utama</strong><br><a href="'+d.bukti_foto+'" target="_blank">📎 Buka file</a></div>';}
+        if(d.buktis&&d.buktis.length){html+='<div><strong>Bukti Tambahan ('+d.buktis.length+')</strong><ul style="padding-left:18px;font-size:13px">';
+        d.buktis.forEach(function(b){html+='<li><a href="'+b.url+'" target="_blank">'+b.name+'</a> <span style="color:#667085">('+b.tipe+')</span></li>';});
+        html+='</ul></div>';}
         document.getElementById('detailContent').innerHTML=html;
         document.getElementById('detailModal').style.display='flex';
     });
 }
 function openEdit(id) {
-    fetch('/keuangan/laporan-saya/'+id+'/detail')
-    .then(r=>r.json()).then(d=>{
-        let html='<form method="POST" action="/keuangan/laporan-saya/'+d.id+'" enctype="multipart/form-data">@csrf @method("PUT")';
-        html+='<div style="margin-bottom:10px"><label class="form-label">Tanggal</label><input type="date" name="tanggal" class="form-input" value="'+d.tanggal+'" required></div>';
-        html+='<div style="margin-bottom:10px"><label class="form-label">Deskripsi</label><textarea name="deskripsi" rows="2" class="form-input" required>'+d.deskripsi+'</textarea></div>';
-        html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px"><div><label class="form-label">Kategori</label><select name="kategori" class="form-input">';
-        ['barang_bantuan','transportasi','konsumsi','hotel','sewa','atk','cadangan','lainnya'].forEach(k=>{
-            html+='<option value="'+k+'" '+(d.kategori===k?'selected':'')+'>'+k+'</option>';
+    fetch('/keuangan/laporan-saya/'+id+'/detail').then(function(r){return r.json()}).then(function(d){
+        var html='<form method="POST" action="/keuangan/laporan-saya/'+d.id+'" enctype="multipart/form-data">';
+        html+='<input type="hidden" name="_token" value="{{ csrf_token() }}"><input type="hidden" name="_method" value="PUT">';
+        html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px"><div><label class="form-label">Kategori</label><select name="kategori" class="form-input">';
+        ['barang_bantuan','transportasi','konsumsi','hotel','sewa','atk','cadangan','lainnya'].forEach(function(k){
+            html+='<option value="'+k+'"'+(d.kategori===k?' selected':'')+'>'+k+'</option>';
         });
         html+='</select></div><div><label class="form-label">Jumlah (Rp)</label><input type="number" step="0.01" min="1" name="jumlah" class="form-input" value="'+d.jumlah+'" required></div></div>';
-        html+='<div style="margin-bottom:10px"><label class="form-label">Kegiatan Terkait</label><select name="anggaran_id" class="form-input"><option value="">— Tidak terkait —</option></select></div>';
-        html+='<div style="margin-bottom:10px"><label class="form-label">Bukti Tambahan</label><input type="file" name="bukti_files[]" class="form-input" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx" multiple></div>';
-        html+='<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px"><button type="button" onclick="closeModal(\'editModal\')" class="btn btn-outline">Batal</button><button type="submit" class="btn btn-primary">💾 Update</button></div></form>';
+        html+='<div style="margin-bottom:14px"><label class="form-label">Tanggal</label><input type="date" name="tanggal" class="form-input" value="'+d.tanggal+'" required></div>';
+        html+='<div style="margin-bottom:14px"><label class="form-label">Deskripsi</label><textarea name="deskripsi" rows="2" class="form-input" required>'+d.deskripsi+'</textarea></div>';
+        html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px"><div><label class="form-label">Kegiatan Terkait</label><select name="anggaran_id" class="form-input"><option value="">— Tidak terkait —</option>';
+        @foreach($kegiatanList as $k)
+        html+='<option value="{{ $k->id }}"'+ (d.anggaran_id==='{{ $k->id }}'?' selected':'') +'>{{ $k->nama_anggaran ?: $k->kategori }}</option>';
+        @endforeach
+        html+='</select></div><div><label class="form-label">Bukti Utama (ganti jika perlu)</label><input type="file" name="bukti_foto" class="form-input" accept="image/*,.pdf"></div></div>';
+        html+='<div style="margin-bottom:14px"><label class="form-label">Unggah Bukti Tambahan</label><input type="file" name="bukti_files[]" class="form-input" multiple accept="image/*,.pdf,.doc,.docx"><div style="font-size:12px;color:#667085;margin-top:4px">Max 5 MB per file. JPG, PNG, PDF, DOC, DOCX.</div></div>';
+        if(d.buktis&&d.buktis.length){html+='<div style="margin-bottom:10px"><strong>Bukti saat ini:</strong><ul style="padding-left:18px;font-size:12px">';
+        d.buktis.forEach(function(b){html+='<li>'+b.name+' <a href="/keuangan/laporan-saya/bukti/'+b.id+'/hapus" style="color:#dc2626" onclick="return confirm(\'Hapus bukti ini?\')">🗑</a></li>';});
+        html+='</ul></div>';}
+        html+='<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;padding-top:14px;border-top:1px solid #e5e7eb"><button type="button" onclick="closeModal(\'editModal\')" class="btn btn-outline">Batal</button><button type="submit" class="btn btn-primary">💾 Update</button></div></form>';
         document.getElementById('editContent').innerHTML=html;
         document.getElementById('editModal').style.display='flex';
     });
 }
 function closeModal(id) { document.getElementById(id).style.display='none'; }
 function number_format(n) { return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
-document.addEventListener('click',function(e){if(e.target.id==='detailModal'||e.target.id==='editModal')e.target.style.display='none'});
+document.addEventListener('click',function(e){if(e.target.id==='detailModal'||e.target.id==='editModal'||e.target.id==='createModal')e.target.style.display='none'});
 </script>
 @endsection
