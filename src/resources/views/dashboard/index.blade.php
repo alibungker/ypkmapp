@@ -14,6 +14,7 @@
         </div>
         <div style="font-size:13px;color:#667085;margin-top:3px;">
             @if($role === 'admin') Ringkasan seluruh data operasional YPKM.
+            @elseif($role === 'keuangan') Ringkasan akuntabilitas dana dan pengeluaran pribadi Anda.
             @elseif($role === 'relawan') Data wilayah kerja: {{ $wilayahLabel ?: 'belum ditetapkan' }}.
             @else Data khusus kelompok: {{ $kelompokNama ?: 'belum terhubung' }}.
             @endif
@@ -21,6 +22,44 @@
     </div>
 </div>
 {{-- Stats --}}
+@if($role === 'keuangan')
+@php
+    $danaAwalSaya = ($stats['saldo_topup_saya'] ?? 0) + ($stats['total_biaya_saya'] ?? 0);
+    $pemakaianSaya = $stats['pemakaian_dana_saya'] ?? 0;
+@endphp
+<div class="mobile-stack" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:20px;">
+    <a href="{{ route('keuangan.laporan-saya') }}" class="stat-card" style="text-decoration:none;background:#00034a;color:white;border-top:3px solid #d6b665;">
+        <div style="font-size:12px;color:rgba(255,255,255,.66);text-transform:uppercase;letter-spacing:.06em;">Saldo Tersedia</div>
+        <div class="stat-value" style="color:white;margin-top:10px;font-size:25px;">Rp {{ number_format($stats['saldo_topup_saya'] ?? 0,0,',','.') }}</div>
+        <div style="font-size:12px;color:#d6b665;margin-top:6px;">Dari Rp {{ number_format($danaAwalSaya,0,',','.') }} dana disetujui</div>
+    </a>
+    <a href="{{ route('keuangan.laporan-saya') }}" class="stat-card" style="text-decoration:none;border-top:3px solid #b07d14;">
+        <div style="font-size:12px;color:#667085;text-transform:uppercase;letter-spacing:.06em;">Total Pengeluaran</div>
+        <div class="stat-value" style="color:#00034a;margin-top:10px;font-size:25px;">Rp {{ number_format($stats['total_biaya_saya'] ?? 0,0,',','.') }}</div>
+        <div style="font-size:12px;color:#9a6b0d;margin-top:6px;">{{ number_format($pemakaianSaya,1,',','.') }}% dana telah digunakan</div>
+    </a>
+    <a href="{{ route('keuangan.laporan-saya') }}" class="stat-card" style="text-decoration:none;border-top:3px solid #017723;">
+        <div style="font-size:12px;color:#667085;text-transform:uppercase;letter-spacing:.06em;">Transaksi Saya</div>
+        <div class="stat-value" style="color:#017723;margin-top:10px;font-size:25px;">{{ number_format($stats['transaksi_saya'] ?? 0) }}</div>
+        <div style="font-size:12px;color:#667085;margin-top:6px;">Pengeluaran tercatat</div>
+    </a>
+    <a href="{{ route('keuangan.laporan-saya') }}#riwayat-pengeluaran" class="stat-card" style="text-decoration:none;border-top:3px solid {{ ($stats['tanpa_bukti_saya'] ?? 0) > 0 ? '#b42318' : '#017723' }};">
+        <div style="font-size:12px;color:#667085;text-transform:uppercase;letter-spacing:.06em;">Tanpa Bukti</div>
+        <div class="stat-value" style="color:{{ ($stats['tanpa_bukti_saya'] ?? 0) > 0 ? '#b42318' : '#017723' }};margin-top:10px;font-size:25px;">{{ number_format($stats['tanpa_bukti_saya'] ?? 0) }}</div>
+        <div style="font-size:12px;color:#667085;margin-top:6px;">Perlu dilengkapi</div>
+    </a>
+</div>
+<div class="card" style="margin-bottom:24px;overflow:hidden;">
+    <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;gap:16px;align-items:center;">
+        <div><h3 style="font-size:15px;font-weight:700;">Pemakaian Dana</h3><p style="font-size:12px;color:#667085;margin-top:3px;">Pengeluaran pribadi terhadap total dana yang disetujui.</p></div>
+        <strong style="color:#00034a;font-size:18px;">{{ number_format($pemakaianSaya,1,',','.') }}%</strong>
+    </div>
+    <div style="padding:18px 20px;">
+        <div class="progress-bar" style="height:10px;"><div class="progress-fill" style="width:{{ min(100,$pemakaianSaya) }}%;background:linear-gradient(90deg,#017723,#b07d14);"></div></div>
+        <div style="display:flex;justify-content:space-between;gap:16px;margin-top:9px;font-size:12px;color:#667085;"><span>Terpakai Rp {{ number_format($stats['total_biaya_saya'] ?? 0,0,',','.') }}</span><span>Tersisa Rp {{ number_format($stats['saldo_topup_saya'] ?? 0,0,',','.') }}</span></div>
+    </div>
+</div>
+@else
 <div class="mobile-stack" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:24px;">
     <div class="stat-card">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
@@ -66,6 +105,7 @@
         @endif
     </div>
 </div>
+@endif
 
 @if($role === 'admin')
 @php

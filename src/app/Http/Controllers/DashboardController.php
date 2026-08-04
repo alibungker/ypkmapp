@@ -49,6 +49,26 @@ class DashboardController extends Controller
 
         if ($user->isAdmin() || $user->canViewKeuangan()) {
             $role = $user->isAdmin() ? 'admin' : 'keuangan';
+
+            if ($role === 'keuangan') {
+                $biayaSaya = BiayaOperasional::where('dicatat_oleh', $user->id);
+                $stats['saldo_topup_saya'] = (float) ($user->saldo_topup ?? 0);
+                $stats['total_biaya_saya'] = (clone $biayaSaya)->sum('jumlah');
+                $stats['transaksi_saya'] = (clone $biayaSaya)->count();
+                $stats['tanpa_bukti_saya'] = (clone $biayaSaya)
+                    ->whereNull('bukti_foto')
+                    ->whereDoesntHave('buktis')
+                    ->count();
+                $stats['pemakaian_dana_saya'] = ($stats['saldo_topup_saya'] + $stats['total_biaya_saya']) > 0
+                    ? round($stats['total_biaya_saya'] / ($stats['saldo_topup_saya'] + $stats['total_biaya_saya']) * 100, 1)
+                    : 0;
+                $stats['pengeluaran_terbaru_saya'] = (clone $biayaSaya)
+                    ->with('anggaran')
+                    ->orderByDesc('tanggal')
+                    ->take(5)
+                    ->get();
+            }
+
             $stats['penerima'] = Penerima::count();
             $stats['penerima_terverifikasi'] = Penerima::where('status', 'terverifikasi')->count();
             $stats['penerima_pending'] = Penerima::where('status', 'pending')->count();
