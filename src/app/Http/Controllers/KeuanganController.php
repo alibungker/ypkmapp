@@ -98,7 +98,7 @@ class KeuanganController extends Controller
     {
         $userId = auth()->id();
         $biaya = BiayaOperasional::where('dicatat_oleh', $userId)
-            ->with('pencatat', 'distribusi', 'anggaran')
+            ->with('pencatat', 'distribusi', 'anggaran', 'buktis')
             ->orderBy('tanggal', 'desc')
             ->get();
         $total = $biaya->sum('jumlah');
@@ -129,14 +129,103 @@ class KeuanganController extends Controller
             'tanggal' => 'required|date',
             'anggaran_id' => 'nullable|exists:anggarans,id',
             'bukti_foto' => 'nullable|image|mimes:jpg,jpeg,png,pdf|max:5120',
+            'bukti_files.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:5120',
         ]);
         $data['dicatat_oleh'] = auth()->id();
         if ($request->hasFile('bukti_foto')) {
             $path = $request->file('bukti_foto')->store('bukti_pengeluaran', 'public');
             $data['bukti_foto'] = $path;
         }
-        BiayaOperasional::create($data);
+        unset($data['bukti_files']);
+        $biaya = BiayaOperasional::create($data);
+        // Multi bukti
+        if ($request->hasFile('bukti_files')) {
+            foreach ($request->file('bukti_files') as $file) {
+                $ext = strtolower($file->getClientOriginalExtension());
+                $tipe = in_array($ext, ['jpg','jpeg','png']) ? 'gambar' : 'dokumen';
+                $path = $file->store('bukti_pengeluaran', 'public');
+                \App\Models\BiayaBukti::create([
+                    'biaya_id' => $biaya->id,
+                    'file_path' => $path,
+                    'file_name' => $file->getClientOriginalName(),
+                    'tipe' => $tipe,
+                ]);
+            }
+        }
         return back()->with('success', 'Pengeluaran berhasil dilaporkan.');
+    }
+
+    public function detailBiayaSaya($id)
+    {
+        $biaya = BiayaOperasional::with(['anggaran', 'buktis', 'pencatat'])
+            ->where('dicatat_oleh', auth()->id())
+            ->findOrFail($id);
+        return response()->json([
+            'id' => $biaya->id,
+            'kategori' => $biaya->kategori,
+            'deskripsi' => $biaya->deskripsi,
+            'jumlah' => $biaya->jumlah,
+            'tanggal' => \Carbon\Carbon::parse($biaya->tanggal)->format('Y-m-d'),
+            'anggaran_id' => $biaya->anggaran_id,
+            'anggaran_nama' => $biaya->anggaran?->nama_anggaran,
+            'bukti_foto' => $biaya->bukti_foto ? asset('storage/' . $biaya->bukti_foto) : null,
+            'buktis' => $biaya->buktis->map(fn($b) => [
+                'id' => $b->id,
+                'url' => asset('storage/' . $b->file_path),
+                'name' => $b->file_name,
+                'tipe' => $b->tipe,
+            ]),
+        ]);
+    }
+
+    public function updateBiayaSaya(Request $request, $id)
+    {
+        $biaya = BiayaOperasional::where('dicatat_oleh', auth()->id())->findOrFail($id);
+        $data = $request->validate([
+            'kategori' => 'required|string|max:100',
+            'deskripsi' => 'required|string|max:500',
+            'jumlah' => 'required|numeric|min:1',
+            'tanggal' => 'required|date',
+            'anggaran_id' => 'nullable|exists:anggarans,id',
+            'bukti_files.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:5120',
+        ]);
+        $biaya->update(collect($data)->only(['kategori','deskripsi','jumlah','tanggal','anggaran_id'])->toArray());
+        if ($request->hasFile('bukti_files')) {
+            foreach ($request->file('bukti_files') as $file) {
+                $ext = strtolower($file->getClientOriginalExtension());
+                $tipe = in_array($ext, ['jpg','jpeg','png']) ? 'gambar' : 'dokumen';
+                $path = $file->store('bukti_pengeluaran', 'public');
+                \App\Models\BiayaBukti::create([
+                    'biaya_id' => $biaya->id,
+                    'file_path' => $path,
+                    'file_name' => $file->getClientOriginalName(),
+                    'tipe' => $tipe,
+                ]);
+            }
+        }
+        return back()->with('success', 'Pengeluaran diupdate.');
+    }
+
+    public function destroyBiayaSaya($id)
+    {
+        $biaya = BiayaOperasional::where('dicatat_oleh', auth()->id())->findOrFail($id);
+        if ($biaya->bukti_foto) {
+            \Storage::disk('public')->delete($biaya->bukti_foto);
+        }
+        foreach ($biaya->buktis as $bukti) {
+            \Storage::disk('public')->delete($bukti->file_path);
+        }
+        $biaya->buktis()->delete();
+        $biaya->delete();
+        return back()->with('success', 'Pengeluaran dihapus.');
+    }
+
+    public function hapusBukti($id)
+    {
+        $bukti = \App\Models\BiayaBukti::with('biaya')->whereHas('biaya', fn($q) => $q->where('dicatat_oleh', auth()->id()))->findOrFail($id);
+        \Storage::disk('public')->delete($bukti->file_path);
+        $bukti->delete();
+        return back()->with('success', 'Bukti dihapus.');
     }
 
     public function storeAnggaran(Request $request)

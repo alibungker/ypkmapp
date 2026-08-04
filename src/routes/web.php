@@ -215,6 +215,10 @@ Route::middleware('auth')->group(function () {
             Route::get('/', [KeuanganController::class, 'index'])->name('index')->middleware(\App\Http\Middleware\FinanceAccess::class);
             Route::get('laporan-saya', [KeuanganController::class, 'laporanSaya'])->name('laporan-saya')->middleware(\App\Http\Middleware\FinanceAccess::class);
             Route::post('laporan-saya/biaya', [KeuanganController::class, 'storeBiayaSaya'])->name('laporan-saya.biaya')->middleware(\App\Http\Middleware\FinanceAccess::class);
+            Route::get('laporan-saya/{id}/detail', [KeuanganController::class, 'detailBiayaSaya'])->name('laporan-saya.detail')->middleware(\App\Http\Middleware\FinanceAccess::class);
+            Route::put('laporan-saya/{id}', [KeuanganController::class, 'updateBiayaSaya'])->name('laporan-saya.update')->middleware(\App\Http\Middleware\FinanceAccess::class);
+            Route::delete('laporan-saya/{id}', [KeuanganController::class, 'destroyBiayaSaya'])->name('laporan-saya.destroy')->middleware(\App\Http\Middleware\FinanceAccess::class);
+            Route::delete('laporan-saya/bukti/{id}', [KeuanganController::class, 'hapusBukti'])->name('laporan-saya.bukti.destroy')->middleware(\App\Http\Middleware\FinanceAccess::class);
             Route::post('dana', [KeuanganController::class, 'storeDana'])->name('dana.store')->middleware(\App\Http\Middleware\FinanceAccess::class);
             Route::post('dana/{id}/update', [KeuanganController::class, 'updateDana'])->name('dana.update')->middleware(\App\Http\Middleware\FinanceAccess::class);
             Route::post('dana/{id}/delete', [KeuanganController::class, 'destroyDana'])->name('dana.delete')->middleware(\App\Http\Middleware\FinanceAccess::class);

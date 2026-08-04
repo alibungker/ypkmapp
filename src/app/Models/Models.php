@@ -81,6 +81,7 @@ class BiayaOperasional extends Model
     public function distribusi() { return $this->belongsTo(Distribusi::class); }
     public function anggaran() { return $this->belongsTo(Anggaran::class); }
     public function pencatat() { return $this->belongsTo(User::class, 'dicatat_oleh'); }
+    public function buktis() { return $this->hasMany(BiayaBukti::class, 'biaya_id'); }
 
     public function scopeBatch($q, $batch) { return $q->where('batch_kegiatan', $batch); }
 }
