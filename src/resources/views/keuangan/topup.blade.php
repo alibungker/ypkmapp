@@ -7,11 +7,12 @@
 <div class="card">
 <div style="padding:20px;border-bottom:1px solid #e5e7eb"><h3 style="font-size:18px;font-weight:700;color:#00034a">Top-up Anggaran</h3></div>
 <div class="card-body">
+<div style="background:#f0f6f2;border:1px solid #cde5d4;border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:13px;color:#1f3a2a;line-height:1.6;display:flex;gap:12px;align-items:flex-start;"><span style="font-size:18px">💡</span><div><strong>Alur Top-up Anggaran:</strong> anggaran kegiatan dibuat di menu <strong>Barang &amp; Kegiatan → tab Kegiatan</strong>. Setelah disetujui, nominal top-up ditambahkan ke anggaran kegiatan terpilih dan dicatat sebagai dana masuk. Ajukan top-up hanya untuk kegiatan yang sudah memiliki anggaran.</div></div>
 <div class="profile-section" style="background:#fff;border-radius:12px;padding:20px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.06)">
 <h3 style="font-size:14px;font-weight:700;color:#00034a;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid #e5e7eb">📝 Ajukan Top-up Baru</h3>
 <form method="POST" action="{{ route('keuangan.topup.store') }}">@csrf
 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px" class="mobile-stack">
-<div><label class="form-label">Anggaran Target <span style="color:#dc2626">*</span></label><select name="anggaran_id" class="form-input" required><option value="">Pilih Anggaran</option>@foreach($anggarans as $a)<option value="{{ $a->id }}">{{ $a->kategori }} ({{ $a->anggaran }})</option>@endforeach</select></div>
+<div><label class="form-label">Anggaran Target <span style="color:#dc2626">*</span></label><select name="anggaran_id" class="form-input" required><option value="">— Pilih Anggaran Kegiatan —</option>@foreach($anggarans as $a)<option value="{{ $a->id }}">{{ $a->nama_anggaran ?: $a->kategori }}{{ $a->target_paket ? ' — '.$a->target_paket.' '.($a->satuan?:'paket') : '' }} (Rp {{ number_format($a->anggaran,0,',','.') }})</option>@endforeach</select><small class="form-hint" style="display:block;margin-top:4px;color:#6b7280;">Sumber: menu <strong>Barang &amp; Kegiatan → tab Kegiatan</strong>. Buat anggaran kegiatan di sana terlebih dahulu agar muncul di daftar ini.</small></div>
 <div><label class="form-label">Nominal <span style="color:#dc2626">*</span></label><input type="number" step="0.01" min="1" name="nominal" class="form-input" required placeholder="0"></div>
 <div><label class="form-label">Tanggal <span style="color:#dc2626">*</span></label><input type="date" name="tanggal" class="form-input" required value="{{ now()->format('Y-m-d') }}"></div>
 </div>
