@@ -38,6 +38,7 @@ class DistribusiController extends Controller
             'creator',
             'pembelianBarang',
             'items.barang',
+            'anggaran',
         ]);
         $user = auth()->user();
         if ($user->isKetuaKelompok()) {

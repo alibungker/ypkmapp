@@ -107,7 +107,7 @@
                 <th><a class="sort-link" href="{{ $sortLink('kegiatan') }}">Kegiatan <span class="sort-icon">{{ $sortIcon('kegiatan') }}</span></a></th>
                 <th><a class="sort-link" href="{{ $sortLink('kelompok') }}">Kelompok <span class="sort-icon">{{ $sortIcon('kelompok') }}</span></a></th>
                 <th><a class="sort-link" href="{{ $sortLink('target') }}">Target Paket <span class="sort-icon">{{ $sortIcon('target') }}</span></a></th>
-                <th>Isi Paket/Kegiatan</th>
+                <th>Nama Kegiatan</th>
                 <th><a class="sort-link" href="{{ $sortLink('penerima') }}">Penerima <span class="sort-icon">{{ $sortIcon('penerima') }}</span></a></th>
                 <th><a class="sort-link" href="{{ $sortLink('nilai') }}">Nilai <span class="sort-icon">{{ $sortIcon('nilai') }}</span></a></th>
                 <th><a class="sort-link" href="{{ $sortLink('tanggal') }}">Tanggal <span class="sort-icon">{{ $sortIcon('tanggal') }}</span></a></th>
@@ -121,20 +121,13 @@
                     <td>{{ $d->kelompok->nama ?? '-' }}</td>
                     <td style="font-weight:700;color:#b07d14;">{{ number_format($d->jumlah_paket) }} paket</td>
                     <td style="min-width:180px;max-width:280px;">
-                        @if($d->items->isNotEmpty())
-                            <div class="dist-items">
-                            @foreach($d->items as $item)
-                                <span class="badge badge-navy" title="{{ $item->barang->nama ?? 'Barang' }}">{{ $item->barang->nama ?? 'Barang' }}: {{ rtrim(rtrim(number_format($item->jumlah_per_paket, 2, ',', '.'), '0'), ',') }}/paket</span>
-                            @endforeach
-                            </div>
-                        @elseif($d->pembelianBarang->isNotEmpty())
-                            <div class="dist-items">
-                            @foreach($d->pembelianBarang as $barang)
-                                <span class="badge badge-navy">{{ $barang->nama_barang ?? $barang->nama ?? 'Barang' }}: {{ number_format($barang->pivot->jumlah ?? 0) }}</span>
-                            @endforeach
-                            </div>
+                        @if($d->anggaran)
+                        <div style="display:inline-block">
+                            <span class="badge badge-navy" title="{{ $d->anggaran->nama_anggaran }}">{{ $d->anggaran->nama_anggaran }}</span>
+                            @if($d->anggaran->target_paket)<small style="color:#6b7280;font-size:11px">({{ number_format($d->anggaran->target_paket) }} {{ $d->anggaran->satuan ?: 'paket' }})</small>@endif
+                        </div>
                         @else
-                            <span style="font-size:12px;color:#9ca3af;">Belum ada rincian</span>
+                        <span style="font-size:12px;color:#9ca3af;">Tidak terhubung ke kegiatan</span>
                         @endif
                     </td>
                     <td>👥 {{ number_format($d->kelompok->penerima_count ?? 0) }}</td>

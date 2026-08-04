@@ -36,12 +36,13 @@ class Kelompok extends Model
 class Distribusi extends Model
 {
     protected $fillable = [
-        'kode_distribusi', 'nama_kegiatan', 'tanggal', 'lokasi', 'titik_koordinat',
+        'kode_distribusi', 'nama_kegiatan', 'anggaran_id', 'tanggal', 'lokasi', 'titik_koordinat',
         'kelompok_id', 'jenis_bantuan', 'jumlah_paket', 'estimasi_nilai_total',
         'sumber_dana', 'catatan', 'bukti_file', 'status', 'created_by'
     ];
 
     public function kelompok() { return $this->belongsTo(Kelompok::class); }
+    public function anggaran() { return $this->belongsTo(Anggaran::class); }
     public function creator() { return $this->belongsTo(User::class, 'created_by'); }
     public function penerimaDistribusi() { return $this->hasMany(PenerimaDistribusi::class); }
     public function items() { return $this->hasMany(DistribusiItem::class); }
