@@ -7,9 +7,10 @@
     <div class="card-body" style="padding:14px 18px;">
         <div style="font-size:16px;font-weight:700;">
             @if($role === 'admin') Dashboard Admin
-            @elseif($role === 'relawan') Dashboard Relawan
-            @else Dashboard Ketua Kelompok
-            @endif
+                @elseif($role === 'keuangan') Dashboard Keuangan
+                @elseif($role === 'relawan') Dashboard Relawan
+                @else Dashboard Staf
+                @endif
         </div>
         <div style="font-size:13px;color:#667085;margin-top:3px;">
             @if($role === 'admin') Ringkasan seluruh data operasional YPKM.

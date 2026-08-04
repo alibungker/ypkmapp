@@ -42,12 +42,13 @@ class DashboardController extends Controller
             'desa_terjangkau' => 0,
         ];
 
-        $role = 'admin';
+        $role = 'staff';
         $kelompokNama = null;
         $wilayahLabel = null;
+        $distribusiTerbaru = collect();
 
-        if ($user->isAdmin()) {
-            $role = 'admin';
+        if ($user->isAdmin() || $user->canViewKeuangan()) {
+            $role = $user->isAdmin() ? 'admin' : 'keuangan';
             $stats['penerima'] = Penerima::count();
             $stats['penerima_terverifikasi'] = Penerima::where('status', 'terverifikasi')->count();
             $stats['penerima_pending'] = Penerima::where('status', 'pending')->count();
