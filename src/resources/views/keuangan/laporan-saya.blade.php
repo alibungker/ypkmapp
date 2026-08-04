@@ -137,8 +137,7 @@
         </tbody>
     </table>
     </div>
-</script>
-@endsection
+</div>
 
 {{-- Modals --}}
 <div id="detailModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:1050;align-items:center;justify-content:center">
@@ -200,6 +199,6 @@ function openEdit(id) {
 }
 function closeModal(id) { document.getElementById(id).style.display='none'; }
 function number_format(n) { return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
-// close on backdrop click
 document.addEventListener('click',function(e){if(e.target.id==='detailModal'||e.target.id==='editModal')e.target.style.display='none'});
 </script>
+@endsection
