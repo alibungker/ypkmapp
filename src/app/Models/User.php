@@ -37,6 +37,17 @@ class User extends Authenticatable
         return $base.str_pad((string) $next, $digits, '0', STR_PAD_LEFT);
     }
 
+    public static function roleFromJabatan(?string $jabatan): string
+    {
+        $jabatan = strtolower(trim((string) $jabatan));
+
+        if (str_contains($jabatan, 'bendahara')) return 'bendahara';
+        if (str_contains($jabatan, 'keuangan')) return 'staff_keuangan';
+        if (str_contains($jabatan, 'staf') || str_contains($jabatan, 'staff')) return 'staff';
+
+        return 'pengurus';
+    }
+
     public function isSuperAdmin(): bool { return $this->role === 'super_admin'; }
     public function isAdmin(): bool { return in_array($this->role, ['super_admin','pengurus']); }
     public function isBendahara(): bool { return $this->role === 'bendahara'; }

@@ -34,7 +34,11 @@ class CrmController extends Controller
     public function store(Request $request, string $type)
     {
         if ($type === 'pengurus') {
-            $d=$this->validatePengurus($request); $d['password']=Hash::make($d['password']); $d['is_active']=$d['status_aktif']; User::create($d);
+            $d=$this->validatePengurus($request);
+            $d['role']=User::roleFromJabatan($d['jabatan']);
+            $d['password']=Hash::make($d['password']);
+            $d['is_active']=$d['status_aktif'];
+            User::create($d);
         } elseif ($type === 'mitra') {
             $d=$this->validateMitra($request); DB::table('mitra')->insert($d+['created_at'=>now(),'updated_at'=>now()]);
         } elseif ($type === 'relawan') {
@@ -46,7 +50,12 @@ class CrmController extends Controller
     public function update(Request $request, string $type, int $id)
     {
         if ($type === 'pengurus') {
-            $u=User::findOrFail($id); $d=$this->validatePengurus($request,$id); if(empty($d['password'])) unset($d['password']); else $d['password']=Hash::make($d['password']); $d['is_active']=$d['status_aktif']; $u->update($d);
+            $u=User::findOrFail($id);
+            $d=$this->validatePengurus($request,$id);
+            if(empty($d['password'])) unset($d['password']); else $d['password']=Hash::make($d['password']);
+            $d['role']=User::roleFromJabatan($d['jabatan']);
+            $d['is_active']=$d['status_aktif'];
+            $u->update($d);
         } elseif ($type === 'mitra') {
             abort_unless(DB::table('mitra')->where('id',$id)->exists(),404); DB::table('mitra')->where('id',$id)->update($this->validateMitra($request)+['updated_at'=>now()]);
         } elseif ($type === 'relawan') {
@@ -64,7 +73,7 @@ class CrmController extends Controller
         return redirect()->route('crm.index',['tab'=>$type])->with('success',$type==='mitra'?'Data dihapus.':'Data dinonaktifkan.');
     }
 
-    private function validatePengurus(Request $r, ?int $id=null): array { return $r->validate(['name'=>'required|string|max:150','nip'=>['nullable','max:20',Rule::unique('users','nip')->ignore($id)],'jabatan'=>'required|string|max:100','email'=>['required','email',Rule::unique('users','email')->ignore($id)],'phone'=>'nullable|max:20','role'=>'required|in:super_admin,pengurus,bendahara,staff,staff_keuangan,relawan,ketua_kelompok','status_aktif'=>'required|boolean','password'=>[$id?'nullable':'required','min:8']]); }
+    private function validatePengurus(Request $r, ?int $id=null): array { return $r->validate(['name'=>'required|string|max:150','nip'=>['nullable','max:20',Rule::unique('users','nip')->ignore($id)],'jabatan'=>'required|string|max:100','email'=>['required','email',Rule::unique('users','email')->ignore($id)],'phone'=>'nullable|max:20','status_aktif'=>'required|boolean','password'=>[$id?'nullable':'required','min:8']]); }
     private function validateMitra(Request $r): array { return $r->validate(['nama_instansi'=>'required|max:180','kategori'=>'required|in:csr_perusahaan,lembaga_donor,komunitas,perorangan','pic_nama'=>'nullable|max:150','pic_email'=>'nullable|email','pic_phone'=>'nullable|max:20','no_mou'=>'nullable|max:100','jenis_dukungan'=>'required|in:finansial,barang,jasa','total_kontribusi'=>'required|numeric|min:0']); }
     private function validateRelawan(Request $r, ?int $id=null, ?int $userId=null): array { return $r->validate(['nama_lengkap'=>'required|max:150','nik'=>['required','digits:16',Rule::unique('relawans','nik')->ignore($id),Rule::unique('users','nik')->ignore($userId)],'tempat_tanggal_lahir'=>'required|max:150','jenis_kelamin'=>'required|in:L,P','phone'=>'required|max:20','email'=>['required','email',Rule::unique('relawans','email')->ignore($id),Rule::unique('users','email')->ignore($userId)],'keahlian_utama'=>'required|in:Medis,Logistik,SAR/Evakuasi,IT/Dokumentasi,Pengajar','status_ketersediaan'=>'required|in:siap_tanggap_bencana,akhir_pekan,nonaktif','jam_kontribusi'=>'required|integer|min:0','domisili_kota'=>'required|max:100']); }
 }
