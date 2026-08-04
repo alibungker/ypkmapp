@@ -1,7 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Laporan Keuangan Saya')
 @section('styles')
-<link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.dataTables.min.css">
 @endsection
 @section('content')
 <style>
@@ -172,8 +171,6 @@
 </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.datatables.net/2.3.2/js/dataTables.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     function initDataTable(selector, noOrderTargets) {

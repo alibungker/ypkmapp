@@ -9,6 +9,7 @@
     <script>tailwind.config={theme:{extend:{colors:{navy:'#00034a',green:'#017723',gold:'#e5a820'}}}}}</script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.dataTables.min.css">
     <style>
         :root{--navy:#00034a;--green:#017723;--gold:#e5a820;--canvas:#f5f6fa;--line:#e5e7eb;--muted:#667085;--sidebar-width:260px}
         *{box-sizing:border-box}
@@ -42,6 +43,8 @@
         .stat-label{font-size:13px;color:var(--muted);margin-top:2px}
         .badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap}.badge-green{background:#e8f5ec;color:var(--green)}.badge-gold{background:#fef7e6;color:#9a6b0d}.badge-navy{background:#e8e8f0;color:var(--navy)}
         .table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}.table-data{width:100%;border-collapse:collapse;font-size:14px}.table-data th{text-align:left;padding:12px 8px;border-bottom:2px solid var(--line);color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}.table-data td{padding:12px 8px;border-bottom:1px solid var(--line);vertical-align:middle}.table-data tr:hover td{background:#f8f9fc}
+        table.dataTable thead th{background:var(--navy)!important;color:white!important;border-bottom:3px solid var(--gold)!important}table.dataTable tbody tr:nth-child(even){background:#f5f7fb}table.dataTable tbody tr:hover{background:#fff8e8}.dt-container{padding:12px 4px}.dt-container .dt-layout-row{gap:12px}.dt-container .dt-search input,.dt-container .dt-length select{border:1.5px solid #cbd5e1!important;border-radius:8px!important;padding:7px 10px!important;background:white!important}.dt-container .dt-search input:focus{outline:none;border-color:var(--navy)!important;box-shadow:0 0 0 3px rgba(0,3,74,.08)}.dt-container .dt-paging .dt-paging-button{border-radius:7px!important}.dt-container .dt-paging .dt-paging-button.current{background:var(--navy)!important;color:white!important;border-color:var(--navy)!important}.dt-info{font-size:12px;color:var(--muted)}
+        .table-data td:last-child a,.table-data td:last-child button,.transaction-table td:last-child a,.transaction-table td:last-child button{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:6px 11px;margin:2px 3px;border:1px solid #d8dce6;border-radius:8px;background:white;color:var(--navy);font-size:12px;font-weight:700;text-decoration:none;cursor:pointer;transition:.15s}.table-data td:last-child a:hover,.table-data td:last-child button:hover,.transaction-table td:last-child a:hover,.transaction-table td:last-child button:hover{border-color:var(--navy);background:#f0f1f8;transform:translateY(-1px)}.table-data td:last-child form:last-child button,.transaction-table td:last-child form:last-child button{border-color:#fecaca;color:#b42318;background:#fff7f7}.table-data td:last-child form:last-child button:hover,.transaction-table td:last-child form:last-child button:hover{background:#fee2e2;border-color:#ef4444}
         .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:9px 18px;border-radius:8px;font-size:14px;font-weight:600;border:none;cursor:pointer;transition:background .15s,color .15s,transform .15s;font-family:inherit;text-decoration:none}.btn:active{transform:translateY(1px)}.btn-primary{background:var(--navy);color:white}.btn-primary:hover{background:#171b63}.btn-outline{background:white;border:1.5px solid var(--line);color:#1a1a2e}.btn-outline:hover{border-color:var(--navy);color:var(--navy)}.btn-sm{padding:6px 13px;font-size:13px;min-height:36px}
         .form-input{width:100%;min-height:42px;padding:10px 14px;border:1.5px solid var(--line);border-radius:8px;font-size:14px;font-family:inherit;transition:border-color .15s,box-shadow .15s;background:white}.form-input:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,3,74,.08)}.form-label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#1a1a2e}
         .progress-bar{height:8px;background:#f0f0f0;border-radius:4px;overflow:hidden}.progress-fill{height:100%;border-radius:4px;transition:width .3s}.alert{padding:12px 16px;border-radius:8px;font-size:14px;margin-bottom:16px}.alert-success{background:#e8f5ec;border:1px solid #c6e6d0;color:var(--green)}
@@ -180,6 +183,35 @@
     mobileQuery.addEventListener?.('change', handleViewportChange);
     syncAccessibility(false);
 })();
+</script>
+<script src="https://cdn.datatables.net/2.3.2/js/dataTables.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const excluded = new Set(['penerimaTable','topupTable','pengeluaranTable']);
+    document.querySelectorAll('table.table-data,table.transaction-table').forEach(function(table, index) {
+        if (excluded.has(table.id) || table.dataset.noDatatable === 'true') return;
+        if (!table.id) table.id = 'globalDataTable' + index;
+        const bodyRows = table.querySelectorAll('tbody tr');
+        if (!bodyRows.length || (bodyRows.length === 1 && bodyRows[0].querySelector('td[colspan]'))) return;
+        const columnCount = table.querySelectorAll('thead tr:first-child th').length;
+        const lastHeader = table.querySelector('thead tr:first-child th:last-child');
+        const actionColumn = lastHeader && /aksi|action/i.test(lastHeader.textContent.trim()) ? [columnCount - 1] : [];
+        try {
+            new DataTable(table, {
+                pageLength: 20,
+                lengthMenu: [[10,20,50,-1],[10,20,50,'Semua']],
+                order: [],
+                columnDefs: actionColumn.length ? [{targets: actionColumn, orderable:false, searchable:false}] : [],
+                language: {
+                    search:'Cari semua:', lengthMenu:'Tampilkan _MENU_ data',
+                    info:'Menampilkan _START_–_END_ dari _TOTAL_ data', infoEmpty:'Tidak ada data',
+                    infoFiltered:'(disaring dari _MAX_ data)', zeroRecords:'Data tidak ditemukan', emptyTable:'Belum ada data',
+                    paginate:{first:'Pertama',last:'Terakhir',next:'Berikutnya',previous:'Sebelumnya'}
+                }
+            });
+        } catch (error) { console.warn('DataTables dilewati:', table.id, error.message); }
+    });
+});
 </script>
 @yield('scripts')
 </body>

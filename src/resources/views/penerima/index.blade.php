@@ -1,7 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Data Penerima')
 @section('styles')
-<link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.dataTables.min.css">
 <style>
 #penerimaTable thead tr:first-child th{background:#00034a;color:#fff;font-weight:600;text-transform:uppercase;letter-spacing:.5px;border-bottom:3px solid #e5a820}
 #penerimaTable tbody tr:nth-child(even){background:#f4f6fb}
@@ -150,8 +149,6 @@
 @endsection
 
 @section('scripts')
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.datatables.net/2.3.2/js/dataTables.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     if (document.getElementById('penerimaTable')) {
