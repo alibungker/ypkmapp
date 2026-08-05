@@ -342,5 +342,4 @@
             @endforelse
         </div>
     </div>
-@endif
 @endsection
