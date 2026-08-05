@@ -152,7 +152,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     if (document.getElementById('penerimaTable')) {
-        new DataTable('#penerimaTable', {
+        $('#penerimaTable').DataTable({
             pageLength: 20,
             lengthMenu: [[10,20,50,-1],[10,20,50,'Semua']],
             order: [[0,'asc']],

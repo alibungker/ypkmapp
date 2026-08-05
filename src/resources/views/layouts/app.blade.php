@@ -10,6 +10,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/2.3.2/js/dataTables.min.js"></script>
     <style>
         :root{--navy:#00034a;--green:#017723;--gold:#e5a820;--canvas:#f5f6fa;--line:#e5e7eb;--muted:#667085;--sidebar-width:260px}
         *{box-sizing:border-box}
@@ -184,7 +186,6 @@
     syncAccessibility(false);
 })();
 </script>
-<script src="https://cdn.datatables.net/2.3.2/js/dataTables.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const excluded = new Set(['penerimaTable','topupTable','pengeluaranTable']);
@@ -197,7 +198,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const lastHeader = table.querySelector('thead tr:first-child th:last-child');
         const actionColumn = lastHeader && /aksi|action/i.test(lastHeader.textContent.trim()) ? [columnCount - 1] : [];
         try {
-            new DataTable(table, {
+            $(table).DataTable({
                 pageLength: 20,
                 lengthMenu: [[10,20,50,-1],[10,20,50,'Semua']],
                 order: [],
