@@ -202,7 +202,11 @@ function addAllocationRow(selected = '', amount = '') {
     if (!allocationRows) return;
     const row = document.createElement('div');
     row.className = 'allocation-row';
-    const options = availableItems.map(item => `<option value="${item.id}" data-stok="${item.stok}" data-harga="${item.harga}" ${String(item.id) === String(selected) ? 'selected' : ''}>${item.label} — stok ${item.stok} — Rp ${Number(item.harga).toLocaleString('id-ID')}</option>`).join('');
+    const options = availableItems.map(item => {
+        const disabled = item.stok <= 0;
+        const label = disabled ? `${item.label} — STOK HABIS` : `${item.label} — stok ${item.stok} — Rp ${Number(item.harga).toLocaleString('id-ID')}`;
+        return `<option value="${item.id}" data-stok="${item.stok}" data-harga="${item.harga}" ${disabled ? 'disabled' : ''} ${String(item.id) === String(selected) ? 'selected' : ''}>${label}</option>`;
+    }).join('');
     row.innerHTML = `<div><label class="form-label">Pilih Barang</label><select class="form-input allocation-item" name="barang[${allocationIndex}][pembelian_barang_id]" required><option value="">-- Pilih barang --</option>${options}</select></div><div><label class="form-label">Jumlah</label><input class="form-input allocation-amount" type="number" min="1" name="barang[${allocationIndex}][jumlah]" value="${amount}" required><small class="allocation-subtotal form-hint">Rp 0</small></div><button type="button" class="allocation-remove" aria-label="Hapus barang">×</button>`;
     allocationRows.appendChild(row); allocationIndex++;
     const select = row.querySelector('.allocation-item'), input = row.querySelector('.allocation-amount');
