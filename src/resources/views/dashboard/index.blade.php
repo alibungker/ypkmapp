@@ -131,6 +131,16 @@
     <div class="mini-ring" style="--accent:#00034a;--p:{{ $stats['total_dana_masuk'] > 0 ? max(0,min(100,round($sisaDana/$stats['total_dana_masuk']*100))) : 0 }};"><span>{{ $stats['total_dana_masuk'] > 0 ? max(0,min(100,round($sisaDana/$stats['total_dana_masuk']*100))) : 0 }}%</span></div>
   </div>
 </div>
+{{-- Ringkasan Keuangan --}}
+<div class="card" style="margin-bottom:24px;animation:cardIn .55s .35s both;">
+  <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:8px;"><x-icon name="wallet"/><h3 style="font-size:15px;font-weight:600;margin:0;">Ringkasan Keuangan</h3></div>
+  <div class="finance-grid">
+    <div class="finance-tile" style="background:linear-gradient(135deg,#e8f5ec,#d1f0e6);border:1px solid #dcf5ee;"><div style="font-size:13px;color:#6b7280;">Dana Masuk</div><div style="font-size:20px;font-weight:700;color:#017723;margin-top:4px;">Rp {{ number_format($stats['total_dana_masuk'],0,',','.') }}</div></div>
+    <div class="finance-tile" style="background:linear-gradient(135deg,#fef2f2,#ffe5e5);border:1px solid #ffd6d6;"><div style="font-size:13px;color:#6b7280;">Nilai Bantuan</div><div style="font-size:20px;font-weight:700;color:#dc2626;margin-top:4px;">Rp {{ number_format($stats['total_nilai_bantuan'],0,',','.') }}</div></div>
+    <div class="finance-tile" style="background:linear-gradient(135deg,#fef7e6,#feebc8);border:1px solid #fde6b1;"><div style="font-size:13px;color:#6b7280;">Biaya Operasional</div><div style="font-size:20px;font-weight:700;color:#b07d14;margin-top:4px;">Rp {{ number_format($stats['total_biaya'],0,',','.') }}</div></div>
+    <div class="finance-tile" style="background:linear-gradient(135deg,#e8e8f0,#dadbee);border:1px solid #c7c9e6;"><div style="font-size:13px;color:rgba(0,3,74,.55);">Sisa Dana</div><div style="font-size:20px;font-weight:700;color:#00034a;margin-top:4px;">Rp {{ number_format($stats['total_dana_masuk'] - $stats['total_nilai_bantuan'] - $stats['total_biaya'],0,',','.') }}</div></div>
+  </div>
+</div>
 @else
 <div class="mobile-stack" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:24px;">
     <div class="stat-card">
@@ -332,32 +342,5 @@
             @endforelse
         </div>
     </div>
-</div>
-
-{{-- Ringkasan Keuangan — hanya Admin --}}
-@if($role === 'admin')
-<div class="card">
-    <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;">
-        <h3 style="font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;"><x-icon name="wallet"/> Ringkasan keuangan</h3>
-    </div>
-    <div class="finance-grid">
-        <div class="finance-tile" style="background:linear-gradient(135deg,#e8f5ec 0,#d1f0e6 100%);border:1px solid #dcf5ee;">
-            <div style="font-size:13px;color:#6b7280;">Dana Masuk</div>
-            <div style="font-size:20px;font-weight:700;color:#017723;margin-top:4px;">Rp {{ number_format($stats['total_dana_masuk'],0,',','.') }}</div>
-        </div>
-        <div class="finance-tile" style="background:linear-gradient(135deg,#fef2f2 0,#ffe5e5 100%);border:1px solid #ffd6d6;">
-            <div style="font-size:13px;color:#6b7280;">Nilai Bantuan</div>
-            <div style="font-size:20px;font-weight:700;color:#dc2626;margin-top:4px;">Rp {{ number_format($stats['total_nilai_bantuan'],0,',','.') }}</div>
-        </div>
-        <div class="finance-tile" style="background:linear-gradient(135deg,#fef7e6 0,#feebc8 100%);border:1px solid #fde6b1;">
-            <div style="font-size:13px;color:#6b7280;">Biaya Operasional</div>
-            <div style="font-size:20px;font-weight:700;color:#b07d14;margin-top:4px;">Rp {{ number_format($stats['total_biaya'],0,',','.') }}</div>
-        </div>
-        <div class="finance-tile" style="background:linear-gradient(135deg,#e8e8f0 0,#dadbee 100%);border:1px solid #c7c9e6;">
-            <div style="font-size:13px;color:rgba(0,3,74,.55);">Sisa Dana</div>
-            <div style="font-size:20px;font-weight:700;color:#00034a;margin-top:4px;">Rp {{ number_format($stats['total_dana_masuk'] - $stats['total_nilai_bantuan'] - $stats['total_biaya'],0,',','.') }}</div>
-        </div>
-    </div>
-</div>
 @endif
 @endsection
