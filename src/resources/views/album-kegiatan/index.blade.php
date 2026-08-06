@@ -95,6 +95,13 @@
                             <a href="{{ route('album-kegiatan.edit', $album) }}" class="btn btn-sm btn-outline" style="min-height:36px;">
                                 <x-icon name="edit" style="width:14px;height:14px;" /> Edit
                             </a>
+                            <form method="POST" action="{{ route('album-kegiatan.destroy', $album) }}" style="display:inline;" onsubmit="return confirm('Hapus album {{ addslashes($album->title) }} beserta semua foto dan audio? Tindakan ini tidak dapat dibatalkan.')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-sm" style="min-height:36px;background:#fee2e2;color:#b42318;border:1px solid #fecaca;" title="Hapus album" aria-label="Hapus album {{ $album->title }}">
+                                    <x-icon name="trash" style="width:14px;height:14px;" /> Hapus
+                                </button>
+                            </form>
                         @endif
                     </div>
                 </div>
