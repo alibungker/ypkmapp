@@ -10,8 +10,8 @@
 .album-hero h1{font-size:clamp(24px,4vw,36px);font-weight:800;margin:0 0 12px;line-height:1.2;position:relative;z-index:1}
 .album-hero-meta{display:flex;gap:16px;flex-wrap:wrap;color:rgba(255,255,255,.8);font-size:13px;position:relative;z-index:1}
 .album-description{background:white;border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:10px;padding:18px 20px;margin-bottom:24px;line-height:1.7;color:#333}
-.audio-player{background:#fff8e8;border:1px solid #f1d58c;border-radius:10px;padding:14px 16px;margin-bottom:24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.audio-player audio{height:40px;flex:1;min-width:240px}
+.attachment-card{background:#f0f4ff;border:1px solid #cdd7f5;border-radius:10px;padding:14px 16px;margin-bottom:24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.attachment-card__info{flex:1;min-width:180px}.attachment-card__name{display:block;color:var(--navy);font-size:13px;font-weight:700;word-break:break-word}.attachment-card__meta{font-size:12px;color:var(--muted);margin-top:3px}
 .gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
 .gallery-item{position:relative;aspect-ratio:4/3;border-radius:12px;overflow:hidden;background:#e8e8f0;border:1px solid var(--line);cursor:pointer}
 .gallery-item img{width:100%;height:100%;object-fit:cover;transition:transform .25s}
@@ -27,7 +27,7 @@
 .lightbox-counter{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);color:white;font-size:13px;background:rgba(0,0,0,.4);padding:6px 12px;border-radius:20px}
 .related-links{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;position:relative;z-index:1}
 .admin-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
-@media(max-width:767px){.album-hero{padding:22px 18px}.gallery-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.lightbox{padding:60px 8px}.lightbox-prev{left:8px}.lightbox-next{right:8px}.lightbox-button{width:42px;height:42px}.audio-player audio{min-width:100%;width:100%}}
+@media(max-width:767px){.album-hero{padding:22px 18px}.gallery-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.lightbox{padding:60px 8px}.lightbox-prev{left:8px}.lightbox-next{right:8px}.lightbox-button{width:42px;height:42px}.attachment-card__name{font-size:12px}}
 </style>
 @endsection
 
@@ -67,14 +67,19 @@
     <div class="album-description">{!! nl2br(e($albumKegiatan->description)) !!}</div>
 @endif
 
-@if($albumKegiatan->audio_path)
-    <div class="audio-player">
-        <div style="font-size:24px;">🎵</div>
-        <div style="min-width:140px;"><strong style="color:var(--navy);display:block;font-size:13px;">Lagu Album</strong><span style="font-size:12px;color:var(--muted);">{{ $albumKegiatan->audio_name ?: 'Audio kegiatan' }}</span></div>
-        <audio controls preload="metadata">
-            <source src="{{ asset('storage/' . $albumKegiatan->audio_path) }}">
-            Browser tidak mendukung pemutar audio.
-        </audio>
+@if($albumKegiatan->attachment_path)
+    <div class="attachment-card">
+        <div style="font-size:26px;">📎</div>
+        <div class="attachment-card__info">
+            <a href="{{ asset('storage/' . $albumKegiatan->attachment_path) }}" target="_blank" rel="noopener" class="attachment-card__name">
+                <x-icon name="download" style="width:14px;height:14px;margin-right:5px;" />{{ $albumKegiatan->attachment_name ?: 'Lampiran dokumen' }}
+            </a>
+            <span class="attachment-card__meta">
+                {{ strtoupper(pathinfo($albumKegiatan->attachment_name ?? '', PATHINFO_EXTENSION)) }}
+                @if($albumKegiatan->attachment_size) · {{ number_format($albumKegiatan->attachment_size / 1024, 1, ',', '.') }} KB @endif
+            </span>
+        </div>
+        <a href="{{ asset('storage/' . $albumKegiatan->attachment_path) }}" class="btn btn-sm btn-primary" download>Unduh</a>
     </div>
 @endif
 

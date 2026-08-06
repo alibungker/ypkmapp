@@ -14,8 +14,8 @@ class AlbumKegiatanController extends Controller
 {
     private const IMAGE_MIMES = 'jpg,jpeg,png,webp';
     private const IMAGE_MAX_KB = 5120;
-    private const AUDIO_MIMES = 'mp3,m4a,ogg,wav';
-    private const AUDIO_MAX_KB = 20480;
+    private const ATTACHMENT_MIMES = 'pdf,doc,docx,xls,xlsx,ppt,pptx,odt,ods,odp,txt,csv,rtf,zip,rar,7z';
+    private const ATTACHMENT_MAX_KB = 20480;
     private const MAX_PHOTOS = 20;
 
     public function index(Request $request)
@@ -58,20 +58,22 @@ class AlbumKegiatanController extends Controller
     {
         $data = $this->validated($request);
         $photos = $request->file('photos', []);
-        $audio = $data['audio_file'] ?? null;
-        unset($data['audio_file']);
+        $attachment = $data['attachment_file'] ?? null;
+        unset($data['attachment_file']);
         $data['created_by'] = auth()->id();
 
         $stored = [];
         $album = null;
         try {
-            DB::transaction(function () use ($data, $photos, $audio, &$stored, &$album) {
+            DB::transaction(function () use ($data, $photos, $attachment, &$stored, &$album) {
                 $album = AlbumKegiatan::create($data);
-                if ($audio) {
-                    $album->audio_path = $audio->store('album-kegiatan/audio', 'public');
-                    $album->audio_name = $audio->getClientOriginalName();
+                if ($attachment) {
+                    $album->attachment_path = $attachment->store('album-kegiatan/lampiran', 'public');
+                    $album->attachment_name = $attachment->getClientOriginalName();
+                    $album->attachment_mime = $attachment->getMimeType();
+                    $album->attachment_size = $attachment->getSize();
                     $album->save();
-                    $stored[] = $album->audio_path;
+                    $stored[] = $album->attachment_path;
                 }
                 $this->storePhotos($album, $photos, $stored);
                 if ($album->photos()->exists() && !$album->cover_photo_id) {
@@ -100,24 +102,28 @@ class AlbumKegiatanController extends Controller
     {
         $data = $this->validated($request);
         $photos = $request->file('photos', []);
-        $audio = $data['audio_file'] ?? null;
-        unset($data['audio_file']);
+        $attachment = $data['attachment_file'] ?? null;
+        unset($data['attachment_file']);
 
         $newStored = [];
         try {
-            DB::transaction(function () use ($request, $albumKegiatan, &$data, $photos, $audio, &$newStored) {
-                if ($request->boolean('hapus_audio') && $albumKegiatan->audio_path) {
-                    Storage::disk('public')->delete($albumKegiatan->audio_path);
-                    $data['audio_path'] = null;
-                    $data['audio_name'] = null;
+            DB::transaction(function () use ($request, $albumKegiatan, &$data, $photos, $attachment, &$newStored) {
+                if ($request->boolean('hapus_lampiran') && $albumKegiatan->attachment_path) {
+                    Storage::disk('public')->delete($albumKegiatan->attachment_path);
+                    $data['attachment_path'] = null;
+                    $data['attachment_name'] = null;
+                    $data['attachment_mime'] = null;
+                    $data['attachment_size'] = null;
                 }
-                if ($audio) {
-                    if ($albumKegiatan->audio_path) {
-                        Storage::disk('public')->delete($albumKegiatan->audio_path);
+                if ($attachment) {
+                    if ($albumKegiatan->attachment_path) {
+                        Storage::disk('public')->delete($albumKegiatan->attachment_path);
                     }
-                    $data['audio_path'] = $audio->store('album-kegiatan/audio', 'public');
-                    $data['audio_name'] = $audio->getClientOriginalName();
-                    $newStored[] = $data['audio_path'];
+                    $data['attachment_path'] = $attachment->store('album-kegiatan/lampiran', 'public');
+                    $data['attachment_name'] = $attachment->getClientOriginalName();
+                    $data['attachment_mime'] = $attachment->getMimeType();
+                    $data['attachment_size'] = $attachment->getSize();
+                    $newStored[] = $data['attachment_path'];
                 }
                 $albumKegiatan->update($data);
                 $this->storePhotos($albumKegiatan, $photos, $newStored);
@@ -134,8 +140,8 @@ class AlbumKegiatanController extends Controller
     public function destroy(AlbumKegiatan $albumKegiatan)
     {
         $paths = $albumKegiatan->photos()->pluck('path')->all();
-        if ($albumKegiatan->audio_path) {
-            $paths[] = $albumKegiatan->audio_path;
+        if ($albumKegiatan->attachment_path) {
+            $paths[] = $albumKegiatan->attachment_path;
         }
         $albumKegiatan->delete();
         Storage::disk('public')->delete(array_values(array_unique(array_filter($paths))));
@@ -190,14 +196,14 @@ class AlbumKegiatanController extends Controller
             'distribusi_id' => 'nullable|integer|exists:distribusis,id',
             'photos' => 'nullable|array|max:' . self::MAX_PHOTOS,
             'photos.*' => 'file|mimes:' . self::IMAGE_MIMES . '|max:' . self::IMAGE_MAX_KB,
-            'audio_file' => 'nullable|file|mimes:' . self::AUDIO_MIMES . '|max:' . self::AUDIO_MAX_KB,
-            'hapus_audio' => 'nullable|boolean',
+            'attachment_file' => 'nullable|file|mimes:' . self::ATTACHMENT_MIMES . '|max:' . self::ATTACHMENT_MAX_KB,
+            'hapus_lampiran' => 'nullable|boolean',
         ], [
             'photos.max' => 'Maksimal ' . self::MAX_PHOTOS . ' foto dalam sekali unggah.',
             'photos.*.mimes' => 'Foto harus berformat JPG, JPEG, PNG, atau WEBP.',
             'photos.*.max' => 'Ukuran setiap foto maksimal 5 MB.',
-            'audio_file.mimes' => 'Audio harus berformat MP3, M4A, OGG, atau WAV.',
-            'audio_file.max' => 'Ukuran audio maksimal 20 MB.',
+            'attachment_file.mimes' => 'Lampiran harus berformat PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, CSV, ZIP, atau RAR.',
+            'attachment_file.max' => 'Ukuran lampiran maksimal 20 MB.',
         ]);
     }
 }

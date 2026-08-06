@@ -2,7 +2,7 @@
 
 @php($editing = isset($albumKegiatan) && $albumKegiatan->exists)
 @section('title', $editing ? 'Edit Album Kegiatan' : 'Tambah Album Kegiatan')
-@section('subtitle', 'Kelola dokumentasi foto dan lagu kegiatan')
+@section('subtitle', 'Kelola dokumentasi foto dan lampiran kegiatan')
 
 @section('styles')
 <style>
@@ -78,13 +78,13 @@
                 <div id="photoPreview" class="preview-grid" hidden></div>
             </div>
             <div class="form-group">
-                <label for="audio_file" class="form-label">Lagu/Audio Album</label>
-                <input id="audio_file" type="file" name="audio_file" class="form-input" accept="audio/mpeg,audio/mp4,audio/ogg,audio/wav,.mp3,.m4a,.ogg,.wav">
-                <div class="form-help">MP3, M4A, OGG, WAV · maks. 20 MB. Audio hanya diputar setelah pengunjung menekan Play.</div>
-                @if($editing && $albumKegiatan->audio_path)
-                    <div style="margin-top:10px;padding:10px;background:#fff8e8;border-radius:8px;font-size:12px;">
-                        🎵 {{ $albumKegiatan->audio_name }}
-                        <label style="display:block;margin-top:8px;"><input type="checkbox" name="hapus_audio" value="1"> Hapus audio saat disimpan</label>
+                <label for="attachment_file" class="form-label">Lampiran Dokumen</label>
+                <input id="attachment_file" type="file" name="attachment_file" class="form-input" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.odt,.ods,.odp,.txt,.csv,.rtf,.zip,.rar,.7z">
+                <div class="form-help">PDF, Word, Excel, PowerPoint, TXT, ZIP, RAR · maks. 20 MB</div>
+                @if($editing && $albumKegiatan->attachment_path)
+                    <div style="margin-top:10px;padding:10px;background:#f0f4ff;border-radius:8px;font-size:12px;">
+                        📎 <a href="{{ asset('storage/' . $albumKegiatan->attachment_path) }}" target="_blank" style="color:var(--navy);font-weight:600;">{{ $albumKegiatan->attachment_name }}</a>
+                        <label style="display:block;margin-top:8px;"><input type="checkbox" name="hapus_lampiran" value="1"> Hapus lampiran saat disimpan</label>
                     </div>
                 @endif
             </div>

@@ -142,7 +142,7 @@ class AlbumKegiatan extends Model
     protected $fillable = [
         'title', 'description', 'event_date',
         'anggaran_id', 'distribusi_id',
-        'cover_photo_id', 'audio_path', 'audio_name', 'created_by',
+        'cover_photo_id', 'attachment_path', 'attachment_name', 'attachment_mime', 'attachment_size', 'created_by',
     ];
     protected $casts = ['event_date' => 'date'];
 

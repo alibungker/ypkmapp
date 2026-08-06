@@ -67,8 +67,8 @@
                         </a>
                     @endif
                     <span class="badge badge-navy">{{ $album->photos_count ?? $album->photos->count() }} foto</span>
-                    @if($album->audio_path)
-                        <span class="badge badge-gold" style="top:10px;left:auto;right:10px;">🎵</span>
+                    @if($album->attachment_path)
+                        <span class="badge badge-gold" style="top:10px;left:auto;right:10px;">📎</span>
                     @endif
                 </div>
                 <div class="album-body">
