@@ -135,3 +135,36 @@ class Log extends Model
     protected $fillable = ['user_id', 'action', 'description', 'ip_address', 'user_agent'];
     public function user() { return $this->belongsTo(User::class); }
 }
+
+class AlbumKegiatan extends Model
+{
+    protected $table = 'album_kegiatans';
+    protected $fillable = [
+        'title', 'description', 'event_date',
+        'anggaran_id', 'distribusi_id',
+        'cover_photo_id', 'audio_path', 'audio_name', 'created_by',
+    ];
+    protected $casts = ['event_date' => 'date'];
+
+    public function photos() { return $this->hasMany(AlbumPhoto::class)->orderBy('sort_order')->orderBy('id'); }
+    public function cover() { return $this->belongsTo(AlbumPhoto::class, 'cover_photo_id'); }
+    public function anggaran() { return $this->belongsTo(Anggaran::class); }
+    public function distribusi() { return $this->belongsTo(Distribusi::class); }
+    public function creator() { return $this->belongsTo(User::class, 'created_by'); }
+
+    public function coverUrl(): ?string
+    {
+        if ($this->cover) return asset('storage/' . $this->cover->path);
+        $first = $this->photos->first();
+        return $first ? asset('storage/' . $first->path) : null;
+    }
+}
+
+class AlbumPhoto extends Model
+{
+    protected $table = 'album_photos';
+    protected $fillable = ['album_kegiatan_id', 'path', 'original_name', 'mime_type', 'size', 'sort_order'];
+
+    public function album() { return $this->belongsTo(AlbumKegiatan::class, 'album_kegiatan_id'); }
+    public function url(): string { return asset('storage/' . $this->path); }
+}

@@ -82,6 +82,7 @@
         <a href="{{ route('penerima.index') }}" class="nav-item {{ request()->routeIs('penerima*') ? 'active' : '' }}" @if(request()->routeIs('penerima*')) aria-current="page" @endif><x-icon name="users"/><span>Penerima</span></a>
         <a href="{{ route('kelompok.index') }}" class="nav-item {{ request()->routeIs('kelompok*') ? 'active' : '' }}" @if(request()->routeIs('kelompok*')) aria-current="page" @endif><x-icon name="group"/><span>Kelompok</span></a>
         <a href="{{ route('distribusi.index') }}" class="nav-item {{ request()->routeIs('distribusi*') ? 'active' : '' }}" @if(request()->routeIs('distribusi*')) aria-current="page" @endif><x-icon name="truck"/><span>Distribusi</span></a>
+        <a href="{{ route('album-kegiatan.index') }}" class="nav-item {{ request()->routeIs('album-kegiatan*') ? 'active' : '' }}" @if(request()->routeIs('album-kegiatan*')) aria-current="page" @endif><x-icon name="gallery"/><span>Galeri Kegiatan</span></a>
         <a href="{{ route('peta.index') }}" class="nav-item {{ request()->routeIs('peta*') ? 'active' : '' }}" @if(request()->routeIs('peta*')) aria-current="page" @endif><x-icon name="map"/><span>Peta</span></a>
         @if(auth()->check() && auth()->user()->canViewKeuangan())
         <div style="margin:14px 8px 5px;font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;">Keuangan</div>

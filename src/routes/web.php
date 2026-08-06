@@ -1,15 +1,16 @@
 <?php
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\AlbumKegiatanController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CrmController;
-use App\Http\Controllers\PenerimaController;
-use App\Http\Controllers\KelompokController;
 use App\Http\Controllers\DistribusiController;
 use App\Http\Controllers\KeuanganController;
+use App\Http\Controllers\KelompokController;
 use App\Http\Controllers\LaporanController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\PenerimaController;
 use App\Http\Controllers\RelawanController;
+use App\Http\Controllers\UserController;
 use App\Models\Distribusi;
 
 // ============================================================
@@ -249,5 +250,19 @@ Route::middleware('auth')->group(function () {
         Route::put('crm/{type}/{id}', [CrmController::class, 'update'])->name('crm.update')->whereNumber('id');
         Route::delete('crm/{type}/{id}', [CrmController::class, 'destroy'])->name('crm.destroy')->whereNumber('id');
         Route::patch('crm/{type}/{id}', [CrmController::class, 'update'])->whereNumber('id');
+
+        // Album Kegiatan — Admin CRUD
+        Route::get('album-kegiatan/create', [AlbumKegiatanController::class, 'create'])->name('album-kegiatan.create');
+        Route::post('album-kegiatan', [AlbumKegiatanController::class, 'store'])->name('album-kegiatan.store');
+        Route::get('album-kegiatan/{albumKegiatan}/edit', [AlbumKegiatanController::class, 'edit'])->name('album-kegiatan.edit');
+        Route::put('album-kegiatan/{albumKegiatan}', [AlbumKegiatanController::class, 'update'])->name('album-kegiatan.update');
+        Route::patch('album-kegiatan/{albumKegiatan}', [AlbumKegiatanController::class, 'update']);
+        Route::delete('album-kegiatan/{albumKegiatan}', [AlbumKegiatanController::class, 'destroy'])->name('album-kegiatan.destroy');
+        Route::delete('album-kegiatan/{albumKegiatan}/foto/{photo}', [AlbumKegiatanController::class, 'destroyPhoto'])->name('album-kegiatan.foto.destroy');
+        Route::post('album-kegiatan/{albumKegiatan}/sampul/{photo}', [AlbumKegiatanController::class, 'setCover'])->name('album-kegiatan.sampul.set');
     });
+
+    // Album Kegiatan — authenticated browse & view
+    Route::get('album-kegiatan', [AlbumKegiatanController::class, 'index'])->name('album-kegiatan.index');
+    Route::get('album-kegiatan/{albumKegiatan}', [AlbumKegiatanController::class, 'show'])->name('album-kegiatan.show');
 });
