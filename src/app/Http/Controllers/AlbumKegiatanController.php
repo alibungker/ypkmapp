@@ -16,7 +16,7 @@ class AlbumKegiatanController extends Controller
     private const IMAGE_MAX_KB = 5120;
     private const ATTACHMENT_MIMES = 'pdf,doc,docx,xls,xlsx,ppt,pptx,odt,ods,odp,txt,csv,rtf,zip,rar,7z';
     private const ATTACHMENT_MAX_KB = 20480;
-    private const MAX_PHOTOS = 20;
+    private const MAX_PHOTOS = 50;
 
     public function index(Request $request)
     {
