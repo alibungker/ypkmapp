@@ -224,6 +224,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var excluded = new Set(['penerimaTable','topupTable','pengeluaranTable']);
     document.querySelectorAll('table.table-data,table.transaction-table').forEach(function(table, index) {
         if (excluded.has(table.id) || table.dataset.noDatatable === 'true') return;
+        if ($.fn.DataTable && $.fn.DataTable.isDataTable(table)) return;
         if (!table.id) table.id = 'globalDataTable' + index;
         var bodyRows = table.querySelectorAll('tbody tr');
         if (!bodyRows.length || (bodyRows.length === 1 && bodyRows[0].querySelector('td[colspan]'))) return;

@@ -532,7 +532,8 @@ rKab.addEventListener('change', () => loadKec(false));
 rKec.addEventListener('change', () => loadDesa(false));
 
 // === Init DataTables ===
-if ($('#tblRingkasan').length) {
+// Skip if global init already handled this table
+if ($('#tblRingkasan').length && !$.fn.DataTable.isDataTable('#tblRingkasan')) {
     $('#tblRingkasan').DataTable({
         ordering: true,
         searching: false,
@@ -542,7 +543,7 @@ if ($('#tblRingkasan').length) {
     });
 }
 
-if ($('#tblRincian').length) {
+if ($('#tblRincian').length && !$.fn.DataTable.isDataTable('#tblRincian')) {
     $('#tblRincian').DataTable({
         ordering: true,
         searching: true,
