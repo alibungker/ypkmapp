@@ -11,6 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.datatables.net/2.3.2/css/dataTables.dataTables.min.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="{{ asset('js/dt_fix.js') }}"></script>
     <script src="https://cdn.datatables.net/2.3.2/js/dataTables.min.js"></script>
     <style>
         :root{--navy:#00034a;--green:#017723;--gold:#e5a820;--canvas:#f5f6fa;--line:#e5e7eb;--muted:#667085;--sidebar-width:260px}
@@ -45,12 +46,39 @@
         .stat-label{font-size:13px;color:var(--muted);margin-top:2px}
         .badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap}.badge-green{background:#e8f5ec;color:var(--green)}.badge-gold{background:#fef7e6;color:#9a6b0d}.badge-navy{background:#e8e8f0;color:var(--navy)}
         .table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}.table-data{width:100%;border-collapse:collapse;font-size:14px}.table-data th{text-align:left;padding:12px 8px;border-bottom:2px solid var(--line);color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}.table-data td{padding:12px 8px;border-bottom:1px solid var(--line);vertical-align:middle}.table-data tr:hover td{background:#f8f9fc}
-        table.dataTable thead th{background:var(--navy)!important;color:white!important;border-bottom:3px solid var(--gold)!important}table.dataTable tbody tr:nth-child(even){background:#f5f7fb}table.dataTable tbody tr:hover{background:#fff8e8}.dt-container{padding:12px 4px}.dt-container .dt-layout-row{gap:12px}.dt-container .dt-search input,.dt-container .dt-length select{border:1.5px solid #cbd5e1!important;border-radius:8px!important;padding:7px 10px!important;background:white!important}.dt-container .dt-search input:focus{outline:none;border-color:var(--navy)!important;box-shadow:0 0 0 3px rgba(0,3,74,.08)}.dt-container .dt-paging .dt-paging-button{border-radius:7px!important}.dt-container .dt-paging .dt-paging-button.current{background:var(--navy)!important;color:white!important;border-color:var(--navy)!important}.dt-info{font-size:12px;color:var(--muted)}
-        .table-data td:last-child a,.table-data td:last-child button,.transaction-table td:last-child a,.transaction-table td:last-child button{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:6px 11px;margin:2px 3px;border:1px solid #d8dce6;border-radius:8px;background:white;color:var(--navy);font-size:12px;font-weight:700;text-decoration:none;cursor:pointer;transition:.15s}.table-data td:last-child a:hover,.table-data td:last-child button:hover,.transaction-table td:last-child a:hover,.transaction-table td:last-child button:hover{border-color:var(--navy);background:#f0f1f8;transform:translateY(-1px)}.table-data td:last-child form:last-child button,.transaction-table td:last-child form:last-child button{border-color:#fecaca;color:#b42318;background:#fff7f7}.table-data td:last-child form:last-child button:hover,.transaction-table td:last-child form:last-child button:hover{background:#fee2e2;border-color:#ef4444}
+        /* ===== DataTables fix ===== */
+        table.dataTable thead th{background:var(--navy)!important;color:white!important;border-bottom:3px solid var(--gold)!important}
+        table.dataTable thead th:focus{outline:none}
+        table.dataTable tbody tr:nth-child(even){background:#f5f7fb}
+        table.dataTable tbody tr:hover{background:#fff8e8}
+        .dt-container{padding:12px 4px}
+        .dt-container .dt-layout-row{gap:12px}
+        .dt-container .dt-search input,.dt-container .dt-length select{border:1.5px solid #cbd5e1!important;border-radius:8px!important;padding:7px 10px!important;background:white!important}
+        .dt-container .dt-search input:focus{outline:none;border-color:var(--navy)!important;box-shadow:0 0 0 3px rgba(0,3,74,.08)}
+        .dt-container .dt-paging .dt-paging-button{border-radius:7px!important;font-size:0!important;padding:0.35rem 0.5rem!important}
+        .dt-container .dt-paging .dt-paging-button::before{font-size:0.85rem!important;font-weight:600!important}
+        .dt-container .dt-paging .dt-paging-button.dt-paging-first::before{content:'«'!important}
+        .dt-container .dt-paging .dt-paging-button.dt-paging-last::before{content:'»'!important}
+        .dt-container .dt-paging .dt-paging-button.dt-paging-next::before{content:'›'!important}
+        .dt-container .dt-paging .dt-paging-button.dt-paging-previous::before{content:'‹'!important}
+        .dt-container .dt-paging .dt-paging-button.current{color:var(--navy)!important}
+        .dt-info{font-size:12px;color:var(--muted)}
+        /* Suppress duplicate header text injected by DataTables button */
+        table.dataTable thead th button{background:none;border:none;cursor:pointer}
+        table.dataTable thead th button span{display:none}
+        table.dataTable thead th button{cursor:pointer}
+        /* ===== End DataTables fix ===== */
+        .table-data td:last-child a,.table-data td:last-child button,.transaction-table td:last-child a,.transaction-table td:last-child button{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:6px 11px;margin:2px 3px;border:1px solid #d8dce6;border-radius:8px;background:white;color:var(--navy);font-size:12px;font-weight:700;text-decoration:none;cursor:pointer;transition:.15s}
+        .table-data td:last-child a:hover,.table-data td:last-child button:hover,.transaction-table td:last-child a:hover,.transaction-table td:last-child button:hover{border-color:var(--navy);background:#f0f1f8;transform:translateY(-1px)}
+        .table-data td:last-child form:last-child button,.transaction-table td:last-child form:last-child button{border-color:#fecaca;color:#b42318;background:#fff7f7}
+        .table-data td:last-child form:last-child button:hover,.transaction-table td:last-child form:last-child button:hover{background:#fee2e2;border-color:#ef4444}
         .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:9px 18px;border-radius:8px;font-size:14px;font-weight:600;border:none;cursor:pointer;transition:background .15s,color .15s,transform .15s;font-family:inherit;text-decoration:none}.btn:active{transform:translateY(1px)}.btn-primary{background:var(--navy);color:white}.btn-primary:hover{background:#171b63}.btn-outline{background:white;border:1.5px solid var(--line);color:#1a1a2e}.btn-outline:hover{border-color:var(--navy);color:var(--navy)}.btn-sm{padding:6px 13px;font-size:13px;min-height:36px}
         .form-input{width:100%;min-height:42px;padding:10px 14px;border:1.5px solid var(--line);border-radius:8px;font-size:14px;font-family:inherit;transition:border-color .15s,box-shadow .15s;background:white}.form-input:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(0,3,74,.08)}.form-label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#1a1a2e}
         .progress-bar{height:8px;background:#f0f0f0;border-radius:4px;overflow:hidden}.progress-fill{height:100%;border-radius:4px;transition:width .3s}.alert{padding:12px 16px;border-radius:8px;font-size:14px;margin-bottom:16px}.alert-success{background:#e8f5ec;border:1px solid #c6e6d0;color:var(--green)}
         .mobile-card-list{display:none}.desktop-table{display:block}.filter-grid{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.filter-grid .form-input{width:auto;min-width:145px}.filter-advanced summary{list-style:none;display:inline-flex;align-items:center;min-height:40px;padding:8px 14px;border:1.5px solid var(--line);border-radius:8px;background:white;color:#1a1a2e;font-size:13px;font-weight:600;cursor:pointer}.filter-advanced summary::-webkit-details-marker{display:none}.filter-advanced summary::after{content:'+';margin-left:8px;color:var(--muted)}.filter-advanced[open]{flex-basis:100%}.filter-advanced[open] summary::after{content:'−'}.filter-advanced__grid{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;padding:12px;background:#f8f9fc;border:1px solid var(--line);border-radius:10px}.button-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.mobile-only{display:none}
+        /* ===== Laporan page ===== */
+        .laporan-table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:12px}.laporan-table-wrap table{table-table-layout:fixed;min-width:880px}
+        /* ===== End laporan ===== */
         @media (max-width: 1023px){
             .sidebar{width:min(300px,88vw);transform:translateX(-105%);box-shadow:18px 0 48px rgba(0,3,74,.3)}body.sidebar-open .sidebar{transform:translateX(0)}body.sidebar-open .sidebar-overlay{opacity:1;visibility:visible}body.sidebar-open{overflow:hidden;touch-action:none}
             .sidebar-close,.mobile-menu-button{display:inline-flex;align-items:center;justify-content:center}.main-content{margin-left:0}.desktop-user-name{display:none}.content-shell{padding:18px}.topbar{padding:12px 18px;min-height:70px}
@@ -60,7 +88,11 @@
             .mobile-data-card__title{font-weight:700;color:var(--navy);margin-bottom:5px}.mobile-data-card__meta{font-size:13px;color:var(--muted);line-height:1.55}.mobile-data-card__actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
         }
         @media (max-width: 767px){
-            .content-shell{padding:14px}.content-shell [style*="display:grid"]{grid-template-columns:1fr!important}.topbar{padding:10px 14px}.topbar h1{font-size:16px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}.topbar p{display:none}.topbar-user>div{width:32px!important;height:32px!important}.mobile-stack{grid-template-columns:1fr!important}.content-shell .mobile-two{grid-template-columns:repeat(2,minmax(0,1fr))!important}.stat-card{padding:16px}.stat-value{font-size:24px}.card-header,.card-body{padding:14px}.filter-grid{display:grid;grid-template-columns:1fr}.filter-grid .form-input{width:100%!important;min-width:0}.filter-advanced{width:100%}.filter-advanced summary{width:100%;justify-content:space-between;min-height:44px}.filter-advanced__grid{display:grid;grid-template-columns:1fr;padding:10px}.button-row .btn{flex:1}.table-data{min-width:720px}.desktop-table{display:none}.mobile-card-list{display:grid;gap:10px}.mobile-data-card{border:1px solid var(--line);border-radius:10px;padding:14px;background:white}.mobile-data-card__title{font-weight:700;color:var(--navy);margin-bottom:5px}.mobile-data-card__meta{font-size:13px;color:var(--muted);line-height:1.55}.mobile-data-card__actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}.mobile-only{display:block}.hide-mobile{display:none!important}.btn{min-height:44px}.form-input{min-height:44px}
+            .content-shell{padding:14px}.content-shell [style*="display:grid"]{grid-template-columns:1fr!important}.topbar{padding:10px 14px}.topbar h1{font-size:16px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}.topbar p{display:none}.topbar-user>div{width:32px!important;height:32px!important}
+            .mobile-stack{grid-template-columns:1fr!important}.content-shell .mobile-two{grid-template-columns:repeat(2,minmax(0,1fr))!important}.stat-card{padding:16px}.stat-value{font-size:24px}.card-header,.card-body{padding:14px}
+            .filter-grid{display:grid;grid-template-columns:1fr}.filter-grid .form-input{width:100%!important;min-width:0}.filter-advanced{width:100%}.filter-advanced summary{width:100%;justify-content:space-between;min-height:44px}.filter-advanced__grid{display:grid;grid-template-columns:1fr;padding:10px}
+            .button-row .btn{flex:1}.table-data{min-width:720px}.desktop-table{display:none}.mobile-card-list{display:grid;gap:10px}
+            .mobile-data-card{border:1px solid var(--line);border-radius:10px;padding:14px;background:white}.mobile-data-card__title{font-weight:700;color:var(--navy);margin-bottom:5px}.mobile-data-card__meta{font-size:13px;color:var(--muted);line-height:1.55}.mobile-data-card__actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}.mobile-only{display:block}.hide-mobile{display:none!important}.btn{min-height:44px}.form-input{min-height:44px}
         }
         @media (max-width: 420px){.topbar h1{max-width:185px}.stat-value{font-size:22px}}
         @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
@@ -189,15 +221,15 @@
 </script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const excluded = new Set(['penerimaTable','topupTable','pengeluaranTable']);
+    var excluded = new Set(['penerimaTable','topupTable','pengeluaranTable']);
     document.querySelectorAll('table.table-data,table.transaction-table').forEach(function(table, index) {
         if (excluded.has(table.id) || table.dataset.noDatatable === 'true') return;
         if (!table.id) table.id = 'globalDataTable' + index;
-        const bodyRows = table.querySelectorAll('tbody tr');
+        var bodyRows = table.querySelectorAll('tbody tr');
         if (!bodyRows.length || (bodyRows.length === 1 && bodyRows[0].querySelector('td[colspan]'))) return;
-        const columnCount = table.querySelectorAll('thead tr:first-child th').length;
-        const lastHeader = table.querySelector('thead tr:first-child th:last-child');
-        const actionColumn = lastHeader && /aksi|action/i.test(lastHeader.textContent.trim()) ? [columnCount - 1] : [];
+        var columnCount = table.querySelectorAll('thead tr:first-child th').length;
+        var lastHeader = table.querySelector('thead tr:first-child th:last-child');
+        var actionColumn = lastHeader && /aksi|action/i.test(lastHeader.textContent.trim()) ? [columnCount - 1] : [];
         try {
             $(table).DataTable({
                 pageLength: 20,
@@ -205,10 +237,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 order: [],
                 columnDefs: actionColumn.length ? [{targets: actionColumn, orderable:false, searchable:false}] : [],
                 language: {
-                    search:'Cari semua:', lengthMenu:'Tampilkan _MENU_ data',
-                    info:'Menampilkan _START_–_END_ dari _TOTAL_ data', infoEmpty:'Tidak ada data',
-                    infoFiltered:'(disaring dari _MAX_ data)', zeroRecords:'Data tidak ditemukan', emptyTable:'Belum ada data',
-                    paginate:{first:'Pertama',last:'Terakhir',next:'Berikutnya',previous:'Sebelumnya'}
+                    search:'Cari:',
+                    searchPlaceholder:'Cari...',
+                    lengthMenu:'Tampilkan _MENU_ data',
+                    info:'Menampilkan _START_–_END_ dari _TOTAL_ data',
+                    infoEmpty:'Tidak ada data',
+                    infoFiltered:'(dari _MAX_ data)',
+                    zeroRecords:'Data tidak ditemukan',
+                    emptyTable:'Belum ada data',
+                    paginate:{}
                 }
             });
         } catch (error) { console.warn('DataTables dilewati:', table.id, error.message); }
