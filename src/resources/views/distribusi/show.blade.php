@@ -72,6 +72,16 @@
 .docs-card .pdf-thumb{height:100px;display:flex;align-items:center;justify-content:center;border-radius:6px;background:#eff6ff;color:#00034a;font-weight:800;font-size:24px}
 .docs-card span{display:block;margin-top:6px;font-size:11px;color:#00034a;overflow-wrap:anywhere;line-height:1.3}
 
+/* ── album gallery ── */
+.album-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.album-card{border:1px solid #e5e7eb;border-radius:10px;padding:8px;background:white;text-decoration:none;display:block;transition:border-color .15s,box-shadow .15s;position:relative}
+.album-card:hover{border-color:#017723;box-shadow:0 2px 8px rgba(1,119,35,.12)}
+.album-card img{display:block;width:100%;height:120px;object-fit:cover;border-radius:6px;background:#f3f4f6}
+.album-card .album-badge{position:absolute;top:12px;right:12px;background:rgba(0,3,74,.78);color:#fff;font-size:10px;font-weight:600;padding:3px 8px;border-radius:999px;backdrop-filter:blur(2px)}
+.album-card .album-cap{display:block;margin-top:6px;font-size:11px;color:#00034a;line-height:1.3;overflow-wrap:anywhere}
+.album-card .album-meta{display:block;margin-top:2px;font-size:10px;color:#9ca3af}
+@media(max-width:640px){.album-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}}
+
 /* ── btn ── */
 .btn-show{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:background .15s,box-shadow .15s;text-decoration:none}
 .btn-show svg{width:16px;height:16px}
@@ -274,6 +284,41 @@
               </a>
             @endforeach
           </div>
+        </div>
+      </div>
+      @endif
+
+      {{-- album kegiatan --}}
+      @if($albums->isNotEmpty())
+      <div class="d-card">
+        <div class="d-card-header">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00034a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <h3>Album Kegiatan</h3>
+          <span style="font-size:12px;color:#6b7280;margin-left:auto">{{ $albums->sum(fn ($a) => $a->photos->count()) }} foto · {{ $albums->count() }} album</span>
+        </div>
+        <div class="d-card-body">
+          @foreach($albums as $album)
+            @if($album->photos->isNotEmpty())
+            <div style="margin-bottom:18px">
+              <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:8px">
+                <strong style="font-size:13px;color:#00034a">{{ $album->title }}</strong>
+                <span style="font-size:11px;color:#9ca3af">{{ $album->photos->count() }} foto{{ $album->event_date ? ' · ' . $album->event_date->format('d M Y') : '' }}</span>
+                <a href="{{ route('album-kegiatan.show', $album) }}" style="margin-left:auto;font-size:11px;font-weight:600;color:#017723;text-decoration:none">Buka album →</a>
+              </div>
+              <div class="album-grid">
+                @foreach($album->photos as $photo)
+                <a href="{{ asset('storage/' . $photo->path) }}" target="_blank" rel="noopener" class="album-card" title="{{ $photo->original_name }}">
+                  <img src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->original_name ?: 'Foto album' }}" loading="lazy">
+                  @if($album->cover_photo_id === $photo->id)
+                  <span class="album-badge">★ Sampul</span>
+                  @endif
+                  <span class="album-cap">{{ $photo->original_name ?: 'Foto' }}</span>
+                </a>
+                @endforeach
+              </div>
+            </div>
+            @endif
+          @endforeach
         </div>
       </div>
       @endif

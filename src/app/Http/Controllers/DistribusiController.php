@@ -7,6 +7,7 @@ use App\Models\BarangBantuan;
 use App\Models\PembelianBarang;
 use App\Models\BiayaOperasional;
 use App\Models\Anggaran;
+use App\Models\AlbumKegiatan;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -392,7 +393,13 @@ class DistribusiController extends Controller
             'kelompok' => fn ($q) => $q->withCount('penerima')->with('ketuaUser'),
             'creator', 'penerimaDistribusi.penerima', 'items.barang', 'biayaOperasional', 'lampiran', 'pembelianBarang'
         ]);
-        return view('distribusi.show', compact('distribusi'));
+        // Album kegiatan yang terhubung ke distribusi ini (beserta fotonya)
+        $albums = AlbumKegiatan::where('distribusi_id', $distribusi->id)
+            ->with('photos')
+            ->orderByDesc('event_date')
+            ->orderByDesc('id')
+            ->get();
+        return view('distribusi.show', compact('distribusi', 'albums'));
     }
 
     public function terima(Distribusi $distribusi, $penerimaId)
