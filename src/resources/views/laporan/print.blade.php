@@ -300,20 +300,41 @@ table.tbl tfoot td{font-weight:700;background:#f3f4f6;border-top:2px solid #d1d5
                 <th style="width:32px">No</th>
                 <th>Nama Penerima</th>
                 <th>NIK</th>
+                <th>Kab/Kota</th>
+                <th>Kecamatan</th>
                 <th>Desa</th>
-                <th class="ctr">Status Verifikasi</th>
-                <th class="ctr">Tanda Terima</th>
+                <th class="ctr">Status</th>
             </tr>
         </thead>
         <tbody>
             @foreach($penerimaList as $i => $pd)
+            @php
+                $nik = optional($pd->penerima)->nik ?: '';
+                $nikLen = strlen($nik);
+                $nikMasked = $nikLen > 8
+                    ? substr($nik, 0, 4) . str_repeat('•', $nikLen - 8) . substr($nik, -4)
+                    : str_repeat('•', max($nikLen - 4, 0)) . substr($nik, -4);
+                $statusLabel = match($pd->status) {
+                    'terjadwal'   => 'Terjadwal',
+                    'diterima'    => 'Menerima Bantuan',
+                    'selesai'     => 'Selesai',
+                    default       => ucfirst($pd->status ?: '-'),
+                };
+            @endphp
             <tr>
                 <td>{{ $i + 1 }}</td>
                 <td style="font-weight:600">{{ optional($pd->penerima)->nama ?: '-' }}</td>
-                <td>{{ optional($pd->penerima)->nik ?: '-' }}</td>
+                <td style="font-family:monospace;letter-spacing:0.5px">{{ $nikMasked }}</td>
+                <td>{{ optional($pd->penerima)->kabupaten ?: '-' }}</td>
+                <td>{{ optional($pd->penerima)->kecamatan ?: '-' }}</td>
                 <td>{{ optional($pd->penerima)->desa ?: '-' }}</td>
-                <td class="ctr">{{ ucfirst(optional($pd->penerima)->status ?: '-') }}</td>
-                <td class="ctr">{{ $pd->status === 'diterima' ? '✔' : '-' }}</td>
+                <td class="ctr">
+                    <span style="display:inline-block;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:600;
+                        {{ $pd->status === 'diterima' ? 'background:#dcfce7;color:#166534'
+                            : ($pd->status === 'selesai' ? 'background:#dbeafe;color:#1e40af' : 'background:#f3f4f6;color:#374151') }}">
+                        {{ $statusLabel }}
+                    </span>
+                </td>
             </tr>
             @endforeach
         </tbody>
