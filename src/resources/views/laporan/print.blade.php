@@ -292,8 +292,8 @@ table.tbl tfoot td{font-weight:700;background:#f3f4f6;border-top:2px solid #d1d5
     @endif
 
     {{-- ===== Daftar penerima ===== --}}
-    @if($penerimaList->isNotEmpty())
     <div class="sec-title">👥 Daftar Penerima Bantuan</div>
+    @if($penerimaList->isNotEmpty())
     <table class="tbl">
         <thead>
             <tr>
@@ -318,6 +318,12 @@ table.tbl tfoot td{font-weight:700;background:#f3f4f6;border-top:2px solid #d1d5
             @endforeach
         </tbody>
     </table>
+    @else
+    <div style="text-align:center;padding:28px 16px;color:#6b7280;font-size:13px;background:#f9fafb;border-radius:8px;border:1px dashed #d1d5db;margin-top:6px">
+        <div style="font-size:24px;margin-bottom:8px">📋</div>
+        <div style="font-weight:600;color:#374151;margin-bottom:4px">Belum ada data penerima</div>
+        <div style="font-size:12px">Data nama penerima bantuan untuk distribusi ini belum tersedia atau belum diverifikasi.</div>
+    </div>
     @endif
 
     {{-- ===== Catatan ===== --}}
