@@ -239,6 +239,7 @@ Route::middleware('auth')->group(function () {
 
         Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index')->middleware(\App\Http\Middleware\FinanceAccess::class);
         Route::get('laporan/export-csv', [LaporanController::class, 'exportCsv'])->name('laporan.export-csv')->middleware(\App\Http\Middleware\FinanceAccess::class);
+        Route::get('laporan/print/{distribusi}', [LaporanController::class, 'printDetail'])->name('laporan.print')->whereNumber('distribusi')->middleware(\App\Http\Middleware\FinanceAccess::class);
 
     Route::middleware(\App\Http\Middleware\AdminOnly::class)->group(function () {
         // Super Admin: cetak kartu user lain

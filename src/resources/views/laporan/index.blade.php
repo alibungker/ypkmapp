@@ -262,6 +262,31 @@
 .text-end { text-align: right; }
 .text-center { text-align: center; }
 
+/* Tombol PDF per baris */
+.btn-pdf-mini {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid hsl(214.3 31.8% 91.4%);
+  background: #fff;
+  color: #00034a;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.btn-pdf-mini:hover {
+  background: #00034a;
+  border-color: #00034a;
+  color: #fff;
+}
+.btn-pdf-mini:focus-visible {
+  outline: 2px solid #b08a2e;
+  outline-offset: 2px;
+}
+
 @media(max-width:767px){
   .report-filter { grid-template-columns: 1fr 1fr; gap: 12px; }
   .report-actions { justify-content: stretch; }
@@ -459,7 +484,7 @@
                     <th>Tanggal/Kode</th><th>Kegiatan/Wilayah</th><th>Kelompok</th>
                     <th class="text-center">Status</th><th class="text-end">Paket</th>
                     <th class="text-end">Nilai</th><th class="text-end">Target</th>
-                    <th class="text-end">Terverifikasi</th><th class="text-end">Tanda Terima</th>
+                    <th class="text-end">Terverifikasi</th><th class="text-end">Tanda Terima</th><th class="text-center no-print">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -474,9 +499,16 @@
                     <td class="text-end">{{ number_format(optional($d->kelompok)->penerima_count ?? 0) }}</td>
                     <td class="text-end">{{ number_format(optional($d->kelompok)->penerima_terverifikasi_count ?? 0) }}</td>
                     <td class="text-end">{{ number_format($d->tanda_terima_count ?: (optional($d->kelompok)->penerima_menerima_count ?? 0)) }}</td>
+                    <td class="text-center no-print">
+                        <a href="{{ route('laporan.print',$d) }}" target="_blank" rel="noopener" title="Cetak PDF detail laporan"
+                           class="btn-pdf-mini">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                            <span>PDF</span>
+                        </a>
+                    </td>
                 </tr>
             @empty
-                <tr><td colspan="9" style="text-align:center;padding:28px;color:#9ca3af;">Tidak ada distribusi sesuai filter.</td></tr>
+                <tr><td colspan="10" style="text-align:center;padding:28px;color:#9ca3af;">Tidak ada distribusi sesuai filter.</td></tr>
             @endforelse
             </tbody>
         </table>
@@ -555,7 +587,8 @@ if ($('#tblRincian').length && !$.fn.DataTable.isDataTable('#tblRincian')) {
         },
         columnDefs: [
             { targets: [4, 5, 6, 7, 8], className: 'dt-nowrap text-end' },
-            { targets: [3], className: 'dt-nowrap text-center' }
+            { targets: [3], className: 'dt-nowrap text-center' },
+            { targets: [9], className: 'dt-nowrap text-center', orderable: false, searchable: false }
         ]
     });
 }

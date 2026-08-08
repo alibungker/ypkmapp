@@ -5,6 +5,7 @@ use App\Models\BiayaOperasional;
 use App\Models\DanaDonatur;
 use App\Models\Distribusi;
 use App\Models\Kelompok;
+use App\Models\PenerimaDistribusi;
 use Illuminate\Http\Request;
 
 class LaporanController extends Controller
@@ -120,5 +121,38 @@ class LaporanController extends Controller
             }
             fclose($out);
         }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    /**
+     * Cetak detail satu distribusi (PDF via window.print).
+     */
+    public function printDetail(Distribusi $distribusi)
+    {
+        $distribusi->load([
+            'kelompok' => fn ($q) => $q->withCount([
+                'penerima',
+                'penerima as penerima_terverifikasi_count' => fn ($p) => $p->where('status', 'terverifikasi'),
+                'penerima as penerima_menerima_count' => fn ($p) => $p->where('terima_bantuan', true),
+            ])->with('ketuaUser'),
+            'items.barang',
+            'biayaOperasional',
+            'anggaran',
+            'creator',
+        ]);
+
+        $distribusi->loadCount([
+            'penerimaDistribusi as tanda_terima_count' => fn ($q) => $q->where('status', 'diterima'),
+        ]);
+
+        $penerimaList = PenerimaDistribusi::where('distribusi_id', $distribusi->id)
+            ->with('penerima')
+            ->orderBy('status')
+            ->orderBy('penerima_id')
+            ->get();
+
+        $totalTerverifikasi = $penerimaList->filter(fn ($p) => optional($p->penerima)->status === 'terverifikasi')->count();
+        $totalTerima = $penerimaList->filter(fn ($p) => $p->status === 'diterima')->count();
+
+        return view('laporan.print', compact('distribusi', 'penerimaList', 'totalTerverifikasi', 'totalTerima'));
     }
 }
