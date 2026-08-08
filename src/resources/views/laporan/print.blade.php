@@ -71,6 +71,23 @@ table.tbl tfoot td{font-weight:700;background:#f3f4f6;border-top:2px solid #d1d5
 .ttd .blok .nama{font-weight:700;text-decoration:underline;margin-top:64px}
 .ttd .blok .nip{font-size:10px;color:#6b7280;margin-top:2px}
 
+/* ===== Peta ===== */
+.map-wrap{border:1px solid #d1d5db;border-radius:8px;overflow:hidden;margin-top:8px}
+.map-wrap iframe{display:block;width:100%;height:320px;border:0}
+.map-coord{font-size:10px;color:#6b7280;margin-top:6px}
+
+/* ===== Galeri media ===== */
+.media-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:8px}
+.media-grid .media-item{border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;background:#fafafa}
+.media-grid img{display:block;width:100%;height:150px;object-fit:cover}
+.media-grid .cap{font-size:9px;color:#6b7280;text-align:center;padding:4px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media print{
+  .media-grid{grid-template-columns:repeat(4,1fr);gap:8px}
+  .media-grid .media-item{break-inside:avoid}
+  .media-grid img{height:130px}
+  .map-wrap{break-inside:avoid}
+}
+
 /* ===== Footer page ===== */
 .page-footer{margin-top:24px;padding-top:10px;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;font-size:9.5px;color:#9ca3af}
 
@@ -173,6 +190,74 @@ table.tbl tfoot td{font-weight:700;background:#f3f4f6;border-top:2px solid #d1d5
             </tr>
         </tfoot>
     </table>
+    @endif
+
+    {{-- ===== Rincian bantuan dari pembelian (pivot distribusi_pembelian_barang) ===== --}}
+    @if($distribusi->pembelianBarang->isNotEmpty())
+    <div class="sec-title">📦 Rincian Bantuan (Barang Disalurkan)</div>
+    <table class="tbl">
+        <thead>
+            <tr>
+                <th style="width:32px">No</th>
+                <th>Barang</th>
+                <th class="ctr">Satuan</th>
+                <th class="num">Jumlah</th>
+                <th class="num">Harga Satuan</th>
+                <th class="num">Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            @php $subtotalBantuan = 0; @endphp
+            @foreach($distribusi->pembelianBarang as $i => $pb)
+            @php
+                $jml = (float) $pb->pivot->jumlah;
+                $harga = (float) $pb->harga_satuan;
+                $sub = $jml * $harga;
+                $subtotalBantuan += $sub;
+            @endphp
+            <tr>
+                <td>{{ $i + 1 }}</td>
+                <td>{{ $pb->nama_barang ?: '-' }}</td>
+                <td class="ctr">{{ $pb->satuan ?: '-' }}</td>
+                <td class="num">{{ number_format($jml, 0, ',', '.') }}</td>
+                <td class="num">Rp {{ number_format($harga, 0, ',', '.') }}</td>
+                <td class="num">Rp {{ number_format($sub, 0, ',', '.') }}</td>
+            </tr>
+            @endforeach
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="5">Total Nilai Bantuan</td>
+                <td class="num">Rp {{ number_format($subtotalBantuan, 0, ',', '.') }}</td>
+            </tr>
+        </tfoot>
+    </table>
+    @endif
+
+    {{-- ===== Peta titik lokasi ===== --}}
+    @if($koordinat)
+    <div class="sec-title">📍 Peta Titik Lokasi Bantuan</div>
+    <div class="map-wrap">
+        <iframe
+            src="https://maps.google.com/maps?q={{ $koordinat['lat'] }},{{ $koordinat['lng'] }}&z=15&output=embed"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            title="Peta titik lokasi {{ $distribusi->kode_distribusi }}"></iframe>
+    </div>
+    <div class="map-coord">Koordinat: {{ $koordinat['lat'] }}, {{ $koordinat['lng'] }}</div>
+    @endif
+
+    {{-- ===== Media (maks 4 foto) ===== --}}
+    @if($media->isNotEmpty())
+    <div class="sec-title">📷 Dokumentasi Kegiatan</div>
+    <div class="media-grid">
+        @foreach($media as $photo)
+        <div class="media-item">
+            <img src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->original_name ?: 'Dokumentasi' }}">
+            <div class="cap">{{ $photo->original_name ?: 'Foto' }}</div>
+        </div>
+        @endforeach
+    </div>
     @endif
 
     {{-- ===== Biaya operasional ===== --}}

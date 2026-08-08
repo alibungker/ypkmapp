@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BiayaOperasional;
+use App\Models\AlbumKegiatan;
 use App\Models\DanaDonatur;
 use App\Models\Distribusi;
 use App\Models\Kelompok;
@@ -138,6 +139,7 @@ class LaporanController extends Controller
             'biayaOperasional',
             'anggaran',
             'creator',
+            'pembelianBarang', // detail bantuan dari pivot distribusi_pembelian_barang
         ]);
 
         $distribusi->loadCount([
@@ -153,6 +155,22 @@ class LaporanController extends Controller
         $totalTerverifikasi = $penerimaList->filter(fn ($p) => optional($p->penerima)->status === 'terverifikasi')->count();
         $totalTerima = $penerimaList->filter(fn ($p) => $p->status === 'diterima')->count();
 
-        return view('laporan.print', compact('distribusi', 'penerimaList', 'totalTerverifikasi', 'totalTerima'));
+        // Koordinat peta: "lat,lng" -> [lat, lng]; null bila tidak valid
+        $koordinat = null;
+        if ($distribusi->titik_koordinat && str_contains($distribusi->titik_koordinat, ',')) {
+            $parts = array_map('trim', explode(',', $distribusi->titik_koordinat));
+            if (count($parts) >= 2 && is_numeric($parts[0]) && is_numeric($parts[1])) {
+                $koordinat = ['lat' => (float) $parts[0], 'lng' => (float) $parts[1]];
+            }
+        }
+
+        // Media (maks 4 foto) dari album kegiatan yang terhubung ke distribusi ini
+        $media = AlbumKegiatan::where('distribusi_id', $distribusi->id)
+            ->with('photos')
+            ->get()
+            ->flatMap(fn ($album) => $album->photos)
+            ->take(4);
+
+        return view('laporan.print', compact('distribusi', 'penerimaList', 'totalTerverifikasi', 'totalTerima', 'koordinat', 'media'));
     }
 }
