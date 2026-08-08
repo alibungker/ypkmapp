@@ -314,12 +314,16 @@ table.tbl tfoot td{font-weight:700;background:#f3f4f6;border-top:2px solid #d1d5
                 $nikMasked = $nikLen > 8
                     ? substr($nik, 0, 4) . str_repeat('•', $nikLen - 8) . substr($nik, -4)
                     : str_repeat('•', max($nikLen - 4, 0)) . substr($nik, -4);
-                $statusLabel = match($pd->status) {
-                    'terjadwal'   => 'Terjadwal',
-                    'diterima'    => 'Menerima Bantuan',
-                    'selesai'     => 'Selesai',
-                    default       => ucfirst($pd->status ?: '-'),
-                };
+                $penerima = $pd->penerima;
+                if ($penerima && $penerima->status == 'ditolak') {
+                    $statusLabel = '❌ Ditolak'; $statusBg = '#fce8e6'; $statusColor = '#dc2626';
+                } elseif ($penerima && $penerima->status == 'pending') {
+                    $statusLabel = '⏳ Menunggu Verifikasi'; $statusBg = '#fef3c2'; $statusColor = '#92400e';
+                } elseif ($penerima && $penerima->terima_bantuan) {
+                    $statusLabel = '✅ Menerima Bantuan'; $statusBg = '#dcfce7'; $statusColor = '#166534';
+                } else {
+                    $statusLabel = '📦 Menunggu Bantuan'; $statusBg = '#dbeafe'; $statusColor = '#1e40af';
+                }
             @endphp
             <tr>
                 <td>{{ $i + 1 }}</td>
@@ -329,9 +333,7 @@ table.tbl tfoot td{font-weight:700;background:#f3f4f6;border-top:2px solid #d1d5
                 <td>{{ optional($pd->penerima)->kecamatan ?: '-' }}</td>
                 <td>{{ optional($pd->penerima)->desa ?: '-' }}</td>
                 <td class="ctr">
-                    <span style="display:inline-block;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:600;
-                        {{ $pd->status === 'diterima' ? 'background:#dcfce7;color:#166534'
-                            : ($pd->status === 'selesai' ? 'background:#dbeafe;color:#1e40af' : 'background:#f3f4f6;color:#374151') }}">
+                    <span style="display:inline-block;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:600;background:{{ $statusBg }};color:{{ $statusColor }}">
                         {{ $statusLabel }}
                     </span>
                 </td>
